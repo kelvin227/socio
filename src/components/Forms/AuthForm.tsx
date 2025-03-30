@@ -73,6 +73,7 @@ const AuthForm = () => {
     },
   });
   const isSmallDevice = useMediaQuery("only screen and (max-width : 768px)");
+  
   const [show, setShow] = useState(true)
   const [loadAni, setloadAni] = useState(false)
 
