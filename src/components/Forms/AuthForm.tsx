@@ -73,7 +73,7 @@ const AuthForm = () => {
     },
   });
   const isSmallDevice = useMediaQuery("only screen and (max-width : 768px)");
-  
+
   const [show, setShow] = useState(true)
   const [loadAni, setloadAni] = useState(false)
 
@@ -326,7 +326,7 @@ const AuthForm = () => {
       </motion.div>: !loadAni ?
       <div className="flex text-white w-full gap-5 flex-col justify-center bg-linear-[135deg,#f75959_0%,#f35587_100%] p-10 items-center">
       <h1 className="text-3xl text-center font-bold">Welcome to Socio</h1>
-      <p>Don't have an account?</p>
+      <p>Don&apost have an account?</p>
       <Button
         size={"lg"}
         className="rounded-full bg-transparent hover:text-red-500"
@@ -348,7 +348,7 @@ const AuthForm = () => {
   >
       <div className="flex text-white w-full gap-5 flex-col justify-center bg-linear-[135deg,#f75959_0%,#f35587_100%] p-10 items-center">
         <h1 className="text-3xl text-center font-bold">Welcome to Socio</h1>
-        <p>Don't have an account?</p>
+        <p>Don&apost have an account?</p>
         <Button
           size={"lg"}
           className="rounded-full bg-transparent hover:text-red-500"
