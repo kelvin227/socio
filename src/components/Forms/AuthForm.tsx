@@ -345,7 +345,7 @@ const AuthForm = () => {
   >
       <div className="flex text-white w-full gap-5 flex-col justify-center bg-linear-[135deg,#f75959_0%,#f35587_100%] p-10 items-center">
         <h1 className="text-3xl text-center font-bold">Welcome to Socio</h1>
-        <p>Don't have an account?</p>
+        <p>Dont have an account?</p>
         <Button
           size={"lg"}
           className="rounded-full bg-transparent hover:text-red-500"
