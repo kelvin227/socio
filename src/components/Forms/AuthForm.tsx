@@ -27,9 +27,7 @@ import { createUser } from "../../../actions/authactions";
 import { toast } from "sonner";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useMediaQuery } from "@uidotdev/usehooks";
-/* eslint-disable react-hooks/rules-of-hooks */
-
+import { useMediaQuery } from 'usehooks-ts'
 
 
 
@@ -74,7 +72,6 @@ const AuthForm = () => {
       password: "",
     },
   });
-  const isSmallDevice = useMediaQuery("only screen and (max-width : 768px)");
 
   const [show, setShow] = useState(true)
   const [loadAni, setloadAni] = useState(false)
@@ -85,11 +82,11 @@ const AuthForm = () => {
     setShow(!show)
     setloadAni(!loadAni)
   }
-
   const handleSubmitForm = async (data: z.infer<typeof formSchema>) => {
+    console.log("your username is:", data.username);
+    console.log("your password is:", data.password);
 
-    if (isClicked) {
-      const response = await createUser(data.username, data.password);
+    const response = await createUser(data.username, data.password);
 
     console.log("respons is ", response)
 
@@ -102,20 +99,16 @@ const AuthForm = () => {
             className: "bg-red-500 text-white"
         })
     }
-    
-    }
   };
-
-  
-
+  const isSmallDevice = useMediaQuery("(min-width : 768px)");
 
   return (
 
     <div className="w-full max-w-xl flex flex-col-reverse lg:flex-row shadow-xl lg:max-w-6xl">
       {show && loadAni ? <Form {...form}>
       <motion.div
-    initial={{ opacity: 1,  x : 0}} // Starting animation state
-    animate={{ opacity: 1,  x : 580}} // End animation state
+    initial={{ opacity: 1,  ...(isSmallDevice ? {x : -300} : {x : 0})}} // Starting animation state
+    animate={{ opacity: 1,  ...(isSmallDevice ? {x : 0} : {x : 580})}} // End animation state
     transition={{
       type: "spring",
       stiffness: 100,
@@ -179,6 +172,8 @@ const AuthForm = () => {
         </form>
         </motion.div>
       </Form> : show && !loadAni ? (
+
+        // doesnt have a motion effect
         <Form {...form}>
         <form
         onSubmit={form.handleSubmit(handleSubmitForm)}
@@ -236,8 +231,8 @@ const AuthForm = () => {
       </Form>
       ) : ( <Form {...form}>
             <motion.div
-    initial={{ ...(isSmallDevice ? { opacity: 0 } : { opacity: 0 }) , x: -300 }} // Starting animation state
-    animate={{ opacity: 1, ...(isSmallDevice ? { x: 0 } : { x: 580 })}} // End animation state
+    initial={{ ...(isSmallDevice ? {opacity : 0} : {opacity : 1}), ...(isSmallDevice ? { x: -300 } : { x: 0 })}} // Starting animation state
+    animate={{ opacity: 1, ...(isSmallDevice ? { x: 0 } : { x: 500 })}} // End animation state
     transition={{
       type: "spring",
       stiffness: 100,
@@ -304,8 +299,8 @@ const AuthForm = () => {
 
       {isClicked && loadAni ? 
       <motion.div
-    initial={{ ...(isSmallDevice ? { opacity: 0 } : { opacity: 0 }) , x: -300 }} // Starting animation state
-    animate={{ ...(isSmallDevice ? { opacity: 1 } : { opacity: 1 }) , ...(isSmallDevice ? { x: 0 } : { x: 0 }) }} // End animation state
+    initial={{ opacity: 1, ...(isSmallDevice ? {x : -300} : {x : 0})}} // Starting animation state
+    animate={{ opacity: 1, ...(isSmallDevice ? {x : 0} : {x : -580}) }} // End animation state
     transition={{
       type: "spring",
       stiffness: 100,
@@ -328,13 +323,13 @@ const AuthForm = () => {
       </motion.div>: !loadAni ?
       <div className="flex text-white w-full gap-5 flex-col justify-center bg-linear-[135deg,#f75959_0%,#f35587_100%] p-10 items-center">
       <h1 className="text-3xl text-center font-bold">Welcome to Socio</h1>
-      <p>Don&apost have an account?</p>
+      <p>Already have an account?</p>
       <Button
         size={"lg"}
         className="rounded-full bg-transparent hover:text-red-500"
         variant={"outline"}
         onClick={handleclicked}
-      >Sign Up
+      >Sign In
       </Button>
     </div>:
       <motion.div
@@ -350,7 +345,7 @@ const AuthForm = () => {
   >
       <div className="flex text-white w-full gap-5 flex-col justify-center bg-linear-[135deg,#f75959_0%,#f35587_100%] p-10 items-center">
         <h1 className="text-3xl text-center font-bold">Welcome to Socio</h1>
-        <p>Don&apost have an account?</p>
+        <p>Don't have an account?</p>
         <Button
           size={"lg"}
           className="rounded-full bg-transparent hover:text-red-500"
