@@ -100,7 +100,7 @@ const AuthForm = () => {
         })
     }
   };
-  const isSmallDevice = useMediaQuery("(min-width : 768px)");
+  const isSmallDevice = useMediaQuery("(max-width : 768px)");
 
   return (
 
@@ -232,7 +232,7 @@ const AuthForm = () => {
       ) : ( <Form {...form}>
             <motion.div
     initial={{ ...(isSmallDevice ? {opacity : 0} : {opacity : 1}), ...(isSmallDevice ? { x: -300 } : { x: 0 })}} // Starting animation state
-    animate={{ opacity: 1, ...(isSmallDevice ? { x: 0 } : { x: 500 })}} // End animation state
+    animate={{ opacity: 1, ...(isSmallDevice ? { x: 0 } : { x: 580 })}} // End animation state
     transition={{
       type: "spring",
       stiffness: 100,
