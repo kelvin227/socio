@@ -59,5 +59,9 @@
     "prisma": "^6.5.0",
     "tailwindcss": "^4",
     "typescript": "^5"
-  }
+  },
+    "rules": {
+      "no-console": "off"
+    }
 }
+
