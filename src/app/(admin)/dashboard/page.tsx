@@ -1,13 +1,5 @@
-import AuthForm from "@/components/Forms/AuthForm";
+import PagePlaceholder from '@/components/page-placeholder';
 
-const Page = async () => {
-
-  return (
-    <div className="flex items-center p-2 justify-center w-full h-screen">
-      
-      <AuthForm />
-    </div>
-  );
-};
-
-export default Page;
+export default function Home() {
+  return <PagePlaceholder pageName="Kelvin" />;
+}
