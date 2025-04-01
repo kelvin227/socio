@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, ReactNode, useEffect, useState } from 'react';
 
 import Link from 'next/link';
 
@@ -116,7 +116,7 @@ export default function SideNav() {
 
 export const SideNavItem: React.FC<{
   label: string;
-  icon: any;
+  icon: ReactNode;
   path: string;
   active: boolean;
   isSidebarExpanded: boolean;
