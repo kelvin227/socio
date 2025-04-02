@@ -53,7 +53,9 @@ const formData = [
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
-  referralCode: z.string().min(8, "referral code must be 8 characters long"),
+  referralCode: z
+  .string().min(8, "referral code must be 8 characters long")
+  .regex(/^\S+$/, "Spaces are not allowed"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters long")
