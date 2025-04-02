@@ -63,7 +63,6 @@ export default function SideNav({navItems}: {navItems : NavItem[] }) {
                           label={item.name}
                           icon={item.icon}
                           path={item.href}
-                          active={item.active}
                           isSidebarExpanded={isSidebarExpanded}
                         />
                       </div>
@@ -85,7 +84,6 @@ export default function SideNav({navItems}: {navItems : NavItem[] }) {
                         label={item.name}
                         icon={item.icon}
                         path={item.href}
-                        active={item.active}
                         isSidebarExpanded={isSidebarExpanded}
                       />
                     </div>
@@ -117,18 +115,14 @@ export const SideNavItem: React.FC<{
   label: string;
   icon: ReactNode;
   path: string;
-  active: boolean;
   isSidebarExpanded: boolean;
-}> = ({ label, icon, path, active, isSidebarExpanded }) => {
+}> = ({ label, icon, path, isSidebarExpanded }) => {
   return (
     <>
       {isSidebarExpanded ? (
         <Link
           href={path}
-          className={`h-full relative flex items-center whitespace-nowrap rounded-md ${
-            active
-              ? 'font-base text-sm bg-neutral-200 shadow-sm text-neutral-700 dark:bg-neutral-800 dark:text-white'
-              : 'hover:bg-neutral-200 hover:text-neutral-700 text-neutral-500 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white'
+          className={`h-full relative flex items-center whitespace-nowrap rounded-md ${ 'hover:bg-neutral-200 hover:text-neutral-700 text-neutral-500 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white'
           }`}
         >
           <div className="relative font-base text-sm py-1.5 px-2 flex flex-row items-center space-x-2 rounded-md duration-100">
@@ -142,10 +136,7 @@ export const SideNavItem: React.FC<{
             <TooltipTrigger>
               <Link
                 href={path}
-                className={`h-full relative flex items-center whitespace-nowrap rounded-md ${
-                  active
-                    ? 'font-base text-sm bg-neutral-200 text-neutral-700 dark:bg-neutral-800 dark:text-white'
-                    : 'hover:bg-neutral-200 hover:text-neutral-700 text-neutral-500 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white'
+                className={`h-full relative flex items-center whitespace-nowrap rounded-md ${ 'hover:bg-neutral-200 hover:text-neutral-700 text-neutral-500 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white'
                 }`}
               >
                 <div className="relative font-base text-sm p-2 flex flex-row items-center space-x-2 rounded-md duration-100">
