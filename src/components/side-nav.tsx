@@ -10,14 +10,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { NavItems } from '../app/(admin)/config';
+import { NavItem } from '../app/(admin)/config';
 import { cn } from '@/lib/utils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { ThemeToggle } from './theme-toggle';
 
-export default function SideNav() {
-  const navItems = NavItems();
+export default function SideNav({navItems}: {navItems : NavItem[] }) {
 
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
     if (typeof window !== 'undefined') {

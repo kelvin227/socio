@@ -8,12 +8,12 @@ import '../../app/globals.css';
 import SideNav from '@/components/side-nav';
 
 import Header from './header';
-import { NavItems } from './config';
+import { NavItems } from './user_config';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Admin Dashboard',
+  title: 'user Dashboard',
   description: 'This is the Admin Dashboard',
 };
 

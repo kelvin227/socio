@@ -1,5 +1,6 @@
+
 import {
-  Bell,
+  MessageCircleQuestion,
   CoinsIcon,
   Home,
   PaperclipIcon,
@@ -8,15 +9,9 @@ import {
   User,
 } from "lucide-react";
 import { IconTransfer } from "@tabler/icons-react";
-import { ReactNode } from "react";
+import { NavItem } from "../(admin)/config";
 
-export interface NavItem {
-  name: string;
-  href: string;
-  icon: ReactNode;
-  position: string;
-}
-export const NavItems : NavItem[] = [
+export const NavItems: NavItem[] = [
   {
     name: "Home",
     href: "/",
@@ -24,7 +19,7 @@ export const NavItems : NavItem[] = [
     position: "top",
   },
   {
-    name: "Users",
+    name: "Profile",
     href: "/profile",
     icon: <User size={20} />,
     position: "top",
@@ -33,34 +28,30 @@ export const NavItems : NavItem[] = [
     name: "Kyc",
     href: "/notifications",
     icon: <PaperclipIcon size={20} />,
-
     position: "top",
   },
   {
-    name: "Coins",
+    name: "OTC",
     href: "/notifications",
     icon: <CoinsIcon size={20} />,
-
     position: "top",
   },
   {
-    name: "Withdrawal",
+    name: "About us",
     href: "/notifications",
     icon: <IconTransfer size={20} />,
-
     position: "top",
   },
   {
     name: "Referrals",
     href: "/notifications",
     icon: <Share size={20} />,
-
     position: "top",
   },
   {
-    name: "Notifications",
+    name: "FAQs",
     href: "/notifications",
-    icon: <Bell size={20} />,
+    icon: <MessageCircleQuestion size={20} />,
     position: "top",
   },
   {

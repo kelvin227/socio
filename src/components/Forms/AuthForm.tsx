@@ -23,20 +23,21 @@ import { FaChevronDown, FaEarthAmericas } from "react-icons/fa6";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
-import { createUser } from "../../../actions/authactions";
 import { toast } from "sonner";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useMediaQuery } from 'usehooks-ts'
+import { Login } from "../../../actions/authactions";
+import { useRouter } from "next/navigation";
 
 
 
 const formData = [
   {
-    name: "username",
-    type: "text",
-    placeHolder: "jondoe1982",
-    label: "username",
+    name: "email",
+    type: "email",
+    placeHolder: "jondoe1982@gmail.com",
+    label: "email",
   },
   {
     name: "password",
@@ -44,34 +45,65 @@ const formData = [
     placeHolder: "*****",
     label: "Password",
   },
+  {
+    name: "referralCode",
+    type: "text",
+    placeHolder: "Enter referral code",
+    label: "Referral Code",
+  },
 ];
 
+const signinFormData = [
+  {
+    name: "email",
+    type: "email",
+    placeHolder: "jondoe1982@gmail.com",
+    label: "email",
+  },
+  {
+    name: "password",
+    type: "password",
+    placeHolder: "*****",
+    label: "Password",
+  },
+]
+
+const SigninformSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string()
+});
+
 const formSchema = z.object({
-  username: z
-    .string()
-    .min(2, {
-      message: "Username must be at least 2 characters.",
-    })
-    .trim(),
-  password: z
-    .string()
-    .min(6, {
-      message: "Password must be at least 6 characters.",
-    })
-    .trim(),
-  // agreeToTerms: z.boolean().refine((val) => val === true, {
-  //   message: "You must agree to the terms and conditions.",
-  // }),
+  email: z.string().email("Invalid email address"),
+  referralCode: z.string().min(8, "referral code must be 8 characters long"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters long")
+    .max(32, "Password must not exceed 32 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
 });
 
 const AuthForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      email: "",
+      referralCode: "",
       password: "",
     },
   });
+
+  const siginForm = useForm<z.infer<typeof SigninformSchema>>({
+    resolver: zodResolver(SigninformSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const router = useRouter()
 
   const [show, setShow] = useState(true)
   const [loadAni, setloadAni] = useState(false)
@@ -83,29 +115,50 @@ const AuthForm = () => {
     setloadAni(!loadAni)
   }
   const handleSubmitForm = async (data: z.infer<typeof formSchema>) => {
-    console.log("your username is:", data.username);
-    console.log("your password is:", data.password);
 
-    const response = await createUser(data.username, data.password);
+    const response = await Login(data.email, data.password, data.referralCode as string);
 
-    console.log("respons is ", response)
 
     if (response.success) {
         toast(response.message, {
             className: "bg-green-500 text-white"
         })
+
+        router.replace("/user_dashboard")
+
     }else {
         toast(response.message, {
             className: "bg-red-500 text-white"
         })
     }
+
+  };
+
+  const handleSignInForm = async (data: z.infer<typeof SigninformSchema>) => {
+
+    const response = await Login(data.email, data.password);
+
+
+    if (response.success) {
+        toast("Sign in Successfull", {
+            className: "bg-green-500 text-white"
+        })
+
+        router.replace("/user_dashboard")
+
+    }else {
+        toast("Sign in failed", {
+            className: "bg-red-500 text-white"
+        })
+    }
+
   };
   const isSmallDevice = useMediaQuery("(max-width : 768px)");
 
   return (
 
     <div className="w-full max-w-xl flex flex-col-reverse lg:flex-row shadow-xl lg:max-w-6xl">
-      {show && loadAni ? <Form {...form}>
+      {show && loadAni ? <Form {...siginForm}>
       <motion.div
     initial={{ opacity: 1,  ...(isSmallDevice ? {x : -300} : {x : 0})}} // Starting animation state
     animate={{ opacity: 1,  ...(isSmallDevice ? {x : 0} : {x : 580})}} // End animation state
@@ -118,7 +171,7 @@ const AuthForm = () => {
     className="w-full max-w-xl flex flex-col-reverse lg:flex-row shadow-xl lg:max-w-6xl"
   >
         <form
-          onSubmit={form.handleSubmit(handleSubmitForm)}
+          onSubmit={siginForm.handleSubmit(handleSignInForm)}
           className="bg-white w-full flex flex-col gap-8 p-10"
         >
           <div className="flex w-full justify-between">
@@ -135,7 +188,7 @@ const AuthForm = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          {formData.map((formField, index) => (
+          {signinFormData.map((formField, index) => (
             <FormField
               key={index}
               control={form.control}

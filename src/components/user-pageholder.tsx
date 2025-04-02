@@ -48,13 +48,13 @@ const chartConfig = {
 
 const cardData = [
   {
-    title: "Pending Kyc",
-    description: "40%",
+    title: "Volume",
+    description: "56%",
     content: "200+",
   },
   {
-    title: "Total Users",
-    description: "40%",
+    title: "Assest Overview",
+    description: "35%",
     content: "200+",
   },
   {

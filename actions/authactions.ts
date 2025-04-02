@@ -1,17 +1,15 @@
 "use server"
 
-import { prisma } from "@/lib/db"
+import { signIn } from "@/auth"
 
-
-export async function createUser(username:string, password:string){
+export async function Login(email:string, password:string, referralCode?: string){
     try {
-        const newUser = await prisma.user.create({
-            data: {
-                email: username,
-                name: password
-            }
+        await signIn("credentials", {
+            email: email,
+            password: password,
+            referralCode: referralCode,
+            redirect: false
         })
-        console.log("new user is: ", newUser)
         return {success: true, message: "User created successfully"}
     } catch (error) {
         console.error(error)

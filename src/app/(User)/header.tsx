@@ -15,8 +15,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
-import { NavItems } from "./config";
+import { Menu, Wallet, BadgeCheck, Bell } from "lucide-react";
+import { NavItems } from "./user_config";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,6 +33,51 @@ export default function Header() {
       </Link>
 
       <div className="ml-4 flex items-center gap-3">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="overflow-hidden rounded-full"
+            >
+              <Bell size={20} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>My Wallet</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>Balance</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>Buy</DropdownMenuItem>
+            <DropdownMenuItem>Sell</DropdownMenuItem>
+            <DropdownMenuItem>Deposit</DropdownMenuItem>
+            <DropdownMenuItem>Withdraw</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <DropdownMenu></DropdownMenu>
+
+        <BadgeCheck className="text-red-500"></BadgeCheck>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="overflow-hidden rounded-full"
+            >
+              <Wallet />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>My Wallet</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>Balance</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>Buy</DropdownMenuItem>
+            <DropdownMenuItem>Sell</DropdownMenuItem>
+            <DropdownMenuItem>Deposit</DropdownMenuItem>
+            <DropdownMenuItem>Withdraw</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
