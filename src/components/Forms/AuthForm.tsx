@@ -27,7 +27,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useMediaQuery } from "usehooks-ts";
-import { Login } from "../../../actions/authactions";
+import { Login, SignUp } from "../../../actions/authactions";
 import { useRouter } from "next/navigation";
 
 const formData = [
@@ -119,7 +119,7 @@ const AuthForm = () => {
     setloadAni(!loadAni);
   };
   const handleSubmitForm = async (data: z.infer<typeof formSchema>) => {
-    const response = await Login(
+    const response = await SignUp(
       data.email,
       data.password,
       data.referralCode as string
@@ -144,15 +144,11 @@ const AuthForm = () => {
     const response = await Login(data.email, data.password);
 
     if (response.success) {
-      toast("Sign in Successfull", {
-        className: "bg-green-500 text-white",
-      });
+      toast.success(response.message);
 
       router.replace("/user_dashboard");
     } else {
-      toast("Sign in failed", {
-        className: "bg-red-500 text-white",
-      });
+      toast.error(response.message);
     }
   };
   const isSmallDevice = useMediaQuery("(max-width : 768px)");
@@ -314,44 +310,19 @@ const AuthForm = () => {
             </Button>
           </div>
         </motion.div>
-      ) : !loadAni ? (
+      ) : (
         <div className="flex text-white w-full gap-5 flex-col justify-center bg-linear-[135deg,#f75959_0%,#f35587_100%] p-10 items-center">
           <h1 className="text-3xl text-center font-bold">Welcome to Socio</h1>
-          <p>Already have an account?</p>
+          <p>don&apos;t have an account?</p>
           <Button
             size={"lg"}
             className="rounded-full bg-transparent hover:text-red-500"
             variant={"outline"}
             onClick={handleclicked}
           >
-            Sign In
+            Sign up
           </Button>
         </div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 1, x: 0 }} // Starting animation state
-          animate={{ opacity: 1, x: 580 }} // End animation state
-          transition={{
-            type: "spring",
-            stiffness: 100,
-            damping: 30,
-            duration: 0.5, // Optional
-          }}
-          className="w-full max-w-xl flex flex-col-reverse lg:flex-row shadow-xl lg:max-w-6xl"
-        >
-          <div className="flex text-white w-full gap-5 flex-col justify-center bg-linear-[135deg,#f75959_0%,#f35587_100%] p-10 items-center">
-            <h1 className="text-3xl text-center font-bold">Welcome to Socio</h1>
-            <p>Dont have an account?</p>
-            <Button
-              size={"lg"}
-              className="rounded-full bg-transparent hover:text-red-500"
-              variant={"outline"}
-              onClick={handleclicked}
-            >
-              Sign Up
-            </Button>
-          </div>
-        </motion.div>
       )}
     </div>
   );

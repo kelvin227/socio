@@ -11,7 +11,7 @@ export default function Layout({
         <body
         >
             {children}
-            <Toaster />
+            <Toaster richColors />
     
         </body>
       </html>

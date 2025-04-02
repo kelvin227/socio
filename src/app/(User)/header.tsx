@@ -17,6 +17,7 @@ import {
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Menu, Wallet, BadgeCheck, Bell } from "lucide-react";
 import { NavItems } from "./user_config";
+import { LogOut } from "../../../actions/authactions";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -100,7 +101,7 @@ export default function Header() {
             <DropdownMenuItem>Settings</DropdownMenuItem>
             <DropdownMenuItem>Support</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Logout</DropdownMenuItem>
+            <DropdownMenuItem onClick={async() => {await LogOut()}}>Logout</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 

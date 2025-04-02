@@ -71,7 +71,7 @@ export function ThemeToggle({ isDropDown = false }: { isDropDown?: boolean }) {
   return (
     <>
       <div className="flex flex-row space-x-2 items-center rounded-full border p-1">
-        <button
+        <Button
           className={cn(
             theme === 'light'
               ? 'bg-neutral-200 rounded-full'
@@ -79,11 +79,11 @@ export function ThemeToggle({ isDropDown = false }: { isDropDown?: boolean }) {
             'p-1',
           )}
           onClick={() => setTheme('light')}
-        >hi
+        >
           <Sun size={18} className="stroke-1" />
-        </button>
+        </Button>
 
-        <button
+        <Button
           className={cn(
             theme === 'system'
               ? 'bg-neutral-200 dark:bg-neutral-700 rounded-full'
@@ -91,19 +91,19 @@ export function ThemeToggle({ isDropDown = false }: { isDropDown?: boolean }) {
             'p-1',
           )}
           onClick={() => setTheme('system')}
-        >hi
+        >
           <Monitor size={18} className="stroke-1" />
-        </button>
+        </Button>
 
-        <button
+        <Button
           className={cn(
             theme === 'dark' ? 'bg-neutral-700 rounded-full' : 'bg-transparent',
             'p-1',
           )}
           onClick={() => setTheme('dark')}
-        >hi
+        >
           <Moon size={18} className="stroke-1" />
-        </button>
+        </Button>
       </div>
     </>
   );
