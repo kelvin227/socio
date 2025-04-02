@@ -135,6 +135,7 @@ const AuthForm = () => {
   };
 
   const handleSignInForm = async (data: z.infer<typeof SigninformSchema>) => {
+    console.log("form clieck")
 
     const response = await Login(data.email, data.password);
 
@@ -158,131 +159,66 @@ const AuthForm = () => {
   return (
 
     <div className="w-full max-w-xl flex flex-col-reverse lg:flex-row shadow-xl lg:max-w-6xl">
-      {show && loadAni ? <Form {...siginForm}>
-      <motion.div
-    initial={{ opacity: 1,  ...(isSmallDevice ? {x : -300} : {x : 0})}} // Starting animation state
-    animate={{ opacity: 1,  ...(isSmallDevice ? {x : 0} : {x : 580})}} // End animation state
-    transition={{
-      type: "spring",
-      stiffness: 100,
-      damping: 30,
-      duration: 0.50, // Optional
-    }}
-    className="w-full max-w-xl flex flex-col-reverse lg:flex-row shadow-xl lg:max-w-6xl"
-  >
-        <form
-          onSubmit={siginForm.handleSubmit(handleSignInForm)}
-          className="bg-white w-full flex flex-col gap-8 p-10"
-        >
-          <div className="flex w-full justify-between">
-            <h1 className="text-4xl font-light">Sign In</h1>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex gap-2 items-center">
-                <FaEarthAmericas />
-                <FaChevronDown />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem>English</DropdownMenuItem>
-                <DropdownMenuItem>French</DropdownMenuItem>
-                <DropdownMenuItem>Chinese</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          {signinFormData.map((formField, index) => (
-            <FormField
-              key={index}
-              control={form.control}
-              name={(formField.name as "password") || "username"}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="uppercase text-xs">
-                    {formField.label}
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      className="rounded-full text-md bg-gray-200/80 p-6"
-                      type={formField.type}
-                      placeholder={formField.placeHolder}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ))}
-          <Button
-            size={"lg"}
-            className="rounded-full py-6 bg-linear-[135deg,#f75959_0%,#f35587_100%]"
-            type="submit"
-          >
-            Sign In
-          </Button>
-          <Label className="text-pink-500">
-            <Checkbox className="bg-gray-100" id="agree" />
-            <span>Remember Me</span>
-          </Label>
-        </form>
-        </motion.div>
-      </Form> : show && !loadAni ? (
+      { show && !loadAni ? (
 
-        // doesnt have a motion effect
-        <Form {...form}>
-        <form
-        onSubmit={form.handleSubmit(handleSubmitForm)}
-        className="bg-white w-full flex flex-col gap-8 p-10"
-      >
-        <div className="flex w-full justify-between">
-          <h1 className="text-4xl font-light">Sign In</h1>
-          <DropdownMenu>
-            <DropdownMenuTrigger className="flex gap-2 items-center">
-              <FaEarthAmericas />
-              <FaChevronDown />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem>English</DropdownMenuItem>
-              <DropdownMenuItem>French</DropdownMenuItem>
-              <DropdownMenuItem>Chinese</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        {formData.map((formField, index) => (
-          <FormField
-            key={index}
-            control={form.control}
-            name={(formField.name as "password") || "username"}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="uppercase text-xs">
-                  {formField.label}
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="rounded-full text-md bg-gray-200/80 p-6"
-                    type={formField.type}
-                    placeholder={formField.placeHolder}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+// doesnt have a motion effect
+<Form {...siginForm}>
+<form
+onSubmit={form.handleSubmit(handleSignInForm)}
+className="bg-white w-full flex flex-col gap-8 p-10"
+>
+<div className="flex w-full justify-between">
+  <h1 className="text-4xl font-light">Sign In</h1>
+  <DropdownMenu>
+    <DropdownMenuTrigger className="flex gap-2 items-center">
+      <FaEarthAmericas />
+      <FaChevronDown />
+    </DropdownMenuTrigger>
+    <DropdownMenuContent>
+      <DropdownMenuItem>English</DropdownMenuItem>
+      <DropdownMenuItem>French</DropdownMenuItem>
+      <DropdownMenuItem>Chinese</DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+</div>
+{signinFormData.map((formField, index) => (
+  <FormField
+    key={index}
+    control={form.control}
+    name={(formField.name as "password") || "username"}
+    render={({ field }) => (
+      <FormItem>
+        <FormLabel className="uppercase text-xs">
+          {formField.label}
+        </FormLabel>
+        <FormControl>
+          <Input
+            className="rounded-full text-md bg-gray-200/80 p-6"
+            type={formField.type}
+            placeholder={formField.placeHolder}
+            {...field}
           />
-        ))}
-        <Button
-          size={"lg"}
-          className="rounded-full py-6 bg-linear-[135deg,#f75959_0%,#f35587_100%]"
-          type="submit"
-        >
-          Sign In
-        </Button>
-        <Label className="text-pink-500">
-          <Checkbox className="bg-gray-100" id="agree" />
-          <span>Remember Me</span>
-        </Label>
-      </form>
-      </Form>
-      ) : ( <Form {...form}>
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+    )}
+  />
+))}
+<Button
+  size={"lg"}
+  className="rounded-full py-6 bg-linear-[135deg,#f75959_0%,#f35587_100%] cursor-pointer"
+  type="submit"
+>
+  Sign In
+</Button>
+<Label className="text-pink-500">
+  <Checkbox className="bg-gray-100" id="agree" />
+  <span>Remember Me</span>
+</Label>
+</form>
+</Form>
+): <Form {...siginForm}>
+      ( <Form {...form}>
             <motion.div
     initial={{ ...(isSmallDevice ? {opacity : 0} : {opacity : 1}), ...(isSmallDevice ? { x: -300 } : { x: 0 })}} // Starting animation state
     animate={{ opacity: 1, ...(isSmallDevice ? { x: 0 } : { x: 580 })}} // End animation state
@@ -348,7 +284,8 @@ const AuthForm = () => {
           </Label>
         </form>
         </motion.div>
-      </Form>)}
+      </Form>)
+      </Form>}
 
       {isClicked && loadAni ? 
       <motion.div
