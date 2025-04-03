@@ -26,6 +26,7 @@ import {
   //IconTrendingDown,
 } from "@tabler/icons-react"
 
+
 const chartData = [
   { month: "January", desktop: 186, mobile: 80 },
   { month: "February", desktop: 305, mobile: 200 },
@@ -63,6 +64,7 @@ const cardData = [
     content: "389",
   },
 ];
+
 export default function PagePlaceholder({ pageName }: { pageName: string }) {
   return (
     <div className="flex flex-col gap-4 mt-10">
@@ -96,6 +98,10 @@ export default function PagePlaceholder({ pageName }: { pageName: string }) {
         <Bar dataKey="mobile" fill="var(--color-mobile)" radius={4} />
       </BarChart>
     </ChartContainer>
+
+    
+
+   
     </div>
   );
 }

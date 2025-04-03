@@ -12,7 +12,7 @@ export async function Login(email:string, password:string){
         if(!existingUser){
             return {success: false, message: "User does not exist"}
         }
-        const isMatch = bcrypt.compareSync(password, password)
+        const isMatch = bcrypt.compareSync(password, existingUser.password)
         if(!isMatch){
             return {success: false, message: "Incorrect password"}
         }
@@ -21,7 +21,7 @@ export async function Login(email:string, password:string){
             password: password,
             redirect: false
         })
-        return {success: true, message: "User created successfully"}
+        return {success: true, message: "Sign in successfully"}
     } catch (error) {
         console.error(error)
         return {success: false, message: "Failed to create a user"}
