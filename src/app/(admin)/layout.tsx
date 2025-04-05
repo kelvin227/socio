@@ -5,7 +5,8 @@ import ContextProvider from '@/components/context-provider';
 
 import '../../app/globals.css';
 
-import SideNav from '@/components/side-nav';
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 
 import Header from './header';
 import { NavItems } from './config';
@@ -27,16 +28,13 @@ export default function RootLayout({
       <body className={inter.className}>
         <ContextProvider>
           <Header />
-          <div className="flex">
-            <SideNav navItems={NavItems} />
-            <div className="w-full overflow-x-auto">
-              <div className="sm:h-[calc(99vh-60px)] overflow-auto ">
-                <div className="w-full flex justify-center mx-auto   overflow-auto h-[calc(100vh - 120px)] overflow-y-auto relative">
-                  <div className="w-full md:max-w-6xl">{children}</div>
-                </div>
-              </div>
-            </div>
-          </div>
+            <SidebarProvider>
+            <AppSidebar navItems={NavItems} />
+            <main className="w-full">
+                  <Header />
+                {children}
+              </main>
+            </SidebarProvider>
         </ContextProvider>
       </body>
     </html>
