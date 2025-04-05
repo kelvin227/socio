@@ -7,7 +7,7 @@ import "../../app/globals.css";
 
 import Header from "./header";
 import { NavItems } from "./user_config";
-import { TooltipProvider } from "@/components/ui/tooltip";
+//import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 
@@ -27,7 +27,7 @@ export default function RootLayout({
     <html suppressHydrationWarning={true} lang="en">
       <body className={inter.className}>
         <ContextProvider>
-          <TooltipProvider>
+          {/* <TooltipProvider> */}
             <SidebarProvider>
               <AppSidebar navItems={NavItems} />
               <main className="w-full">
@@ -35,7 +35,7 @@ export default function RootLayout({
                 {children}
               </main>
             </SidebarProvider>
-          </TooltipProvider>
+          {/* </TooltipProvider> */}
         </ContextProvider>
       </body>
     </html>
