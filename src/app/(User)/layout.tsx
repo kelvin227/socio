@@ -1,20 +1,21 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 
-import ContextProvider from '@/components/context-provider';
+import ContextProvider from "@/components/context-provider";
 
-import '../../app/globals.css';
+import "../../app/globals.css";
 
-import SideNav from '@/components/side-nav';
+import Header from "./header";
+import { NavItems } from "./user_config";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 
-import Header from './header';
-import { NavItems } from './user_config';
-
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'user Dashboard',
-  description: 'This is the Admin Dashboard',
+  title: "user Dashboard",
+  description: "This is the Admin Dashboard",
 };
 
 export default function RootLayout({
@@ -26,17 +27,15 @@ export default function RootLayout({
     <html suppressHydrationWarning={true} lang="en">
       <body className={inter.className}>
         <ContextProvider>
-          <Header />
-          <div className="flex">
-            <SideNav navItems={NavItems} />
-            <div className="w-full overflow-x-auto">
-              <div className="sm:h-[calc(99vh-60px)] overflow-auto ">
-                <div className="w-full flex justify-center mx-auto   overflow-auto h-[calc(100vh - 120px)] overflow-y-auto relative">
-                  <div className="w-full md:max-w-6xl">{children}</div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <TooltipProvider>
+            <SidebarProvider>
+              <AppSidebar navItems={NavItems} />
+              <main className="w-full">
+                  <Header />
+                {children}
+              </main>
+            </SidebarProvider>
+          </TooltipProvider>
         </ContextProvider>
       </body>
     </html>

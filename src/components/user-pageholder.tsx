@@ -64,7 +64,7 @@ const cardData = [
     content: "389",
   },
 ];
-
+  
 export default function PagePlaceholder({ pageName }: { pageName: string }) {
   return (
     <div className="flex flex-col gap-4 mt-10">
@@ -100,7 +100,7 @@ export default function PagePlaceholder({ pageName }: { pageName: string }) {
     </ChartContainer>
 
     
-
+   
    
     </div>
   );

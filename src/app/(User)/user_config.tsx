@@ -6,58 +6,57 @@ import {
   PaperclipIcon,
   Settings,
   Share,
-  User,
+  User
 } from "lucide-react";
-import { IconTransfer } from "@tabler/icons-react";
 import { NavItem } from "../(admin)/config";
 
 export const NavItems: NavItem[] = [
   {
     name: "Home",
-    href: "/",
-    icon: <Home size={20} />,
+    href: "/user_dashboard",
+    icon: Home,
     position: "top",
   },
   {
     name: "Profile",
     href: "/profile",
-    icon: <User size={20} />,
+    icon: User,
     position: "top",
   },
   {
     name: "Kyc",
     href: "/notifications",
-    icon: <PaperclipIcon size={20} />,
+    icon: PaperclipIcon,
     position: "top",
   },
   {
     name: "OTC",
-    href: "/notifications",
-    icon: <CoinsIcon size={20} />,
+    href: "/otc",
+    icon: CoinsIcon,
     position: "top",
   },
   {
     name: "About us",
     href: "/notifications",
-    icon: <IconTransfer size={20} />,
+    icon: User,
     position: "top",
   },
   {
     name: "Referrals",
     href: "/notifications",
-    icon: <Share size={20} />,
+    icon: Share,
     position: "top",
   },
   {
     name: "FAQs",
     href: "/notifications",
-    icon: <MessageCircleQuestion size={20} />,
+    icon: MessageCircleQuestion,
     position: "top",
   },
   {
     name: "Settings",
     href: "/settings",
-    icon: <Settings size={20} />,
+    icon: Settings,
     position: "bottom",
   },
 ];

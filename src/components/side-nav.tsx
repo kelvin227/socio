@@ -131,15 +131,14 @@ export const SideNavItem: React.FC<{
           </div>
         </Link>
       ) : (
-        <TooltipProvider delayDuration={70}>
           <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger asChild>
               <Link
                 href={path}
                 className={`h-full relative flex items-center whitespace-nowrap rounded-md ${ 'hover:bg-neutral-200 hover:text-neutral-700 text-neutral-500 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white'
                 }`}
               >
-                <div className="relative font-base text-sm p-2 flex flex-row items-center space-x-2 rounded-md duration-100">
+                <div className="">
                   {icon}
                 </div>
               </Link>
@@ -152,7 +151,6 @@ export const SideNavItem: React.FC<{
               <span>{label}</span>
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
       )}
     </>
   );

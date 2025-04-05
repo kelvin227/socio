@@ -7,66 +7,61 @@ import {
   Share,
   User,
 } from "lucide-react";
-import { IconTransfer } from "@tabler/icons-react";
-import { ReactNode } from "react";
+import { LucideIcon } from "lucide-react";
 
 export interface NavItem {
   name: string;
   href: string;
-  icon: ReactNode;
+  icon: LucideIcon;
   position: string;
 }
 export const NavItems : NavItem[] = [
   {
     name: "Home",
     href: "/",
-    icon: <Home size={20} />,
+    icon: Home,
     position: "top",
   },
   {
     name: "Users",
-    href: "/profile",
-    icon: <User size={20} />,
+    href: "/user_management",
+    icon: User,
     position: "top",
   },
   {
     name: "Kyc",
     href: "/notifications",
-    icon: <PaperclipIcon size={20} />,
-
+    icon: PaperclipIcon,
     position: "top",
   },
   {
     name: "Coins",
     href: "/notifications",
-    icon: <CoinsIcon size={20} />,
-
+    icon: CoinsIcon,
     position: "top",
   },
   {
     name: "Withdrawal",
-    href: "/notifications",
-    icon: <IconTransfer size={20} />,
-
+    href: "/Withdrawal_request",
+    icon: User,
     position: "top",
   },
   {
     name: "Referrals",
-    href: "/notifications",
-    icon: <Share size={20} />,
-
+    href: "/referral_system",
+    icon: Share,
     position: "top",
   },
   {
     name: "Notifications",
     href: "/notifications",
-    icon: <Bell size={20} />,
+    icon: Bell,
     position: "top",
   },
   {
     name: "Settings",
     href: "/settings",
-    icon: <Settings size={20} />,
+    icon: Settings,
     position: "bottom",
   },
 ];
