@@ -27,7 +27,6 @@ export default function RootLayout({
     <html suppressHydrationWarning={true} lang="en">
       <body className={inter.className}>
         <ContextProvider>
-          <Header />
             <SidebarProvider>
             <AppSidebar navItems={NavItems} />
             <main className="w-full">
