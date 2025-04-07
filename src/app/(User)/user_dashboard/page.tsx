@@ -2,7 +2,6 @@ import { auth } from "@/auth";
 import PagePlaceholder from "@/components/user-pageholder";
 import { Payment, columns } from "./columns";
 import { DataTable } from "./data-table";
-import { redirect } from "next/navigation";
 
 async function getData(): Promise<Payment[]> {
   // Fetch data from your API here.
