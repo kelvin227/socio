@@ -24,7 +24,7 @@ export async function Login(email:string, password:string){
         return {success: true, message: "Sign in successfully"}
     } catch (error) {
         console.error(error)
-        return {success: false, message: "Failed to create a user"}
+        return {success: false, message: "There's an error somewhere"}
     }
 }
 

@@ -32,7 +32,9 @@ export default function RootLayout({
               <AppSidebar navItems={NavItems} />
               <main className="w-full">
                   <Header />
-                {children}
+                  <div className="ml-5 mt-4 mr-3">
+                    {children}
+                  </div>
               </main>
             </SidebarProvider>
           {/* </TooltipProvider> */}

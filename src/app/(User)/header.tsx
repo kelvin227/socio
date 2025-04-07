@@ -21,8 +21,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Menu, Wallet, BadgeCheck, Bell, ArrowDownToLine, ArrowUpToLine, RefreshCcw, History } from "lucide-react";
+import { Menu, Wallet, BadgeCheck, Bell, ArrowDownToLine, ArrowUpToLine, RefreshCcw, History, ChevronsUpDown } from "lucide-react";
 import { NavItems } from "./user_config";
 import { LogOut } from "../../../actions/authactions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -59,14 +69,11 @@ export default function Header() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Wallet</DropdownMenuLabel>
+            <DropdownMenuLabel>Notifications</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Balance</DropdownMenuItem>
+            <DropdownMenuItem>@prima has sent you 3.45 Usdt Check Your available Balance</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Buy</DropdownMenuItem>
-            <DropdownMenuItem>Sell</DropdownMenuItem>
-            <DropdownMenuItem>Deposit</DropdownMenuItem>
-            <DropdownMenuItem>Withdraw</DropdownMenuItem>
+            <DropdownMenuItem>Your btc funds are running low</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <DropdownMenu></DropdownMenu>
@@ -92,6 +99,7 @@ export default function Header() {
                     <DialogTitle>Your Balance</DialogTitle>
                         <DialogHeader>
                               <DialogTitle> $0</DialogTitle>
+                              
                             </DialogHeader>
                             <div className="flex flex-box flex-col-4 justify-center w-full gap-2">
                               <div className="grid text-sm text-center">
@@ -115,7 +123,28 @@ export default function Header() {
                               </div>
                             </div>
                             <DropdownMenuSeparator />
-                                         
+                            <Table>
+  <TableCaption>Coins.</TableCaption>
+  <TableHeader>
+    <TableRow>
+      <TableHead className="w-[100px]"><div className="flex flex-box items-center">Coins<ChevronsUpDown/></div></TableHead>
+      <TableHead><div className="flex flex-box items-center">Available balance <ChevronsUpDown/></div></TableHead>
+      <TableHead className="text-right"><div className="flex flex-box items-center">equivalent <ChevronsUpDown/></div></TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell className="font-medium">USDT</TableCell>
+      <TableCell>0.25</TableCell>
+      <TableCell className="text-right">$0.25</TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell className="font-medium">Rubi</TableCell>
+      <TableCell>5</TableCell>
+      <TableCell className="text-right">$4.25</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
                             </DialogContent>
                         </Dialog>
               </DropdownMenuLabel>
@@ -145,7 +174,10 @@ export default function Header() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem asChild><Link href="/profile/overview">Profile</Link></DropdownMenuItem>
+            <DropdownMenuItem>kyc</DropdownMenuItem>
+            <DropdownMenuItem>Task Center</DropdownMenuItem>
+            <DropdownMenuItem>Security</DropdownMenuItem>
             <DropdownMenuItem>Support</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
