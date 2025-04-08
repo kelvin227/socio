@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-
+//import { SessionProvider } from "next-auth/react"
 import ContextProvider from "@/components/context-provider";
 
 import "../../app/globals.css";
@@ -27,17 +27,19 @@ export default function RootLayout({
     <html suppressHydrationWarning={true} lang="en">
       <body className={inter.className}>
         <ContextProvider>
-          {/* <TooltipProvider> */}
-            <SidebarProvider>
-              <AppSidebar navItems={NavItems} />
-              <main className="w-full">
-                  <Header />
-                  <div className="ml-5 mt-4 mr-3">
-                    {children}
-                  </div>
-              </main>
-            </SidebarProvider>
-          {/* </TooltipProvider> */}
+          {/* <SessionProvider> */}
+            {/* <TooltipProvider> */}
+              <SidebarProvider>
+                <AppSidebar navItems={NavItems} />
+                <main className="w-full">
+                    <Header />
+                    <div className="ml-5 mt-4 mr-3">
+                      {children}
+                    </div>
+                </main>
+              </SidebarProvider>
+            {/* </TooltipProvider> */}
+          {/* </SessionProvider> */}
         </ContextProvider>
       </body>
     </html>

@@ -139,7 +139,6 @@ const AuthForm = () => {
   };
 
   const handleSignInForm = async (data: z.infer<typeof SigninformSchema>) => {
-    console.log("form click");
 
     const response = await Login(data.email, data.password);
 

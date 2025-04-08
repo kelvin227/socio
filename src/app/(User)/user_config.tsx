@@ -3,7 +3,6 @@ import {
   MessageCircleQuestion,
   CoinsIcon,
   Home,
-  PaperclipIcon,
   Settings,
   Share,
   User
@@ -21,12 +20,6 @@ export const NavItems: NavItem[] = [
     name: "Profile",
     href: "/profile",
     icon: User,
-    position: "top",
-  },
-  {
-    name: "Kyc",
-    href: "/notifications",
-    icon: PaperclipIcon,
     position: "top",
   },
   {
