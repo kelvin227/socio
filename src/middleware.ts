@@ -1,12 +1,8 @@
 // export { auth as middleware } from "@/auth"
 
-import NextAuth from "next-auth"
-import { authConfig } from "./auth.config"
 
+import { auth } from "@/auth"
 
-// import { auth } from "@/auth"
-
-const {auth} = NextAuth(authConfig)
 
 export default auth((req) => {
     const protectedRoutes = ["/user_dashboard", "/wallet", "/otc"]

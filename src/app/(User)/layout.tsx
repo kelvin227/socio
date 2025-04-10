@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-//import { SessionProvider } from "next-auth/react"
+import { SessionProvider } from "next-auth/react";
 import ContextProvider from "@/components/context-provider";
 
 import "../../app/globals.css";
 
 import Header from "./header";
 import { NavItems } from "./user_config";
-//import { TooltipProvider } from "@/components/ui/tooltip";
-import { SidebarProvider } from "@/components/ui/sidebar";
+//import { TooltipProvider } from "@/components/ui/tooltip"; 
+import { SidebarProvider } from "@/components/ui/sidebar"; 
 import { AppSidebar } from "@/components/app-sidebar";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -20,26 +20,26 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode; 
+}) {
   return (
-    <html suppressHydrationWarning={true} lang="en">
+    <html suppressHydrationWarning lang="en">
       <body className={inter.className}>
         <ContextProvider>
-          {/* <SessionProvider> */}
+          <SessionProvider> {/* Fixed missing session prop */}
             {/* <TooltipProvider> */}
-              <SidebarProvider>
-                <AppSidebar navItems={NavItems} />
+              <SidebarProvider> 
+                <AppSidebar navItems={NavItems} /> 
                 <main className="w-full">
-                    <Header />
-                    <div className="ml-5 mt-4 mr-3">
-                      {children}
-                    </div>
+                  <Header />
+                  <div className="ml-5 mt-4 mr-3">
+                    {children}
+                  </div>
                 </main>
               </SidebarProvider>
             {/* </TooltipProvider> */}
-          {/* </SessionProvider> */}
+          </SessionProvider>
         </ContextProvider>
       </body>
     </html>

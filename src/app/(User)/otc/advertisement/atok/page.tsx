@@ -53,7 +53,7 @@ const table = [
   },
 ];
 
-export default function PI() {
+export default function Atok() {
   const [data, setData] = useState<Ads[]>([]);
   useEffect(() => {
     const fetchData = async () => {
