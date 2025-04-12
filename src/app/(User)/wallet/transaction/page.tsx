@@ -1,5 +1,5 @@
 import React from "react";
-import { Payment, columns } from "./columns";
+import { Payment } from "./columns";
 import { TransactionTable } from "./trans";
 
 async function getData(): Promise<Payment[]> {
