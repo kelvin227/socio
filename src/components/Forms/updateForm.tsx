@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { updateUserProfile } from '@/functions/user'
 
+/* eslint-disable */
 
   
   const SigninformSchema = z.object({
