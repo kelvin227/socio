@@ -154,7 +154,7 @@ export default function Header() {
               </Link>
             <DropdownMenuSeparator />
             <DropdownMenuItem><Link href={'/wallet/transaction'}>Transaction histroy</Link></DropdownMenuItem>
-            <DropdownMenuItem>Payment settings</DropdownMenuItem>
+            <DropdownMenuItem><Link href={"wallet/payment/crypto"}></Link>Payment settings</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <DropdownMenu>
