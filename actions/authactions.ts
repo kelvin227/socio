@@ -56,7 +56,7 @@ export async function SignUp(email:string, password:string, referralCode?: strin
         })
         return {success: true, message: "User created successfully"}
     } catch (error) {
-        console.error(error)
+        //console.error(error)
         return {success: false, message: "Failed to create a user"}
     }
 }

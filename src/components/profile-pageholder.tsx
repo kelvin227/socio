@@ -51,7 +51,7 @@ export default function Profile_pageholder({user}:{user: User})  {
 
           <div className="absolute right-0">
             <CardContent>
-           <UpdateForm />
+           <UpdateForm email={user?.email}/>
           </CardContent>
             </div> 
         </div>

@@ -1,8 +1,9 @@
+"use server"
 import { prisma } from "@/lib/db";
 
 export async function getUserByEmail(email: string) {
   const user = await prisma.user.findUnique({
-    where: { email: email },
+    where: { email },
     omit: {
       id: true,
       password: true
@@ -14,32 +15,41 @@ export async function getUserByEmail(email: string) {
 }
 
 
-export async function updateUserProfile(email: string, input: string, mode: number) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data: any = {};
+export async function updateUserProfile(email: string, newUsername: string) {
+  try {
+    // Fetch the user by email
+    const user = await getUserByEmail(email);
+    if (!user) {
+      return { success: false, message: "User not found" };
+    }
 
-  if (mode === 1) {
-    data.username = input;
+    // Validate the new username
+    if (!newUsername || newUsername.trim() === "") {
+      return { success: false, message: "Username cannot be empty" };
+    }
+
+    // Check if the new username is already taken by another user
+    const existingUser = await prisma.user.findUnique({
+      where: { userName: newUsername },
+    });
+    if (existingUser && existingUser.email !== email) {
+      return { success: false, message: "Username is already taken" };
+    }
+
+    // Check if the new username is the same as the current username
+    if (user.userName === newUsername) {
+      return { success: false, message: "New username is the same as the current username" };
+    }
+
+    // Update the user's username in the database
+    await prisma.user.update({
+      where: { email },
+      data: { userName: newUsername },
+    });
+
+    return { success: true, message: "Username updated successfully" };
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    return { success: false, message: "An error occurred while updating the username" };
   }
-
-  // Add other modes here
-  else if (mode === 2) 
-    { data.phoneNo = input }
-  else if (mode === 3)
-  { data.image = input }
-  else if (mode === 4)
-  { data.name = input }
-  else if (mode == 5)
-  { data.}
-
-  if (Object.keys(data).length === 0) {
-    throw new Error("Nothing to update.");
-  }
-
-  const user = await prisma.user.update({
-    where: { email },
-    data,
-  });
-
-  return user;
 }

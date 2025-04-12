@@ -92,9 +92,10 @@ export default function Header() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>My Wallet</DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <Link href={"/wallet"}>
             <DropdownMenuLabel className="hover:bg-gray-800">
-              <Dialog>
-                  <DialogTrigger>Balance</DialogTrigger>
+              {/* <Dialog>
+                  <DialogTrigger>Assets</DialogTrigger>
                     <DialogContent>
                     <DialogTitle>Your Balance</DialogTitle>
                         <DialogHeader>
@@ -146,13 +147,14 @@ export default function Header() {
   </TableBody>
 </Table>
                             </DialogContent>
-                        </Dialog>
+                        </Dialog> */}
+                        Assets
               </DropdownMenuLabel>
+             
+              </Link>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Buy</DropdownMenuItem>
-            <DropdownMenuItem>Sell</DropdownMenuItem>
-            <DropdownMenuItem>Deposit</DropdownMenuItem>
-            <DropdownMenuItem>Withdraw</DropdownMenuItem>
+            <DropdownMenuItem><Link href={'/wallet/transaction'}>Transaction histroy</Link></DropdownMenuItem>
+            <DropdownMenuItem>Payment settings</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <DropdownMenu>

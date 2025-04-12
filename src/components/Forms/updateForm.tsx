@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Button } from '../ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form'
@@ -6,49 +6,58 @@ import { Input } from '../ui/input'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { Checkbox } from '../ui/checkbox'
+
 import { Label } from '../ui/label'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { updateUserProfile } from '@/functions/user'
 
-const signinFormData = [
-    {
-      name: "username",
-      type: "text",
-      placeHolder: "johndoe",
-      label: "Username",
-    },
-  ];
+
   
   const SigninformSchema = z.object({
-    email: z.string().regex(/^\S+$/, "Spaces are not allowed"),
+    username: z.string().regex(/^\S+$/, "Spaces are not allowed"),
   });
 
   
 
-const UpdateForm = () => {
+const UpdateForm = ({email} : {email: string}) => {
     const router = useRouter();
+
+    const [signinFormData, setSigninFormData] = useState([
+      {
+        name: "username",
+        type: "test",
+        placeHolder: "johndoe",
+        label: "johndoe",
+      },
+    ]);
+
     const signinForm = useForm<z.infer<typeof SigninformSchema>>({
         resolver: zodResolver(SigninformSchema),
         defaultValues: {
-          email: ""
+          username: ""
         },
       });
     const handleSignInForm = async (data: z.infer<typeof SigninformSchema>) => {
-        const input =
-        const response = await updateUserProfile(data.email, data.input, mode.no);
+        const input = data.username;
+        
+        // Call the updateUserProfile function with the email and input
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const response = await updateUserProfile(email, input);
         
         if (response.success) {
           toast.success(response.message);
-    
-          router.replace("/user_dashboard");
-        } else {
+  
+        } else{  
           toast.error(response.message);
         }
+        
       };
+
+
+      
   return (
-    <div><Button asChild>
+    <div>
     <Dialog>
       <DialogTrigger>
         Edit
@@ -64,8 +73,8 @@ const UpdateForm = () => {
             {signinFormData.map((formField, index) => (
               <FormField
                 key={index}
-                control={signinForm.control}
-                name={(formField.name as "password") || "email"}
+                //control={signinForm.control}
+                name={(formField.name as "username")}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="uppercase text-xs">
@@ -91,16 +100,12 @@ const UpdateForm = () => {
             >
               Sign In
             </Button>
-            <Label className="text-pink-500">
-              <Checkbox className="bg-gray-100" id="agree" />
-              <span>Remember Me</span>
-            </Label>
           </form>
         </Form>
       </DialogContent>
     </Dialog>
       
-  </Button></div>
+</div>
   )
 }
 
