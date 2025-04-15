@@ -1,11 +1,12 @@
 "use client"
+/* eslint-disable */
 import type { PutBlobResult } from '@vercel/blob';
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SubmitKyc } from '@/functions/user';
+//import { SubmitKyc } from '@/functions/user';
 
 export default function UKyc() {
   const idCardFrontRef = useRef<HTMLInputElement>(null); // Separate ref for front ID card

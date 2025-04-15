@@ -29,7 +29,6 @@ import { motion } from "framer-motion";
 import { useMediaQuery } from "usehooks-ts";
 import { Login, SignUp } from "../../../actions/authactions";
 import { useRouter } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 const formData = [
   {
