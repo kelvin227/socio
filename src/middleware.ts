@@ -5,7 +5,7 @@ import { auth } from "@/auth"
 
 
 export default auth((req) => {
-    const protectedRoutes = ["/user_dashboard", "/wallet", "/otc"]
+    const protectedRoutes = ["/user_dashboard", "/wallet", "/otc", "/profile", "/profile/overview", "/profile/security", "/profile/user_kyc", "/profile/task", "/wallet/payment/crypto", "/wallet/transaction", "/otc", "/otc/advertisement", "/otc/advertisement/atok", "/otc/advertisement/opin", "/otc/advertisement/rbl", "/otc/advertisement/sda", "/otc/advertisement/star", "/otc/advertisement/wow"]
     const session = req?.auth
     const pathname = req.nextUrl.pathname
     //const isProtectedRoute = protectedRoutes.includes(pathname)

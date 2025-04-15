@@ -29,19 +29,19 @@ export const NavItems: NavItem[] = [
   },
   {
     name: "About us",
-    href: "/notifications",
+    href: "/About",
     icon: User,
     position: "top",
   },
   {
     name: "Referrals",
-    href: "/notifications",
+    href: "/profile/referrals",
     icon: Share,
     position: "top",
   },
   {
     name: "FAQs",
-    href: "/notifications",
+    href: "/faq",
     icon: MessageCircleQuestion,
     position: "top",
   }
