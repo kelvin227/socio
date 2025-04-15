@@ -10,7 +10,7 @@ const AboutPage = () => {
 
       <h2 className="text-2xl font-semibold mt-6 mb-4">Our Mission</h2>
       <p className="text-gray-700 mb-4">
-        At Socio, our mission is to create a world where everyone has access to the tools they need to succeed. Whether it's connecting with others, managing finances, or accessing premium services, we are here to make it happen.
+        At Socio, our mission is to create a world where everyone has access to the tools they need to succeed. Whether it&apos;s connecting with others, managing finances, or accessing premium services, we are here to make it happen.
       </p>
 
       <h2 className="text-2xl font-semibold mt-6 mb-4">Our Team</h2>
