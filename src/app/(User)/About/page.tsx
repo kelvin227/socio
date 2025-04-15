@@ -31,7 +31,7 @@ const AboutPage = () => {
         Have questions or need support? Feel free to reach out to us at{" "}
         <a href="mailto:support@socio.com" className="text-blue-500 underline">
           support@socio.com
-        </a>. We’re here to help!
+        </a>. We&apos;re here to help!
       </p>
     </div>
   );
