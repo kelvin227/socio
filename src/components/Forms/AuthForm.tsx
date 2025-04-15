@@ -29,6 +29,7 @@ import { motion } from "framer-motion";
 import { useMediaQuery } from "usehooks-ts";
 import { Login, SignUp } from "../../../actions/authactions";
 import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 const formData = [
   {
@@ -297,6 +298,11 @@ const AuthForm = () => {
           className="w-full max-w-xl flex flex-col-reverse lg:flex-row shadow-xl lg:max-w-6xl"
         >
           <div className="flex text-white w-full gap-5 flex-col justify-center bg-linear-[135deg,#f75959_0%,#f35587_100%] p-10 items-center">
+          <img
+                    src="https://school.codegator.com.ng/image/logo2.png"
+                   className="w-24 h-24"
+                   alt="Socio Logo"
+                  />
             <h1 className="text-3xl text-center font-bold">Welcome to Socio</h1>
             <p>Already have an account?</p>
             <Button
@@ -311,6 +317,10 @@ const AuthForm = () => {
         </motion.div>
       ) : (
         <div className="flex text-white w-full gap-5 flex-col justify-center bg-linear-[135deg,#f75959_0%,#f35587_100%] p-10 items-center">
+                  <img
+                    src="https://school.codegator.com.ng/image/logo2.png"
+                   className="w-24 h-24"
+                  />
           <h1 className="text-3xl text-center font-bold">Welcome to Socio</h1>
           <p>don&apos;t have an account?</p>
           <Button

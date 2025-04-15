@@ -25,6 +25,7 @@ model User {
   referredBy    String?
   accounts      Account[]
   sessions      Session[]
+  kyc           Kyc[]
  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -68,5 +69,21 @@ model VerificationToken {
   expires    DateTime
  
   
+}
+
+model Kyc {
+  id               String   @id @default(cuid())
+  email            String   // Foreign key for User's email
+  FullName         String
+  country          String
+  IDNO             String
+  documentURL1      String
+  documentURL2      String
+  Status           String
+  Rejection_reason String?
+  createdAt        DateTime @default(now())
+  Reviewed_at      DateTime?
+
+  user             User     @relation(fields: [email], references: [email], onDelete: Cascade) // Relating user_id with User's id
 }
  

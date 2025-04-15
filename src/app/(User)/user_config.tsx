@@ -3,7 +3,6 @@ import {
   MessageCircleQuestion,
   CoinsIcon,
   Home,
-  Settings,
   Share,
   User
 } from "lucide-react";
@@ -45,11 +44,5 @@ export const NavItems: NavItem[] = [
     href: "/notifications",
     icon: MessageCircleQuestion,
     position: "top",
-  },
-  {
-    name: "Settings",
-    href: "/settings",
-    icon: Settings,
-    position: "bottom",
-  },
+  }
 ];

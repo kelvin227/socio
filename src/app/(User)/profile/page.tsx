@@ -9,7 +9,6 @@ import React from "react";
 
 export default async function Profile() {
   const session= await auth()
-  console.log(session?.user?.email)
   const profile = await getUserByEmail(session?.user?.email as string)
   //   const [copiedText, copyToClipboard] = useCopyToClipboard();
   // const hasCopiedText = Boolean(copiedText);

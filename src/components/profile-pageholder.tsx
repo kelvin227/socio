@@ -7,7 +7,7 @@ import {
   CardTitle,
   CardContent,
 } from "@/components/ui/card";
-import { IdCard, ScanFace, ScanQrCode, UserRound } from "lucide-react";
+import { AtSign, IdCard, ScanFace, ScanQrCode, UserRound } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa6";
 import { useCopyToClipboard } from "@uidotdev/usehooks";
 import { User } from '@prisma/client';
@@ -22,7 +22,7 @@ export default function Profile_pageholder({user}:{user: User})  {
       <Card>
         <div className="flex flex-box">
           <CardContent>
-            <IdCard size={50} />
+            <AtSign size={50} />
           </CardContent>
           <div className="grid grid-box">
             <CardTitle>Username</CardTitle>
@@ -30,9 +30,25 @@ export default function Profile_pageholder({user}:{user: User})  {
           </div>
           <div className="absolute right-0">
             <CardContent>
-            <Button>
-                Edit
-            </Button>
+            <UpdateForm email={user?.email} field="username" /> {/* For username */}
+          </CardContent>
+            </div> 
+          
+        </div>
+      </Card>
+
+      <Card>
+        <div className="flex flex-box">
+          <CardContent>
+            <IdCard size={50} />
+          </CardContent>
+          <div className="grid grid-box">
+            <CardTitle>Name</CardTitle>
+            <CardDescription>{user?.name}</CardDescription>
+          </div>
+          <div className="absolute right-0">
+            <CardContent>
+            <UpdateForm email={user?.email} field="name" /> {/* For username */}
           </CardContent>
             </div> 
           
@@ -51,7 +67,7 @@ export default function Profile_pageholder({user}:{user: User})  {
 
           <div className="absolute right-0">
             <CardContent>
-           <UpdateForm email={user?.email}/>
+           <UpdateForm email={user?.email} field="name" /> {/* For name */}
           </CardContent>
             </div> 
         </div>
@@ -68,9 +84,7 @@ export default function Profile_pageholder({user}:{user: User})  {
           </div>
           <div className="absolute right-0">
             <CardContent>
-            <Button>
-                Edit
-            </Button>
+            {/* <UpdateForm email={user?.email}/> */}
           </CardContent>
             </div> 
         </div>

@@ -52,7 +52,13 @@ export default function Header() {
           className="flex items-center gap-2 text-lg font-semibold md:text-base"
           prefetch={false}
         >
-          <span className="w-8 h-8 border bg-accent rounded-full" />
+          <span className="w-8 h-8 border bg-accent rounded-full"><Avatar>
+                            <AvatarImage
+                              src="https://school.codegator.com.ng/image/logo2.png"
+                              alt="Socio Logo"
+                            />
+                            <AvatarFallback>CN</AvatarFallback>
+                          </Avatar></span>
           <span>Socio</span>
         </Link>
       </div>
@@ -154,7 +160,7 @@ export default function Header() {
               </Link>
             <DropdownMenuSeparator />
             <DropdownMenuItem><Link href={'/wallet/transaction'}>Transaction histroy</Link></DropdownMenuItem>
-            <DropdownMenuItem><Link href={"wallet/payment/crypto"}></Link>Payment settings</DropdownMenuItem>
+            <DropdownMenuItem><Link href={"/wallet/payment/crypto"}>Payment settings</Link></DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <DropdownMenu>
