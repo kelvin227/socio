@@ -1,9 +1,8 @@
-import React from 'react'
+import React from "react";
+import { getKycRequests } from "@/functions/user";
+import KycHolder from "@/components/kyc_holder";
 
-const Kyc = () => {
-  return (
-    <div>Kyc</div>
-  )
+export default async function Kycpage() {
+  const fetch = await getKycRequests();
+  return <KycHolder kyc={fetch} />;
 }
-
-export default Kyc

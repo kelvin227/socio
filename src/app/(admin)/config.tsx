@@ -1,11 +1,12 @@
 import {
   Bell,
-  CoinsIcon,
   Home,
-  PaperclipIcon,
   Settings,
   Share,
   User,
+  Wallet,
+  TrendingUp,
+  ShieldCheck,
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
@@ -15,52 +16,53 @@ export interface NavItem {
   icon: LucideIcon;
   position: string;
 }
-export const NavItems : NavItem[] = [
+
+export const NavItems: NavItem[] = [
   {
-    name: "Home",
-    href: "/",
+    name: "Dashboard",
+    href: "/dashboard",
     icon: Home,
     position: "top",
   },
   {
-    name: "Users",
+    name: "User Management",
     href: "/user_management",
     icon: User,
     position: "top",
   },
   {
-    name: "Kyc",
-    href: "/notifications",
-    icon: PaperclipIcon,
+    name: "KYC Requests",
+    href: "/kyc",
+    icon: ShieldCheck,
     position: "top",
   },
   {
-    name: "Coins",
-    href: "/notifications",
-    icon: CoinsIcon,
+    name: "Transactions",
+    href: "/admin/transactions",
+    icon: TrendingUp,
     position: "top",
   },
   {
-    name: "Withdrawal",
-    href: "/Withdrawal_request",
-    icon: User,
+    name: "Withdrawal Requests",
+    href: "/withdrawals",
+    icon: Wallet,
     position: "top",
   },
   {
-    name: "Referrals",
+    name: "Referrals stats",
     href: "/referral_system",
     icon: Share,
     position: "top",
   },
   {
     name: "Notifications",
-    href: "/notifications",
+    href: "/admin/notifications",
     icon: Bell,
     position: "top",
   },
   {
     name: "Settings",
-    href: "/settings",
+    href: "/admin/settings",
     icon: Settings,
     position: "bottom",
   },

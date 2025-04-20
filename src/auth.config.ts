@@ -46,7 +46,6 @@ const providers = [
                 }
             })
         } else {
-            console.log("user exists")
             const isMatch = bcrypt.compareSync(password, user.password)
             if (!isMatch){
                 return null

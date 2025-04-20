@@ -10,6 +10,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 
 import Header from './header';
 import { NavItems } from './config';
+import { SessionProvider } from 'next-auth/react';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -27,6 +28,7 @@ export default function RootLayout({
     <html suppressHydrationWarning={true} lang="en">
       <body className={inter.className}>
         <ContextProvider>
+          <SessionProvider>
             <SidebarProvider>
             <AppSidebar navItems={NavItems} />
             <main className="w-full">
@@ -34,6 +36,7 @@ export default function RootLayout({
                 {children}
               </main>
             </SidebarProvider>
+            </SessionProvider>
         </ContextProvider>
       </body>
     </html>

@@ -183,9 +183,9 @@ export default function Header() {
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild><Link href="/profile/overview">Profile</Link></DropdownMenuItem>
-            <DropdownMenuItem>kyc</DropdownMenuItem>
-            <DropdownMenuItem>Task Center</DropdownMenuItem>
-            <DropdownMenuItem>Security</DropdownMenuItem>
+            <DropdownMenuItem asChild><Link href={"/profile/user_kyc"}>kyc</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild><Link href={"/profile/task"}>Task Center</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild><Link href={"/profile/security"}>Security</Link></DropdownMenuItem>
             <DropdownMenuItem>Support</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem

@@ -1,4 +1,5 @@
 "use server"
+/* eslint-disable */
 import { prisma } from "@/lib/db";
 
 export async function getUserByEmail(email: string) {
@@ -6,6 +7,18 @@ export async function getUserByEmail(email: string) {
     where: { email: email },
     omit: {
       id: true,
+      password: true
+    }
+    
+  });
+
+  return user;
+}
+
+export async function getUserByID(id: string) {
+  const user = await prisma.user.findUnique({
+    where: { id},
+    omit: {
       password: true
     }
     
@@ -69,7 +82,10 @@ export async function SubmitKyc(
   ) {
   try {
     // Fetch the user by email
-    const users = await getUserByEmail(email);
+    const users = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, email: true },
+      });
     if (!users) {
       return { success: false, message: "User not found" };
     }
@@ -84,25 +100,194 @@ export async function SubmitKyc(
     if (!idCardNumber || idCardNumber.trim() === "") {
       return { success: false, message: "ID card number cannot be empty" };
     }
-
+    const kyc = await prisma.kyc.findUnique({
+      where: { userid: users.id },
+    });
+    const userid = users.id;
+    // Check if the new value is already taken (only for username)
     // Update the user's KYC details in the database
-    await prisma.kyc.create({
-      data: {
-        FullName,
-        email,
-        country,
-        IDNO: idCardNumber,
-        documentURL1: idCardFront,
-        documentURL2: idCardBack,
-        Status: "pending",
-        //user: { connect: { email } }, // Connect to the user by email
+    if(kyc){
+      await prisma.kyc.update({
+        where: { userid: kyc.userid },
+        data: {
+          FullName,
+          userid: kyc.userid,
+          country,
+          IDNO: idCardNumber,
+          documentURL1: idCardFront,
+          documentURL2: idCardBack,
+          Status: "pending",
+          //user: { connect: { email } }, // Connect to the user by email
+      }
     }
-  }
-  );
+    );
+    } else{
+      // Create a new KYC record if it doesn't exist
+      await prisma.kyc.create({
+        data: {
+          FullName,
+          userid: userid,
+          country,
+          IDNO: idCardNumber,
+          documentURL1: idCardFront,
+          documentURL2: idCardBack,
+          Status: "pending",
+          //user: { connect: { email } }, // Connect to the user by email
+      }
+    });
+    }
 
     return { success: true, message: "KYC details submitted successfully" };
   } catch (error) {
     console.error(`Error submitting KYC details for user ${email}:`, error);
     return { success: false, message: `An error occurred while submitting KYC details` };
   }
+}
+
+export async function getKycStatus(email: string) {
+  try {
+    const users = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, email: true },
+      });
+    // Fetch the user's KYC status by email
+    const kyc = await prisma.kyc.findUnique({
+      where: {userid: users?.id},
+      select: { Status: true, userid: true },
+    });
+
+    if (!kyc) {
+      return { success: false, message: "KYC details not found" };
+    }
+
+    return { success: true, message: kyc.Status };
+  } catch (error) {
+    console.error(`Error fetching KYC status for user ${email}:`, error);
+    return { success: false, message: `An error occurred while fetching KYC status` };
+  }
+}
+ export async function getKycDetails(email: string) {
+  try {
+    const users = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, email: true },
+      });
+    // Fetch the user's KYC status by email
+    const kyc = await prisma.kyc.findUnique({
+      where: {userid: users?.id},
+      select: { FullName: true, country: true, IDNO: true, documentURL1: true, documentURL2: true, Status: true },
+    });
+
+    if (!kyc) {
+      return { success: false, message: "KYC details not found" };
+    }
+
+    return { success: true, message: "kyc" };
+  } catch (error) {
+    console.error(`Error fetching KYC status for user ${email}:`, error);
+    return { success: false, message: `An error occurred while fetching KYC status` };
+  }
+}
+export async function getKycRequests() {
+  try {
+    const kycRequests = await prisma.kyc.findMany({
+      where: { Status: "pending" },
+      include: {
+        user: {
+          select: {
+            email: true, // Include the user's email
+          },
+        },
+      },
+    });
+
+    // Map the KYC requests to include user email
+    return kycRequests.map((kyc) => ({
+      id: kyc.userid,
+      FullName: kyc.FullName,
+      country: kyc.country,
+      IDNO: kyc.IDNO,
+      idCardFront: kyc.documentURL1,
+      idCardBack: kyc.documentURL2,
+      email: kyc.user?.email || "N/A", // Include the email or "N/A" if not found
+    }));
+  } catch (error) {
+    console.error("Error fetching KYC requests:", error);
+    throw new Error("Failed to fetch KYC requests");
+  }
+}
+
+export async function blockuser(email: string) {
+  // Fetch the user by email
+  try{
+    const block = await prisma.user.update({
+      where: { email }, // Replace with the actual user ID
+      data: { isBlocked: true }, // Set isBlocked to true
+  });
+  if(!block) {
+    return { success: false, message: "failed to blocked user" };
+  }
+  return { success: true, message: "User blocked successfully" };
+}catch (error) {
+  console.error("Error blocking user:", error);
+  throw new Error("Failed to block user");
+}
+}
+
+export async function unblockuser(email: string){
+  try{
+    const unblock = await prisma.user.update({
+      where: { email }, // Replace with the actual user ID
+      data: { isBlocked: false }, // Set isBlocked to true
+  });
+  if(!unblock) {
+    return { success: false, message: "Failed to Unblocked user"};
+  }
+  return{ success: true, message: "User Unblocked Successfully"}
+
+}catch (error) {
+  throw new Error("Failed to Unblock user");
+}
+}
+
+export async function approvekyc(email: string){
+  try{
+    const users = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, email: true },
+      });
+
+    const approve = await prisma.kyc.update({
+      where: { userid: users?.id }, // Replace with the actual user ID
+      data: { Status: "approved" }, // Set isBlocked to true
+  });
+  if(!approve) {
+    return { success: false, message: "Failed to approve user KYC"};
+  }
+  return{ success: true, message: "User KYC Approved Successfully"}
+
+}catch (error) {
+  throw new Error("Failed to approve user KYC" + error);
+}
+}
+
+export async function rejectkyc(email: string, reason: string){
+  try{
+    const users = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, email: true },
+      });
+
+    const approve = await prisma.kyc.update({
+      where: { userid: users?.id }, // Replace with the actual user ID
+      data: { Status: "rejected", Rejection_reason: reason }, // Set isBlocked to true
+  });
+  if(!approve) {
+    return { success: false, message: "Failed to approve user KYC"};
+  }
+  return{ success: true, message: "User KYC Approved Successfully"}
+
+}catch (error) {
+  throw new Error("Failed to approve user KYC" + error);
+}
 }

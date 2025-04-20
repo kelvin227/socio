@@ -16,11 +16,23 @@ export async function Login(email:string, password:string){
         if(!isMatch){
             return {success: false, message: "Incorrect password"}
         }
+        if(existingUser.roles === "admin"){
+
         await signIn("credentials", {
             email: email,
             password: password,
-            redirect: false
+            redirect: true,
+            callbackUrl: "/dashboard"
         })
+    }
+        else if(existingUser.roles === "user"){
+            await signIn("credentials", {
+                email: email,
+                password: password,
+                redirect: true,
+                callbackUrl: "/user_dashboard"
+            })
+        }
         return {success: true, message: "Sign in successfully"}
     } catch (error) {
         console.error(error)

@@ -1,9 +1,6 @@
-import React from 'react'
+import React from "react";
+import UserManagementHolder from "@/components/usermanagement";
 
-const Users = () => {
-  return (
-    <div>Users</div>
-  )
+export default async function UserManagement() {
+  return <UserManagementHolder />;
 }
-
-export default Users
