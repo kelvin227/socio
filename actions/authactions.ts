@@ -21,15 +21,13 @@ export async function Login(email:string, password:string){
         await signIn("credentials", {
             email: email,
             password: password,
-            redirect: true,
-            callbackUrl: "/dashboard"
+            redirect: false,
         })
     }
             await signIn("credentials", {
                 email: email,
                 password: password,
-                redirect: true,
-                callbackUrl: "/user_dashboard"
+                redirect: false,
             })
         return {success: true, message: "Sign in successfully"}
     } catch (error) {
