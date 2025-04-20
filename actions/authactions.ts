@@ -25,14 +25,12 @@ export async function Login(email:string, password:string){
             callbackUrl: "/dashboard"
         })
     }
-        else if(existingUser.roles === "user"){
             await signIn("credentials", {
                 email: email,
                 password: password,
                 redirect: true,
                 callbackUrl: "/user_dashboard"
             })
-        }
         return {success: true, message: "Sign in successfully"}
     } catch (error) {
         console.error(error)
