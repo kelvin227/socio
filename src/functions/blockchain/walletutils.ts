@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db';
 import { ethers } from 'ethers';
 /* eslint-disable */
 
+
 export default async function getBalance(walletAddress: string) {
     const sepolia =  "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43";
     const usdt = "0x55d398326f99059ff775485246999027b3197955";
