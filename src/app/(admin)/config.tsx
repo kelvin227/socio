@@ -4,9 +4,9 @@ import {
   Settings,
   Share,
   User,
-  Wallet,
   TrendingUp,
   ShieldCheck,
+  User2,
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
@@ -38,14 +38,14 @@ export const NavItems: NavItem[] = [
   },
   {
     name: "Transactions",
-    href: "/admin/transactions",
+    href: "/transactions",
     icon: TrendingUp,
     position: "top",
   },
   {
-    name: "Withdrawal Requests",
-    href: "/withdrawals",
-    icon: Wallet,
+    name: "Add moderator",
+    href: "/Moderator",
+    icon: User2,
     position: "top",
   },
   {
@@ -56,13 +56,13 @@ export const NavItems: NavItem[] = [
   },
   {
     name: "Notifications",
-    href: "/admin/notifications",
+    href: "/notifications",
     icon: Bell,
     position: "top",
   },
   {
     name: "Settings",
-    href: "/admin/settings",
+    href: "/settings",
     icon: Settings,
     position: "bottom",
   },

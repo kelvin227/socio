@@ -1,6 +1,7 @@
 "use server"
 /* eslint-disable */
 import { prisma } from "@/lib/db";
+import { hashPassword } from "@/lib/utils";
 
 export async function getUserByEmail(email: string) {
   const user = await prisma.user.findUnique({
@@ -291,3 +292,135 @@ export async function rejectkyc(email: string, reason: string){
   throw new Error("Failed to approve user KYC" + error);
 }
 }
+
+
+
+export async function getAllTransactions() {
+  try {
+    // Fetch transactions with pagination and search
+    const transactions = await prisma.transaction.findMany({
+      where: { status: { in: ["completed", "failed", "pending"] } }, // Filter by transaction type
+    });
+
+    // Get the total count of transactions for pagination
+    return transactions
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    throw new Error("Failed to fetch transactions");
+  }
+}
+
+export async function searchTransaction(id: string) {
+  try {
+    // Fetch transactions with pagination and search
+    const transaction = await prisma.transaction.findFirst({
+      where: {
+            id
+      },
+    });
+    
+    
+    return transaction
+    //return{ success: true, message: "User KYC  Successfully"}
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    throw new Error("Failed to fetch transactions");
+  }
+}
+
+export async function addModerator(email: string, name: string, roles: string) {
+  try {
+    // Fetch the user by email
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+    if (user) {
+    if (user.roles === "moderator") {
+      return { success: false, message: "User is already a moderator" };
+    }
+    }
+
+
+    // Validate the new value
+    if (!name || name.trim() === "") {
+      return { success: false, message: "Name cannot be empty" };
+    }
+    if (!roles || roles.trim() === "") {
+      return { success: false, message: "Role cannot be empty" };
+    }
+
+    // Check if the new value is already taken (only for username)
+    if (roles !== "moderator") {
+      return { success: false, message: "Role must be moderator" };
+    }
+
+    //hash the password before storing it in the database
+    const hashedPassword = hashPassword("password"); // Replace "password" with the actual password
+    // Update the user's field in the database
+    await prisma.user.create({
+      data: { 
+        email,
+        name, 
+        roles,
+        password: hashedPassword, // Set a default password or handle it as needed
+        isBlocked: false, // Set isBlocked to false by default
+        userName: email.split("@")[0], // Set a default username based on the email
+        image: "https://example.com/default-avatar.png", // Set a default avatar URL
+      },
+    });
+
+    return { success: true, message: `Moderator added successfully` };
+  } catch (error) {
+    console.error(`Error adding moderator for user ${email}:`, error);
+    return { success: false, message: `An error occurred while adding moderator` };
+  }
+}
+export async function addNotification(userId: string, title: string, message: string) {
+  try {
+    // Validate input
+    if (!userId || !title || !message) {
+      return { success: false, message: "All fields are required" };
+    }
+
+    // Create a new notification in the database
+    const notification = await prisma.notification.create({
+      data: {
+        userId,
+        title,
+        message,
+        isRead: false, // Default to unread
+      },
+    });
+
+    return { success: true, message: "Notification added successfully", notification };
+  } catch (error) {
+    console.error("Error adding notification:", error);
+    return { success: false, message: "Failed to add notification" };
+  }
+}
+
+export async function getNotifications(email: string) {
+  try {
+    // Fetch the user by email
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true }, // Select only the user ID
+    });
+    if (!user) {
+      return { success: false, message: "User not found" };
+    }
+    const userId = user.id; // Get the user ID
+    // Fetch notifications for the user
+    const notifications = await prisma.notification.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" }, // Sort by creation date (latest first)
+    });
+
+    return { success: true, notifications };
+  } catch (error) {
+    console.error("Error fetching notifications:", error);
+    return { success: false, message: "Failed to fetch notifications" };
+  }
+}
+
+

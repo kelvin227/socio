@@ -1,6 +1,7 @@
 "use server"
 
 import { signIn, signOut } from "@/auth"
+import { createWallet } from "@/functions/blockchain/wallet.utils"
 import { prisma } from "@/lib/db"
 import bcrypt from "bcryptjs"
 
@@ -16,20 +17,10 @@ export async function Login(email:string, password:string){
         if(!isMatch){
             return {success: false, message: "Incorrect password"}
         }
-        if(existingUser.roles === "admin"){
-
-        await signIn("credentials", {
-            email: email,
-            password: password,
-            redirect: true,
-            callbackUrl: "/dashboard"
-        })
-    }
             await signIn("credentials", {
                 email: email,
                 password: password,
-                redirect: true,
-                callbackUrl: "/user_dashboard"
+                redirect: false,
             })
         return {success: true, message: "Sign in successfully"}
     } catch (error) {
@@ -64,9 +55,14 @@ export async function SignUp(email:string, password:string, referralCode?: strin
             referralCode: referralCode,
             redirect: false
         })
+        const wallet = await createWallet(password, email);
+    if (!wallet) {
+        return {success: false, message: "Failed to create a wallet"}
+    }
         return {success: true, message: "User created successfully"}
+        
     } catch (error) {
-        //console.error(error)
+        console.error(error)
         return {success: false, message: "Failed to create a user"}
     }
 }

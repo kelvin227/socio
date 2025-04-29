@@ -26,6 +26,7 @@ import { Label } from "../ui/label";
 import { toast } from "sonner";
 import { Login } from "../../../actions/authactions";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 
 const signinFormData = [
@@ -132,9 +133,12 @@ const AdminForm = () => {
         </Form>
 
         <div className="flex text-white w-full gap-5 flex-col justify-center bg-linear-[135deg,#f75959_0%,#f35587_100%] p-10 items-center">
-                  <img
-                    src="https://school.codegator.com.ng/image/logo2.png"
+                  <Image
+                  alt="logo"
+                    src="https://kalajtomdzamxvkl.public.blob.vercel-storage.com/logo2-6X2L1QaE3Zc3GrRsCHvW0JY0kcA7bx.png"
                    className="w-24 h-24"
+                   width={24}
+                   height={24}
                   />
           <h1 className="text-3xl text-center font-bold">Welcome to Socio</h1>
           <p></p>

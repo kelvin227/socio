@@ -22,7 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Menu, Wallet, BadgeCheck, Bell, ArrowDownToLine, ArrowUpToLine, RefreshCcw, History } from "lucide-react";
+import { Menu, Wallet, Bell, ArrowDownToLine, ArrowUpToLine, RefreshCcw, History } from "lucide-react";
 import { NavItems } from "./config";
 import { LogOut } from "../../../actions/authactions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -59,19 +59,15 @@ export default function Header() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>My Wallet</DropdownMenuLabel>
+            <DropdownMenuLabel>Notificationa</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Balance</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Buy</DropdownMenuItem>
-            <DropdownMenuItem>Sell</DropdownMenuItem>
-            <DropdownMenuItem>Deposit</DropdownMenuItem>
-            <DropdownMenuItem>Withdraw</DropdownMenuItem>
+            <DropdownMenuItem>You Have a new kyc request</DropdownMenuItem>
+            <DropdownMenuItem>You have a new kyc request</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <DropdownMenu></DropdownMenu>
 
-        <BadgeCheck className="text-red-500"></BadgeCheck>
+        
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
