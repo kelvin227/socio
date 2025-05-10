@@ -239,6 +239,44 @@ const OTC = () => {
         </Link>
         
       </div>
+
+      <div className="pb-4">
+        <Link href={"/otc/advertisement/socio"}>
+        <Card>
+          <div className="flex flex-box w-full p-2">
+            <CardContent>
+              <div>
+                <Avatar>
+                  <AvatarImage
+                    src="https://kalajtomdzamxvkl.public.blob.vercel-storage.com/logo2-6X2L1QaE3Zc3GrRsCHvW0JY0kcA7bx.png"
+                    alt="@shadcn"
+                  />
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+              </div>
+            </CardContent>
+        
+            <div className="">
+              <CardContent>Socio</CardContent>
+            </div>
+        
+            <div className="absolute right-0">
+              <div className="grid grid-box">
+                <CardContent>Start Trading</CardContent>
+        
+                <CardContent>
+                  <div className="flex flex-box">
+                    2% fee
+                    <TrendingUp />
+                  </div>
+                </CardContent>
+              </div>
+            </div>
+          </div>
+        </Card>
+        </Link>
+        
+      </div>
     </div>
   );
 };

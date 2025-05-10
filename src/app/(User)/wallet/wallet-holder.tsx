@@ -4,22 +4,13 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import React, { useState } from 'react';
 import { ethers } from 'ethers';
-import { sendtest } from '@/functions/blockchain/wallet.utils';
+import getBalance, { sendtest } from '@/functions/blockchain/wallet.utils';
 
 export default function Wallet({email, address} : {email: string, address: string}) {
   const [balances, setBalance] = useState<string | null>(null); // State to store the balance
   const [showTransfer, setshowTransfer] = useState(false); // State to control the visibility of the transfer dialog
 const walletAddress = address; // Replace with actual wallet address
-const balance = async () => {
-    const response = await fetch(
-        `https://api-sepolia.etherscan.io/api?module=account&action=balance&address=${walletAddress}&tag=latest&apikey=KB4T4QZCQQBM4G5WDHHZRHV1RYAIDYXMBQ`
-    );
-        const data = await response.json();
-        const balance = ethers.formatEther(data.result); // Assuming the API returns the balance in the 'result' field
-        return {success: true, message: balance};
 
-        
-    }
   const [show, setshow] = useState(false); // State to control the visibility of the deposit dialog
   const [recipientAddress, setRecipientAddress] = useState(""); // State for recipient address
   const [transferAmount, setTransferAmount] = useState(""); // State for transfer amount
@@ -27,16 +18,13 @@ const balance = async () => {
 
   // Function to handle the transfer
   const handleTransfer = async () => {
-
-    
-      
     if (!recipientAddress || !ethers.isAddress(recipientAddress)) {
-      toast.error("Invalid recipient address");
+      toast("Invalid recipient address");
       return;
     }
 
     if (!transferAmount || isNaN(Number(transferAmount)) || Number(transferAmount) <= 0) {
-      toast.error("Invalid transfer amount");
+      toast("Invalid transfer amount");
       return;
     }
 
@@ -46,14 +34,11 @@ const balance = async () => {
       const provider = await sendtest(transferAmount, recipientAddress, email);
 
       // Send the transaction
-      if(!provider){
-        console.log(provider)
-      }
       console.log(provider)
       
     } catch (error) {
       console.error("Error during transfer:", error);
-      toast.error("Transfer failed. Please try again.");
+      toast("Transfer failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -63,7 +48,7 @@ const balance = async () => {
   React.useEffect(() => {
     const fetchBalance = async () => {
       try {
-        const balanceData = await balance();
+        const balanceData = await getBalance(address);
         if (balanceData.success) {
           setBalance(balanceData.message);
         } else {

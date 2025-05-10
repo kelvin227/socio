@@ -30,35 +30,36 @@ export async function createWallet(password: string, email: string) {
     return newWallet;
 }
 
-export default async function getBalance(walletAddress: string) {
-    const sepolia =  "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43";
+export default async function getBalance(address: string) {
     const usdt = "0x55d398326f99059ff775485246999027b3197955";
-    const usdtresponse = await fetch ('https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress='+ {usdt} +'&address=0x222b38Fec42183288d752ED2926a142eEc655967&tag=latest&apikey=HUSTYYQF38TCG66EA8DZ18AY57QV42VHJ8'
-); 
+    const usdtresponse = await fetch (`https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=${usdt}&address=${address}&tag=latest&apikey=${process.env.BSC_API_KEY}`); 
+
     const response = await fetch(
-        "https://api-sepolia.etherscan.io/api?module=account&action=balance&address=0x3d80C535515074d9BDC25AD6eB40641E0aeBd12f&tag=latest&apikey=KB4T4QZCQQBM4G5WDHHZRHV1RYAIDYXMBQ"
+        `https://api-sepolia.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest&apikey=${process.env.SEPOLIA_API_KEY}`
     );
     const data = await response.json();
-    const balance = data.result; // Assuming the API returns the balance in the 'result' field
-    return ethers.formatEther(balance);
+    const balance = ethers.formatEther(data.result); // Assuming the API returns the balance in the 'result' field
+    return {success: true, message: balance};
     //return {success: true, message: balance};
     
 }
-export async function monitor(){
+export async function gettransaction(address: string) {
    const responses = await fetch(
-    "https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=0x55d398326f99059ff775485246999027b3197955&address=0x222b38Fec42183288d752ED2926a142eEc655967&page=1&offset=5&startblock=0&endblock=999999999&sort=asc&apikey=HUSTYYQF38TCG66EA8DZ18AY57QV42VHJ8"
+    `https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=0x55d398326f99059ff775485246999027b3197955&address=${address}&page=2&offset=5&startblock=0&endblock=999999999&sort=asc&apikey=${process.env.BSC_API_KEY}`
 );
-const response = await fetch(
-    "https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=0x3d80C535515074d9BDC25AD6eB40641E0aeBd12f&startblock=0&endblock=99999999&page=1&offset=10&sort=asc&apikey=KB4T4QZCQQBM4G5WDHHZRHV1RYAIDYXMBQ"
-);
-const data = await response.json();
-const trans = data.result; // Assuming the API returns the balance in the 'result' field
-return (trans);
-    
+try {
+      const response = await fetch(
+        `https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=desc&apikey=${process.env.SEPOLIA_API_KEY}`
+      );
+      return response.json();
+      
+    } catch (error) {
+      console.error("Error fetching transaction data:", error);
+    } 
 }
 
-export async function sendusdt(address: string, amount: string, password: string, recipient: string) {
-    const provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/" + process.env.INFURA_API_KEY);
+export async function sendusdt(address: string, amount: string, recipient: string) {
+    const provider = new ethers.JsonRpcProvider(`https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`);
     const privateK = await prisma.wallets.findUnique({
         where:{address},
         select: {private_key: true}
@@ -75,8 +76,8 @@ export async function sendusdt(address: string, amount: string, password: string
     if (wallet) {
         const tx = await wallet.sendTransaction({
             to: recipient,
-            value: ethers.parseUnits(amount, 18),
-            chainId: 56//11155111 // Sepolia testnet chain ID
+            value: ethers.parseEther(amount),
+            chainId: 56//11155111 // USDT testnet chain ID
         });
         console.log("Transaction Hash:", tx.hash);
         await tx.wait(); // Wait for the transaction to be mined
@@ -90,28 +91,31 @@ export async function sendusdt(address: string, amount: string, password: string
 }
 
 export async function sendtest(amount: string, recipient: string, email: string) {
+    console.log("email from sendtest", email);
     const user = await prisma.user.findUnique({
         where: { email },
         select: { id: true }
     });
+    console.log("user from sendtest", user);
     if (!user) {
-        return{success: true, message: "failed to get user info"};
-        console.log(user);
+        //return{success: true, message: "failed to get user info"};
+        console.log("error from getting user details", user);
     }
     
     const walletss = await prisma.wallets.findUnique({
-        where: { id: user.id },
+        where: { userId: user?.id },
         select: { address: true, encrypted_key: true, private_key: true, },
     });
     
           // Connect to the Ethereum Sepolia network
           if (!walletss) {
-            return{success: true, message: "unable to get wallet info"};
+            //return{success: true, message: "unable to get wallet info"};
             console.log(walletss);
           }
-    const provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/" + process.env.INFURA_API_KEY);
+          console.log("return null for walletss", walletss);
+    const provider = new ethers.JsonRpcProvider(`https://sepolia.infura.io/v3/80c842e999184bd28fd9d46c6d19afb4`);
    // const decrypt_private_key = await ethers.Wallet.fromEncryptedJson(privateK.private_key, password);
-    const wallet = new ethers.Wallet(walletss.private_key, provider);
+    const wallet = new ethers.Wallet(walletss?.private_key as string, provider);
 
     //if (!decrypt_private_key) {
     //    throw new Error("Invalid password or wallet not found");
@@ -120,16 +124,15 @@ export async function sendtest(amount: string, recipient: string, email: string)
         const tx = await wallet.sendTransaction({
             to: recipient,
             value: ethers.parseEther(amount),
-            chainId: 11155111 // Sepolia testnet chain ID
         });
-        console.log(wallet);
+        console.log("error sending a getting user detials", wallet);
         console.log("Transaction Hash:", tx.hash);
         await tx.wait(); // Wait for the transaction to be mined
         console.log("Transaction confirmed in block:", tx.blockNumber);
     }
 
     //const data = await wallet; // Assuming the API returns the balance in the 'result' field
-    console.log(walletss);
+    console.log("error with return", walletss);
     //return ethers.formatEther(balance);
     
 }

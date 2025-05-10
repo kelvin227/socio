@@ -12,20 +12,18 @@ const session= await auth();
               select: { id: true }
           });
           if (!user) {
-              console.log(user)
+              console.log("error: User not found");
           }
-          console.log(user);
           
           const wallet = await prisma.wallets.findUnique({
               where: { userId: user?.id },
               select: { address: true},
           });
-          if(wallet){
-            console.log(wallet);
+          if(!wallet){
+            console.log("error: Wallet not found");
           }
-          console.log(wallet);
 
  return (
-<TransactionTable address={wallet?.address as string}/>
+<TransactionTable address={wallet?.address as string} email={email}/>
  );
 }

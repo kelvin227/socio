@@ -8,27 +8,34 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
-  createdAt     DateTime       @default(now())
-  emailVerified DateTime?
-  image         String?        @default("default.png")
-  updatedAt     DateTime       @updatedAt
-  password      String
-  referralCode  String?        @unique
-  referredBy    String?
-  phoneNo       String?
-  name          String?
-  userName      String?        @unique
-  roles         String?        @default("user")
-  isBlocked     Boolean?       @default(false)
-  accounts      Account[]
-  kyc           Kyc[]
-  Notification  Notification[]
-  sessions      Session[]
-  Transaction   Transaction[]
-  userWallet    userWallet[]
-  wallet        wallets[]
+  id              String    @id @default(cuid())
+  email           String    @unique
+  createdAt       DateTime  @default(now())
+  emailVerified   Boolean?
+  emailVerifiedAt DateTime?
+  kycverified     Boolean?  @default(false)
+  kycverifiedAt   DateTime?
+
+  image          String?          @default("default.png")
+  updatedAt      DateTime         @updatedAt
+  password       String
+  referralCode   String?          @unique
+  referredBy     String?
+  phoneNo        String?
+  name           String?
+  userName       String?          @unique
+  roles          String?          @default("user")
+  isBlocked      Boolean?         @default(false)
+  accounts       Account[]
+  kyc            Kyc[]
+  Notification   Notification[]
+  sessions       Session[]
+  Transaction    Transaction[]
+  userWallet     userWallet[]
+  wallet         wallets[]
+  ads            ads[]
+  adsTransaction adsTransaction[]
+  traderequest   traderequest[]
 }
 
 model Account {
@@ -112,18 +119,16 @@ model Notification {
 
 model Transaction {
   id                    String   @id @default(cuid())
-  transactionId         String   @unique
   senderWalletAddress   String
   receiverWalletAddress String
-  transactionHash       String
+  transactionHash       String   @unique
   userId                String
-  transactionType       String
   amount                Float
   status                String
   createdAt             DateTime @default(now())
   coin                  String
   fee                   String
-  orderId               String
+  orderId               String   @unique
   price                 String
   qty                   Int
 
@@ -139,6 +144,63 @@ model wallets {
   created_at    DateTime @default(now())
   encrypted_key String?
   userId        String   @unique
+
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ads {
+  id        String   @id @default(cuid())
+  coin      String
+  type      String?
+  price     String
+  status    String
+  proof     String
+  minQty    Int
+  maxQty    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  userName  String
+
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model adsTransaction {
+  id            String   @id @default(cuid())
+  adId          String
+  orderId       String  @unique
+  coin          String
+  type          String?
+  price         String
+  status        String
+  amount        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  userId        String
+  walletAddress String?
+  merchantID    String
+  userName      String
+  merchantconfirm String @default("pending")
+  customerconfirm String @default("pending")
+
+
+  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model traderequest {
+  id            String   @id @default(cuid())
+  adId          String
+  coin          String
+  type          String?
+  price         String
+  status        String
+  amount        String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  userId        String   @unique
+  merchantId    String   @unique
+  walletAddress String?
+  merchantName  String
 
   User User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

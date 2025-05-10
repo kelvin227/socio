@@ -24,8 +24,8 @@ export const columns: ColumnDef<Ads>[] = [
     header: "Price",
   },
   {
-    accessorKey: "quantity",
-    header: "quantity",
+    accessorKey: "minQty",
+    header: "minQty",
   },
   {
     accessorKey: "payment",

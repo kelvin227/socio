@@ -293,17 +293,53 @@ export async function rejectkyc(email: string, reason: string){
 }
 }
 
+export async function addTransaction(senderWalletAddress: string, receiverWalletAddress: string, transactionHash: string, amount: number, coin: string, fee: string, orderId: string, price: string, qty: number) {
+  try{
+    const userId = await prisma.wallets.findUnique({
+      where: { address: senderWalletAddress },
+      select: { userId: true },
+    });
+    if (!userId) {
+      throw new Error("User not found for the given wallet address");
+    }
+    const transaction = await prisma.transaction.create({
+      data: {
+        senderWalletAddress,
+        receiverWalletAddress,
+        transactionHash,
+        userId: userId.userId,
+        amount,
+        status: "pending",
+        coin,
+        fee,
+        orderId,
+        price,
+        qty
+      }
+  });
+  
+} catch (error) {
+    console.error("Error adding transaction:", error);
+    throw new Error("Failed to add transaction");
+  }
+}
 
-
-export async function getAllTransactions() {
+export async function getp2ptransaction(email: string) {
   try {
+    const userId = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true }, // Select only the user ID
+    });
     // Fetch transactions with pagination and search
     const transactions = await prisma.transaction.findMany({
-      where: { status: { in: ["completed", "failed", "pending"] } }, // Filter by transaction type
+      where: { userId: userId?.id }, // Filter by transaction type
     });
-
+    if (!transactions) {
+      return { success: false, message: "No transactions found for the user" };
+      
+    }
+    return {success: true, message: transactions};
     // Get the total count of transactions for pagination
-    return transactions
   } catch (error) {
     console.error("Error fetching transactions:", error);
     throw new Error("Failed to fetch transactions");
@@ -423,4 +459,298 @@ export async function getNotifications(email: string) {
   }
 }
 
+export async function createads(email: string, coin: string, price: string, minQty: number, maxQty: number, proof: string,) {
+  try {
+    // Fetch the user by email
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true, userName: true }, // Select only the user ID
+    });
+    if (!user) {
+      return { success: false, message: "User not found" };
+    }
+    const userId = user.id; // Get the user ID
+    const username = user.userName; // Get the username
+    // Create a new ad in the database
+    const ads = await prisma.ads.create({
+      data: {
+        coin,
+        price,
+        minQty,
+        maxQty,
+        proof,
+        status: "inactive",
+        userId,
+        userName: username || "", // Include the username in the ad data
+      },
+    });
 
+    return { success: true, message: "Ad created successfully" };
+  } catch (error) {
+    console.log("Error creating ad:", error);
+    return { success: false, message: "Failed to create ad" };
+  }
+}
+export async function getAds(email: string) {
+  try {
+    // Fetch the user by email
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true }, // Select only the user ID
+    });
+    if (!user) {
+      return { success: false, message: "User not found" };
+    }
+    const userId = user.id; // Get the user ID
+    // Fetch ads for the user
+    const ads = await prisma.ads.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" }, // Sort by creation date (latest first)
+    });
+
+    return { success: true, ads };
+  } catch (error) {
+    console.error("Error fetching ads:", error);
+    return { success: false, message: "Failed to fetch ads" };
+  }
+}
+
+export async function getAllAds() {
+  try {
+    // Fetch all ads
+    const ads = await prisma.ads.findMany({
+      orderBy: { createdAt: "desc" }, // Sort by creation date (latest first)
+    });
+
+    if (!ads) {
+      return { success: false, message: "No ads found" };
+    }
+    
+    return { success: true, ads, };
+  } catch (error) {
+    console.error("Error fetching ads:", error);
+    return { success: false, message: "Failed to fetch ads" };
+  }
+}
+
+export async function addtraderequest(email: string, userName: string, adId: string, amount: number, price: number, coin: string, type: string) {
+  try {
+    console.log("Adding trade request:", { email, userName, adId, amount, price, coin });
+    // Fetch the user by email
+    const merchant = await prisma.user.findUnique({
+      where: { userName },
+      select: { id: true, userName: true }, // Select only the user ID
+    });
+    if (!merchant) {
+      return { success: false, message: "User not found" };
+    }
+    const merchantId = merchant.id; // Get the user ID
+    const username = merchant.userName; // Get the username
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true }, // Select only the user ID
+    });
+    if (!user) {
+      return { success: false, message: "User not found" };
+    }
+    const wallet = await prisma.userWallet.findUnique({
+      where: { userid: user.id }
+    });
+    let walletAddress;
+    if(coin==="ATOK"){
+      walletAddress = wallet?.walletAddress; // Get the user's wallet address
+    }else if(coin==="WOW") {
+      walletAddress = wallet?.walletAddress2; // Get the user's wallet address
+    } else if(coin==="SDA"){
+      walletAddress = wallet?.walletAddress3; // Get the user's wallet address
+    } else if(coin ==="RBL"){
+      walletAddress = wallet?.walletAddress4; // Get the user's wallet address
+    }else if(coin === "Opincur"){
+      walletAddress = wallet?.walletAddress5; // Get the user's wallet address
+    }else if(coin === "Star"){
+      walletAddress = wallet?.walletAddress6; // Get the user's wallet address
+    }else if(coin ==="Socio"){
+      walletAddress = wallet?.walletAddress7; // Get the user's wallet address
+    }
+
+    const userId = user.id; // Get the user ID
+    // Create a new ad in the database
+    const priceNo = price.toString().replace(/,/g, "");
+    const amountNo = amount.toString().replace(/,/g, "");
+    const traderequest = await prisma.traderequest.create({
+      data: {
+        adId,
+        coin,
+        price: priceNo,
+        status: "pending",
+        type,
+        amount: amountNo,
+        userId,
+        merchantId,
+        walletAddress, // Include the wallet address in the ad data
+        merchantName: username || "", // Include the username in the ad data
+      },
+    });
+
+    if(!traderequest){
+      return{success: false, message: "failed to upload"}
+    }
+    return { success: true, message: "Trade request created successfully" };
+  } catch (error) {
+    console.log("Error creating trade request:", error);
+    return { success: false, message: "Failed to create trade request" };
+  }
+}
+
+export async function gettraderequests(email: string) {
+  try {
+    // Fetch the user by email
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: { id: true }, // Select only the user ID
+    });
+    if (!user) {
+      return { success: false, message: "User not found" };
+    }
+    const userId = user.id; // Get the user ID
+    // Fetch ads for the user
+    const traderequests = await prisma.traderequest.findMany({
+      where: {
+        OR: [
+          { merchantId: userId },
+          { userId: userId }
+        ]
+      },
+      orderBy: { createdAt: "desc" }, // Sort by creation date (latest first)
+    });
+
+    return { success: true, traderequests };
+  } catch (error) {
+    console.error("Error fetching traderequests:", error);
+    return { success: false, message: "Failed to fetch traderequests" };
+  }
+}
+
+export async function gettraderequestsinfo(id: string) {
+  try {
+    // Fetch ads for the user
+    const info = await prisma.traderequest.findUnique({
+      where: {
+        id
+      },
+    });
+
+    return { success: true, info };
+  } catch (error) {
+    console.error("Error fetching traderequests:", error);
+    return { success: false, message: "Failed to fetch traderequests" };
+  }
+}
+
+export async function acceptTrade(id: string) {
+  try {
+    // Fetch the user by email
+    const traderequest = await prisma.traderequest.findUnique({
+      where: { id },    });
+    if (!traderequest) {
+      return { success: false, message: "Trade request not found" };
+    }
+    const traderequestId = traderequest.id; // Get the user ID
+    const adId = traderequest.adId; // Get the user ID
+    const amount = traderequest.amount; // Get the user ID
+    const price = traderequest.price; // Get the user ID
+    const coin = traderequest.coin; // Get the user ID
+    const status = traderequest.status; // Get the user ID
+    const walletAddress = traderequest.walletAddress;
+
+    if (status === "Accepted") {
+      return { success: false, message: "Trade request already Accepted" };
+    }
+
+    // Update the user's field in the database
+    await prisma.traderequest.update({
+      where: { id },
+      data: { status: "Accepted" },
+    });
+
+    // Create a new ad in the database
+    const addTransaction = await prisma.adsTransaction.create({
+      data: {
+        adId: adId,
+        orderId: traderequestId,
+        coin,
+        price,
+        status: "pending",
+        amount,
+        userId: traderequest.userId,
+        merchantconfirm: "pending",
+        customerconfirm: "pedning",
+        merchantID: traderequest.merchantId,
+        walletAddress,
+        userName: traderequest.merchantName || "", // the username is the merchant username
+      },
+    });
+
+    if(!addTransaction){
+      return{success: false, message:""}
+    }
+
+    return { success: true, message: `Trade request accepted successfully` };
+  } catch (error) {
+    console.error(`Error accepting trade request ${id}:`, error);
+    return { success: false, message: `An error occurred while accepting trade request` };
+  }
+}
+
+export async function getadstransactions(ids: string){
+  try{
+    const gettrans = await prisma.adsTransaction.findUnique({
+      where:{ orderId: ids}
+    })
+
+    if(!gettrans){
+      return{success: false, message: "unable to get transaction info"}
+    }
+    return{ success: true, gettrans}
+
+  }catch(error){
+    console.log(error);
+  }
+
+}
+
+export async function confirmbuyer(id: string){
+  try{
+    console.log(`the id is${id}`)
+    const gettrans = await prisma.adsTransaction.update({
+      where: { orderId: id },
+      data:{
+        merchantconfirm: "sent"
+      }
+    })
+    if(!gettrans){
+      return{success:false, message: "unable to update transaction"}
+    }
+    return{succes: true, gettrans}
+  }catch(error){
+    console.log(error)
+  }
+}
+
+export async function confirmseen(id: string){
+  try{
+    const gettrans = await prisma.adsTransaction.update({
+      where: { orderId: id },
+      data:{
+        customerconfirm: "sent"
+      }
+    })
+    if(!gettrans){
+      return{success:false, message: "unable to update transaction"}
+    }
+    return{succes: true, gettrans}
+  }catch(error){
+    console.log(error)
+  }
+}

@@ -67,17 +67,17 @@ export default function KycPageholder ({email, kycss}: {email: string, kycss: st
     
       // Validate form fields
       if (!formData.fullName.trim()) {
-        toast.error("Full name is required");
+        toast("Full name is required");
         setIsLoading(false);
         return;
       }
       if (!formData.country) {
-        toast.error("Country is required");
+        toast("Country is required");
         setIsLoading(false);
         return;
       }
       if (!formData.idCardNumber.trim()) {
-        toast.error("ID card number is required");
+        toast("ID card number is required");
         setIsLoading(false);
         return;
       }
@@ -233,11 +233,17 @@ export default function KycPageholder ({email, kycss}: {email: string, kycss: st
                 <SelectValue placeholder="Select your country" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="USA">United States</SelectItem>
-                <SelectItem value="UK">United Kingdom</SelectItem>
-                <SelectItem value="Canada">Canada</SelectItem>
+                <SelectItem value="Nepal">Nepal</SelectItem>
+                <SelectItem value="China">China</SelectItem>
                 <SelectItem value="India">India</SelectItem>
+                <SelectItem value="Vietnam">Vietnam</SelectItem>
+                <SelectItem value="US">US</SelectItem>
+                <SelectItem value="UK">UK</SelectItem>
+                <SelectItem value="Japan">Japan</SelectItem>
+                <SelectItem value="Pakistan">Pakistan</SelectItem>
+                <SelectItem value="Canada">Canada</SelectItem>
                 <SelectItem value="Nigeria">Nigeria</SelectItem>
+                <SelectItem value="Bangladesh">Bangladesh</SelectItem>
               </SelectContent>
             </Select>
           </div>
