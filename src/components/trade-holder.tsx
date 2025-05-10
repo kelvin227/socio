@@ -1,10 +1,11 @@
 "use client";
+/* eslint-disable */
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { acceptTrade, confirmbuyer, confirmseen, getadstransactions, gettraderequests, gettraderequestsinfo } from "@/functions/user";
 import { Clock } from "lucide-react";
-import { sendtest } from "@/functions/blockchain/wallet.utils";
+//import { sendtest } from "@/functions/blockchain/wallet.utils";
 
 export default function PendingTrades({ email, id }: { email: string, id: string }) {
   const [show, setShow] = useState(false);
@@ -88,8 +89,8 @@ export default function PendingTrades({ email, id }: { email: string, id: string
       } else {
         toast("An unexpected error occured")
       }
-    } catch (error) {
-
+    } catch (error: any) {
+      toast("Error message", error)
     }
   }
   const handlerecieved = async(tradeId: string) => {
@@ -105,15 +106,17 @@ export default function PendingTrades({ email, id }: { email: string, id: string
     }
   }
 
-  const handleView = async (type: string, Id: string) => {
+  const handleView = async (type: string, Id: string, stat: string) => {
     setShow(true);
     setSelectedType(type)
     fetchTransactionDetails(Id);
+    settradeid(Id)
+    setstatus(stat)
   }
 
   useEffect(() => {
     fetchPendingTrades();
-  }, [email]);
+  }, []);
 
   useEffect(() => {
     if (!show || !tradeid) return;
@@ -142,6 +145,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
   return (
     <div className="container mx-auto py-10">
       <h1 className="text-2xl font-bold mb-4">Pending Trades</h1>
+      <h1>{transStatus} {customerconfirm}</h1>
 
       {loading ? (
         <p className="text-center text-gray-500">Loading pending trades...</p>
@@ -166,11 +170,11 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                   <td className={trade.status === "pending" ? "p-4 text-yellow-500" : "pbb-4"}>{trade.status}</td>
                   <td className="p-4">
                     {
-                      id === trade.userId ? (<Button className="bg-blue-500 text-white" onClick={() => {handleView(trade.type, trade.id); settradeid(trade.id), setstatus(trade.status)}}>View</Button>) :
+                      id === trade.userId ? (<Button className="bg-blue-500 text-white" onClick={() => handleView(trade.type, trade.id, trade.status)}>View</Button>) :
                         (
                           <Button
                             className="bg-blue-500 text-white"
-                            onClick={() => { {trade.status === "Accepted"? ( handleView(trade.type, trade.id) ) : (accept(trade.id)) }settradeid(trade.id) }}
+                            onClick={() => { {trade.status === "Accepted"? ( handleView(trade.type, trade.id, trade.status) ) : (accept(trade.id)) }settradeid(trade.id) }}
                           >
                             {trade.status === "Accepted" ? "View" :"Accept and View"}
                           </Button>)
@@ -196,7 +200,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
             </div>
             <h1 className="text-2xl font-bold text-yellow-700 mb-2">Send Atok to user wallet Address</h1>
             <p className="text-gray-600 mb-4">
-              To complete the trade, please send the agreed amount of Atok to the user's wallet address. Once the payment is confirmed, the trade will be finalized.
+              To complete the trade, please send the agreed amount of Atok to the user&apos;s wallet address. Once the payment is confirmed, the trade will be finalized.
             </p>
             <span className="text-gray-600 mb-4">User Wallet Address: <span className="font-bold">{pendingTrades[0].walletAddress}</span></span><br />
             <span className="text-gray-600 mb-4">Amount to send: <span className="font-bold">{pendingTrades[0].amount}</span></span><br />

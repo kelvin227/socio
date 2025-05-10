@@ -1,6 +1,6 @@
+/* eslint-disable */
 import { auth } from "@/auth";
 import { getAllAds, getUserByEmail } from "@/functions/user";
-import { User } from "@prisma/client";
 import React from "react";
 import AtokHolder from "@/components/atok_holder";
 // import { useCopyToClipboard } from "@uidotdev/usehooks";

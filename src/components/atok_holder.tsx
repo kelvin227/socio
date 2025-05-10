@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable */
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowBigLeft, Clock } from "lucide-react";
@@ -11,7 +12,6 @@ import { PutBlobResult } from "@vercel/blob";
 import { useRouter } from "next/navigation";
 
 export default function AtokHolder({ email, name, data }: { email: string, name: string, data:any[] }) {
-  const [filteredTransactions, setFilteredTransactions] = useState<any[]>(data); // Filtered wallet transactions
    const [selectedType, setSelectedType] = useState<string | null>("buy"); // Selected transaction type for filtering
   const [showdialog, setshowdialog] = useState(false);
   const [showModal, setshowModal] = useState(false);
@@ -160,9 +160,6 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
     const toReceive = amount * Number(formData.price); // Ensure price is treated as a number
     const toReceiveProcessing = toReceive - toReceive * 0.02; // Deduct 2% processing fee
 
-    const amounts = Number(e.target.value); // Ensure price is treated as a number
-    const toreceives = amounts * Number(formData.price); // Ensure price is treated as a number
-    const toreceiveprocessings = toreceives - toreceives * 0.02; // Deduct 2% processing fee
     setFormData((prev) => ({
       ...prev,
       amount, // Update the amount
