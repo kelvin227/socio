@@ -35,8 +35,11 @@ export default function UserManagementHolder() {
       }
       const data = {
         ...response, 
-        email: response.email || "", // Ensure id is present
+        email: response.email || "", // Ensure email is present
         isBlocked: response.isBlocked || false, // Ensure isBlocked is present
+        emailVerified: typeof response.emailVerified === "string" || typeof response.emailVerified === "number"
+          ? new Date(response.emailVerified)
+          : null, // Convert emailVerified to Date if valid
       };
       setUserData(data);
     } catch (error) {
