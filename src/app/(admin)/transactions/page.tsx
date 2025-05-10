@@ -9,7 +9,6 @@ export default function TransactionLog() {
   const [transactions, setTransactions] = useState<{
     id: string | null,
   qty: number,
-  transactionId: string,
   price: string,
   fee: string,
   orderId: string,
@@ -18,7 +17,6 @@ export default function TransactionLog() {
   receiverWalletAddress: string,
   transactionHash: string,
   userId: string,
-  transactionType: string,
   amount: number,
   status: string,
   createdAt: Date,
