@@ -468,10 +468,13 @@ export async function createads(email: string, coin: string, price: string, minQ
     // Fetch the user by email
     const user = await prisma.user.findUnique({
       where: { email },
-      select: { id: true, userName: true }, // Select only the user ID
+      select: { id: true, userName: true, kycverified: true }, // Select only the user ID
     });
     if (!user) {
       return { success: false, message: "User not found" };
+    }
+    if(!user.kycverified){
+      return{success: false, message: "you must verify you kyc before you create an ad"}
     }
     const userId = user.id; // Get the user ID
     const username = user.userName; // Get the username
