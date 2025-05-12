@@ -90,21 +90,24 @@ export async function sendusdt(address: string, amount: string, recipient: strin
     
 }
 
-export async function sendtest(amount: string, recipient: string, email: string) {
-    console.log("email from sendtest", email);
-    const user = await prisma.user.findUnique({
-        where: { email },
-        select: { id: true }
-    });
-    console.log("user from sendtest", user);
-    if (!user) {
-        //return{success: true, message: "failed to get user info"};
-        console.log("error from getting user details", user);
-    }
-    
-    const walletss = await prisma.wallets.findUnique({
-        where: { userId: user?.id },
+export async function sendtest(amount: string, recipient: string, id: string) {
+    // console.log("email from sendtest", email);
+    // const user = await prisma.user.findUnique({
+    //     where: { email },
+    //     select: { id: true }
+    // });
+    // console.log("user from sendtest", user);
+    // if (!user) {
+    //     //return{success: true, message: "failed to get user info"};
+    //     console.log("error from getting user details", user);
+    // }
+    const wallets = await prisma.wallets.findUnique({
+        where: { userId: id },
         select: { address: true, encrypted_key: true, private_key: true, },
+    });
+    const walletss = await prisma.wallets.findUnique({
+        where: { userId: recipient },
+        select: { address: true },
     });
     
           // Connect to the Ethereum Sepolia network
@@ -115,21 +118,22 @@ export async function sendtest(amount: string, recipient: string, email: string)
           console.log("return null for walletss", walletss);
     const provider = new ethers.JsonRpcProvider(`https://sepolia.infura.io/v3/80c842e999184bd28fd9d46c6d19afb4`);
    // const decrypt_private_key = await ethers.Wallet.fromEncryptedJson(privateK.private_key, password);
-    const wallet = new ethers.Wallet(walletss?.private_key as string, provider);
+    const wallet = new ethers.Wallet(wallets?.private_key as string, provider);
 
     //if (!decrypt_private_key) {
     //    throw new Error("Invalid password or wallet not found");
     //}
     if (wallet) {
         const tx = await wallet.sendTransaction({
-            to: recipient,
+            to: walletss?.address,
             value: ethers.parseEther(amount),
         });
         console.log("error sending a getting user detials", wallet);
         console.log("Transaction Hash:", tx.hash);
         await tx.wait(); // Wait for the transaction to be mined
-        console.log("Transaction confirmed in block:", tx.blockNumber);
+        return {success: true, tx}
     }
+    return{success: false, message: wallet}
 
     //const data = await wallet; // Assuming the API returns the balance in the 'result' field
     console.log("error with return", walletss);

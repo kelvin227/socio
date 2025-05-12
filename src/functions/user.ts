@@ -265,6 +265,10 @@ export async function approvekyc(email: string){
   if(!approve) {
     return { success: false, message: "Failed to approve user KYC"};
   }
+  const userkyc = await prisma.user.update({
+    where: {email},
+    data: {kycverified: true}
+  })
   return{ success: true, message: "User KYC Approved Successfully"}
 
 }catch (error) {
@@ -459,7 +463,7 @@ export async function getNotifications(email: string) {
   }
 }
 
-export async function createads(email: string, coin: string, price: string, minQty: number, maxQty: number, proof: string,) {
+export async function createads(email: string, coin: string, price: string, minQty: number, maxQty: number, proof: string, type: string ) {
   try {
     // Fetch the user by email
     const user = await prisma.user.findUnique({
@@ -471,6 +475,19 @@ export async function createads(email: string, coin: string, price: string, minQ
     }
     const userId = user.id; // Get the user ID
     const username = user.userName; // Get the username
+   const existingAds = await prisma.ads.findMany({
+  where: { userId },
+});
+
+const sameTypeAd = existingAds.find(ad => ad.type === type);
+
+if (sameTypeAd) {
+  return {
+    success: false,
+    message: `You have already created a ${type} ad. Go to 'View Ads' to edit your ad details.`,
+  };
+}
+
     // Create a new ad in the database
     const ads = await prisma.ads.create({
       data: {
@@ -482,9 +499,12 @@ export async function createads(email: string, coin: string, price: string, minQ
         status: "inactive",
         userId,
         userName: username || "", // Include the username in the ad data
+        type
       },
     });
-
+    if(!ads){
+      return{ success: false, message: ads}
+    }
     return { success: true, message: "Ad created successfully" };
   } catch (error) {
     console.log("Error creating ad:", error);
@@ -663,6 +683,7 @@ export async function acceptTrade(id: string) {
     const coin = traderequest.coin; // Get the user ID
     const status = traderequest.status; // Get the user ID
     const walletAddress = traderequest.walletAddress;
+    const type = traderequest.type;
 
     if (status === "Accepted") {
       return { success: false, message: "Trade request already Accepted" };
@@ -680,12 +701,13 @@ export async function acceptTrade(id: string) {
         adId: adId,
         orderId: traderequestId,
         coin,
+        type,
         price,
         status: "pending",
         amount,
         userId: traderequest.userId,
         merchantconfirm: "pending",
-        customerconfirm: "pedning",
+        customerconfirm: "pending",
         merchantID: traderequest.merchantId,
         walletAddress,
         userName: traderequest.merchantName || "", // the username is the merchant username
@@ -749,7 +771,7 @@ export async function confirmseen(id: string){
     if(!gettrans){
       return{success:false, message: "unable to update transaction"}
     }
-    return{succes: true, gettrans}
+    return{success: true, gettrans}
   }catch(error){
     console.log(error)
   }

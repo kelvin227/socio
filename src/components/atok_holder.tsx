@@ -11,8 +11,9 @@ import { toast } from "sonner";
 import { PutBlobResult } from "@vercel/blob";
 import { useRouter } from "next/navigation";
 
-export default function AtokHolder({ email, name, data }: { email: string, name: string, data:any[] }) {
-   const [selectedType, setSelectedType] = useState<string | null>("buy"); // Selected transaction type for filtering
+export default function AtokHolder({ email, name, data }: { email: string, name: string, data: any[] }) {
+  const [showads, setshowads] = useState(false);
+  const [selectedType, setSelectedType] = useState<string | null>("buy"); // Selected transaction type for filtering
   const [showdialog, setshowdialog] = useState(false);
   const [showModal, setshowModal] = useState(false);
   const [imgproof, setimgproof] = useState<PutBlobResult | null>(null);
@@ -31,40 +32,8 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
     adId: "",
     pricee: "",
     merchantusername: "",
+    type: "buy"
   });
-  const postads = async (proof: string) => {
-    try {
-      const response = await createads(
-        email,
-        "atok",
-        formData.price,
-        formData.minQty,
-        formData.maxQty,
-        proof
-      );
-      if (response.success) {
-        toast.success("Ads created successfully!");
-        setFormData({
-          proof: "",
-          price: "",
-          minQty: 0,
-          maxQty: 0,
-          payment: "",
-          amount: 0,
-          toreceive: 0,
-          toreceiveprocessing: 0,
-          adId: "",
-          pricee: "",
-          merchantusername: "",
-        }); // Reset form
-      } else {
-        toast.error("Error creating ads!");
-      }
-    } catch (error) {
-      console.error("Error creating ads:", error);
-      toast.error("An unexpected error occurred.");
-    }
-  };
 
 
   const [btn, setBtn] = useState(false);
@@ -108,7 +77,37 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
       const newBlobFront = (await frontResponse.json()) as PutBlobResult;
       setimgproof(newBlobFront);
 
-      await postads(imgproof?.url || ""); // Use the uploaded image URL
+      const response = await createads(
+        email,
+        "atok",
+        formData.price,
+        formData.minQty,
+        formData.maxQty,
+        imgproof?.url || "",
+        formData.type
+      );
+      if (response.success) {
+        toast("Ads created successfully!", {
+        className: "bg-green-500 text-white",
+      });
+        setFormData({
+          proof: "",
+          price: "",
+          minQty: 0,
+          maxQty: 0,
+          payment: "",
+          amount: 0,
+          toreceive: 0,
+          toreceiveprocessing: 0,
+          adId: "",
+          pricee: "",
+          merchantusername: "",
+          type: "buy",
+        }); // Reset form
+      } 
+        toast(response.message, {
+        className: "bg-red-500 text-white",
+      });
     } catch (error) {
       console.error("Error uploading files:", error);
     }
@@ -165,10 +164,7 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
       amount, // Update the amount
       toreceive: toReceive, // Set the calculated value for toreceive
       toreceiveprocessing: toReceiveProcessing, // Set the calculated value for toreceiveprocessing
-      amounts: amount, // Update the amounts
-      toreceives: toReceive, // Set the calculated value for toreceives
-      toreceiveprocessings: toReceiveProcessing, // Set the calculated value for toreceiveprocessings
-    }));
+      }));
   };
 
   const router = useRouter();
@@ -253,6 +249,20 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
                   />
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-grey-700">Type</label>
+                  <select
+                    name="type"
+                    value={formData.type}
+                    onChange={handleInputChange}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                    required
+                  >
+                    <option value="buy">Buy</option>
+                    <option value="sell">Sell</option>
+                  </select>
+                </div>
+
+                <div>
                   <label className="block text-sm font-medium text-gray-700">Payment Method</label>
                   <select
                     name="payment"
@@ -261,9 +271,7 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                     required
                   >
-                    <option value="">Select Payment Method</option>
                     <option value="Wallet">Wallet</option>
-                    <option value="Bank Transfer">Bank Transfer</option>
                   </select>
                 </div>
                 <Button type="submit" className="w-full bg-blue-500">
@@ -282,7 +290,7 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
           </div>
         </div>
         <div className="w-full pb-3">
-          <Button className="w-full bg-red-500" onClick={
+          <Button className="w-full" onClick={
             () => {
               router.replace("/otc/advertisement/trades")
             }
@@ -292,93 +300,93 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
       <div className="container mx-auto py-10">
 
         {/* Ads Table */}
-        <div className={showdialog  ? "hidden" : ""}>
-        <h2 className="text-2xl font-bold mb-4">Ads List</h2>
-        
-        <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-md hidden sm:table">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="p-4 text-left">Username</th>
-              <th className="p-4 text-left">Price</th>
-              <th className="p-4 text-left">Available|limits</th>
-              <th className="p-4 text-left">Payment Method</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredData.length > 0 ? (
-              filteredData.map((ad: any) => (
-                <tr key={ad.id} className="border-b">
-                  <td className="p-4">{ad.userName}</td>
-                  <td className="p-4">{ad.price} USDT</td>
-                  <td className="p-4">{ad.minQty}-{ad.maxQty} Atok</td>
-                  <td className="p-4">Wallet</td>
-                  <td>
-                    
-                    <Button
-                      className="bg-blue-500 text-white"
-                      disabled={name == ad.userName ? true : false}
-                      onClick={() => {
-                        handleAdSelection(ad);
-                        
-                      }}
-                    >
-                      Buy
-                    </Button>
+        <div className={showdialog ? "hidden" : ""}>
+          <h2 className="text-2xl font-bold mb-4">Ads List</h2>
+
+          <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-md hidden sm:table">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="p-4 text-left">Username</th>
+                <th className="p-4 text-left">Price</th>
+                <th className="p-4 text-left">Available|limits</th>
+                <th className="p-4 text-left">Payment Method</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredData.length > 0 ? (
+                filteredData.map((ad: any) => (
+                  <tr key={ad.id} className="border-b">
+                    <td className="p-4">{ad.userName}</td>
+                    <td className="p-4">{ad.price} USDT</td>
+                    <td className="p-4">{ad.minQty}-{ad.maxQty} Atok</td>
+                    <td className="p-4">Wallet</td>
+                    <td>
+
+                      <Button
+                        className="bg-blue-500 text-white"
+                        disabled={name == ad.userName ? true : false}
+                        onClick={() => {
+                          handleAdSelection(ad);
+
+                        }}
+                      >
+                        Buy
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} className="p-4 text-center text-gray-500">
+                    No ads found
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={4} className="p-4 text-center text-gray-500">
-                  No ads found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
         </div>
         {/* hiddem dialog */}
         <div className={showdialog && !showModal ? "" : "hidden"}>
-        <form onSubmit={handlepurchase} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Amount</label>
-            <input
-              type="number"
-              name="amount"
-              value={formData.amount}
-              onChange={handleAmountChange} // Trigger calculation on amount change
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">You will receive:</label>
-            <input
-              type="number"
-              name="toreceive"
-              value={formData.toreceive || 0} // Display the calculated value
-              readOnly // Make the input read-only
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              What you will receive after deduction of processing fee:
-            </label>
-            <input
-              type="number"
-              name="toreceiveprocessing"
-              value={formData.toreceiveprocessing || 0} // Display the calculated value
-              readOnly // Make the input read-only
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100"
-            />
-          </div>
-          <Button type="submit" className="w-full bg-blue-500">
-            Submit
-          </Button>
-        </form>
+          <form onSubmit={handlepurchase} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Amount</label>
+              <input
+                type="number"
+                name="amount"
+                value={formData.amount}
+                onChange={handleAmountChange} // Trigger calculation on amount change
+                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">You will receive:</label>
+              <input
+                type="number"
+                name="toreceive"
+                value={formData.toreceive || 0} // Display the calculated value
+                readOnly // Make the input read-only
+                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                What you will receive after deduction of processing fee:
+              </label>
+              <input
+                type="number"
+                name="toreceiveprocessing"
+                value={formData.toreceiveprocessing || 0} // Display the calculated value
+                readOnly // Make the input read-only
+                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100"
+              />
+            </div>
+            <Button type="submit" className="w-full bg-blue-500">
+              Submit
+            </Button>
+          </form>
         </div>
-        
+
         {/* Mobile View */}
         <div className="block sm:hidden border p-4 rounded-lg shadow-md">
           <div className="gap-4">
@@ -386,26 +394,26 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
               data.map((ad: any) => (
                 <div key={ad.id}>
                   <div className={showdialog ? "hidden" : ""}>
-                <div className="flex flex-cols-2 gap-4" >
-                  <div className="col-span-1">
-                    <h3 className="text-lg font-bold">{ad.userName}</h3>
-                    <p>Price: {ad.price} USDT</p>
-                    <p>Available: {ad.minQty}-{ad.maxQty} PI</p>
-                    <p>Payment Method: Wallet</p>
+                    <div className="flex flex-cols-2 gap-4" >
+                      <div className="col-span-1">
+                        <h3 className="text-lg font-bold">{ad.userName}</h3>
+                        <p>Price: {ad.price} USDT</p>
+                        <p>Available: {ad.minQty}-{ad.maxQty} PI</p>
+                        <p>Payment Method: Wallet</p>
+                      </div>
+                      <div className="col-span-1">
+                        <Button
+                          className="bg-blue-500 text-white"
+                          disabled={name == ad.userName ? true : false}
+                          onClick={() => {
+                            handleAdSelection(ad);
+                          }}
+                        >
+                          Buy
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="col-span-1">
-                    <Button
-                      className="bg-blue-500 text-white"
-                      disabled={name == ad.userName ? true : false}
-                      onClick={() => {
-                        handleAdSelection(ad);
-                      }}
-                    >
-                      Buy
-                    </Button>
-                  </div>
-                </div>
-                </div>
                 </div>
               ))
             ) : (
@@ -416,20 +424,20 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
         </div>
         {/* Modal for Purchase Confirmation */}
         <div className={showModal ? "" : "hidden"}>
-                Waiting For Confirmation
-                <div className="max-w-md mx-auto p-6 bg-yellow-50 border border-yellow-300 shadow-lg rounded-lg text-center">
-                  <div className="flex justify-center mb-4">
-                    <Clock className="text-yellow-500 w-16 h-16" />
-                  </div>
-                  <h1 className="text-2xl font-bold text-yellow-700 mb-2">trade Pending</h1>
-                  <p className="text-gray-700 mb-4">
-                    Thank you, <span className="font-semibold">hii</span>, for choose to buy from me. Your trade request has been sent to the buyer.
-                  </p>
-                  <p className="text-gray-600">
-                    Please allow up to 48 hours for the verification process to complete. We will notify you once your KYC has been approved.
-                  </p>
-                </div>
-              </div>
+          Waiting For Confirmation
+          <div className="max-w-md mx-auto p-6 bg-yellow-50 border border-yellow-300 shadow-lg rounded-lg text-center">
+            <div className="flex justify-center mb-4">
+              <Clock className="text-yellow-500 w-16 h-16" />
+            </div>
+            <h1 className="text-2xl font-bold text-yellow-700 mb-2">trade Pending</h1>
+            <p className="text-gray-700 mb-4">
+              Thank you, <span className="font-semibold">hii</span>, for choose to buy from me. Your trade request has been sent to the buyer.
+            </p>
+            <p className="text-gray-600">
+              Please allow up to 48 hours for the verification process to complete. We will notify you once your KYC has been approved.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -15,7 +15,6 @@ model User {
   emailVerifiedAt DateTime?
   kycverified     Boolean?  @default(false)
   kycverifiedAt   DateTime?
-
   image          String?          @default("default.png")
   updatedAt      DateTime         @updatedAt
   password       String

@@ -10,6 +10,7 @@ import { NavItems } from "./user_config";
 //import { TooltipProvider } from "@/components/ui/tooltip"; 
 import { SidebarProvider } from "@/components/ui/sidebar"; 
 import { AppSidebar } from "@/components/app-sidebar";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -35,6 +36,7 @@ export default function RootLayout({
                   <Header />
                   <div className="ml-5 mt-4 mr-3">
                     {children}
+                    <Toaster richColors />
                   </div>
                 </main>
               </SidebarProvider>
