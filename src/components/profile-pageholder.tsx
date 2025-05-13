@@ -12,6 +12,7 @@ import { FaWhatsapp } from "react-icons/fa6";
 import { useCopyToClipboard } from "@uidotdev/usehooks";
 import { User } from '@prisma/client';
 import UpdateForm from './Forms/updateForm';
+import PicForm from './Forms/PicForm';
 
 export default function Profile_pageholder({user}:{user: User})  {
 
@@ -67,7 +68,7 @@ export default function Profile_pageholder({user}:{user: User})  {
 
           <div className="absolute right-0">
             <CardContent>
-           <UpdateForm email={user?.email} field="name" /> {/* For name */}
+           <PicForm email={user?.email} /> {/* For name */}
           </CardContent>
             </div> 
         </div>

@@ -11,6 +11,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import Header from './header';
 import { NavItems } from './config';
 import { SessionProvider } from 'next-auth/react';
+import { Toaster } from '@/components/ui/sonner';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -32,8 +33,11 @@ export default function RootLayout({
             <SidebarProvider>
             <AppSidebar navItems={NavItems} />
             <main className="w-full">
+              <div className="ml-5 mt-4 mr-3">
                   <Header />
                 {children}
+                <Toaster richColors />
+                </div>
               </main>
             </SidebarProvider>
             </SessionProvider>

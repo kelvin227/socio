@@ -63,7 +63,7 @@ const AdminForm = () => {
  
   const handleSignInForm = async (data: z.infer<typeof SigninformSchema>) => {
 
-    const response = await Login(data.email, data.password);
+    const response = await Login(data.email, data.password, "admin");
 
     if (response.success) {
       toast.success(response.message);

@@ -431,10 +431,10 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
             </div>
             <h1 className="text-2xl font-bold text-yellow-700 mb-2">trade Pending</h1>
             <p className="text-gray-700 mb-4">
-              Thank you, <span className="font-semibold">hii</span>, for choose to buy from me. Your trade request has been sent to the buyer.
+              Thank you, <span className="font-semibold">{name}</span>, for choose to buy from me. Your trade request has been sent to the buyer.
             </p>
             <p className="text-gray-600">
-              Please allow up to 48 hours for the verification process to complete. We will notify you once your KYC has been approved.
+              please wait while the buyer is being contacted if the buyer does not response in the next 2 hours your request will be automatically be canceled
             </p>
           </div>
         </div>

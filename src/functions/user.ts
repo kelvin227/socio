@@ -201,17 +201,10 @@ export async function getKycRequests() {
         },
       },
     });
-
-    // Map the KYC requests to include user email
-    return kycRequests.map((kyc) => ({
-      id: kyc.userid,
-      FullName: kyc.FullName,
-      country: kyc.country,
-      IDNO: kyc.IDNO,
-      idCardFront: kyc.documentURL1,
-      idCardBack: kyc.documentURL2,
-      email: kyc.user?.email || "N/A", // Include the email or "N/A" if not found
-    }));
+    if(!kycRequests){
+      return{success: false, message:"unable to get kyc"};
+    }
+    return{success: true, message: kycRequests};
   } catch (error) {
     console.error("Error fetching KYC requests:", error);
     throw new Error("Failed to fetch KYC requests");
@@ -283,17 +276,21 @@ export async function rejectkyc(email: string, reason: string){
       select: { id: true, email: true },
       });
 
-    const approve = await prisma.kyc.update({
-      where: { userid: users?.id }, // Replace with the actual user ID
+      if(!users){
+        return{success: false, message:"unable to fetc user details"}
+      }
+
+    const reject = await prisma.kyc.update({
+      where: { userid: users.id }, // Replace with the actual user ID
       data: { Status: "rejected", Rejection_reason: reason }, // Set isBlocked to true
   });
-  if(!approve) {
-    return { success: false, message: "Failed to approve user KYC"};
+  if(!reject) {
+    return { success: false, message: "Failed to reject user KYC"};
   }
-  return{ success: true, message: "User KYC Approved Successfully"}
+  return{ success: true, message: "User KYC recjected Successfully"}
 
 }catch (error) {
-  throw new Error("Failed to approve user KYC" + error);
+  throw new Error("Failed to reject user KYC" + error);
 }
 }
 

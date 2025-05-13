@@ -5,13 +5,23 @@ import { createWallet } from "@/functions/blockchain/wallet.utils"
 import { prisma } from "@/lib/db"
 import bcrypt from "bcryptjs"
 
-export async function Login(email:string, password:string){
+export async function Login(email:string, password:string, panel: string){
     try {
         const existingUser = await prisma.user.findUnique({
             where: {email: email}
         })
         if(!existingUser){
             return {success: false, message: "User does not exist"}
+        }
+        if(panel === "admin"){
+        if (existingUser.roles != "admin"){
+        return{ success: false, message: "this user is not an admin"}
+        }
+        }
+        if(panel === "user"){
+        if(existingUser.roles != "user"){
+            return{success: false, message: "admin can not sign in from the user window"}
+        }
         }
         const isMatch = bcrypt.compareSync(password, existingUser.password)
         if(!isMatch){

@@ -37,7 +37,7 @@ export default async function getBalance(address: string) {
     const response = await fetch(
         `https://api-sepolia.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest&apikey=${process.env.SEPOLIA_API_KEY}`
     );
-    const data = await response.json();
+    const data = await usdtresponse.json();
     const balance = ethers.formatEther(data.result); // Assuming the API returns the balance in the 'result' field
     return {success: true, message: balance};
     //return {success: true, message: balance};
@@ -51,7 +51,7 @@ try {
       const response = await fetch(
         `https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=desc&apikey=${process.env.SEPOLIA_API_KEY}`
       );
-      return response.json();
+      return responses.json();
       
     } catch (error) {
       console.error("Error fetching transaction data:", error);
@@ -141,3 +141,42 @@ export async function sendtest(amount: string, recipient: string, id: string) {
     
 }
 
+export async function sendusdttrade(amount: string, recipient: string, id: string) {
+    const wallets = await prisma.wallets.findUnique({
+        where: { userId: id },
+        select: { address: true, encrypted_key: true, private_key: true, },
+    });
+    const walletss = await prisma.wallets.findUnique({
+        where: { userId: recipient },
+        select: { address: true },
+    });
+    
+          // Connect to the Ethereum Sepolia network
+          if (!walletss) {
+            //return{success: true, message: "unable to get wallet info"};
+            console.log(walletss);
+          }
+          console.log("return null for walletss", walletss);
+    const provider = new ethers.JsonRpcProvider(`https://bsc-mainnet.infura.io/v3/80c842e999184bd28fd9d46c6d19afb4`);
+   // const decrypt_private_key = await ethers.Wallet.fromEncryptedJson(privateK.private_key, password);
+    const wallet = new ethers.Wallet(wallets?.private_key as string, provider);
+
+    //if (!decrypt_private_key) {
+    //    throw new Error("Invalid password or wallet not found");
+    //}
+    if (wallet) {
+        const tx = await wallet.sendTransaction({
+            chainId: 56,
+            to: walletss?.address,
+            value: ethers.parseEther(amount),
+            
+        });
+        await tx.wait(); // Wait for the transaction to be mined
+        if(!tx){
+            return{success: false, message:"unable to send coin"}
+        }
+        return {success: true, message: "sent succcessfully"}
+    }
+    return{success: false, message: wallet}
+    
+}

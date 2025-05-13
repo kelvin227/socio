@@ -1,39 +1,44 @@
 "use client";
 /* eslint-disable */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { approvekyc, rejectkyc } from "@/functions/user";
+import { approvekyc, getKycRequests, rejectkyc } from "@/functions/user";
+import { toast } from "sonner";
 
-export default function KycHolder({ kyc }: { kyc: Array<any> }) {
-  const kycRequests = kyc;
-
-  const [selectedRequest, setSelectedRequest] = useState<
-    { id: string; FullName: string; email: string; country: string; IDNO: string; idCardFront: string; idCardBack: string } | null
-  >(null);
+export default function KycHolder() {
+  const [kycRequests, setKycRequest] = useState<any>([]);
+  const [selectedRequest, setSelectedRequest] = useState<any>(null);
 
   const [showRejectModal, setShowRejectModal] = useState(false); // State to show/hide the rejection modal
   const [rejectionReason, setRejectionReason] = useState(""); // State to store the rejection reason
 
-  const handleViewDetails = (request: {
-    id: string;
-    FullName: string;
-    email: string;
-    country: string;
-    IDNO: string;
-    idCardFront: string;
-    idCardBack: string;
-  }) => {
+  const handleViewDetails = (request :any) => {
     setSelectedRequest(request);
   };
+
+  const kyc = async() =>{
+    try{
+      const response = await getKycRequests();
+      if(response.success){
+        setKycRequest(response.message);
+        toast("successfully fetched kyc result");
+      }else{
+        toast("someting went wrong while fetching kyc request")
+      }
+      
+    } catch(error: any){
+      toast.error("try catch error", error)
+    }
+  }
 
   const Approve = async ({ email }: { email: string }) => {
     try {
       const response = await approvekyc(email);
       if (response.success) {
-        console.log("KYC Approved successfully!");
+        toast("KYC Approved successfully!");
       } else {
-        console.log("Failed to approve KYC request.");
+        toast("Failed to approve KYC request.");
       }
     } catch (error) {
       console.error("Error approving KYC:", error);
@@ -57,14 +62,16 @@ export default function KycHolder({ kyc }: { kyc: Array<any> }) {
     if (!selectedRequest) return;
 
     try {
-      await Reject({ email: selectedRequest.email, reason: rejectionReason });
+      await Reject({ email: selectedRequest.user.email, reason: rejectionReason });
       setShowRejectModal(false); // Close the modal after submission
       setRejectionReason(""); // Clear the rejection reason
     } catch (error) {
       console.error("Error submitting rejection reason:", error);
     }
   };
-
+ useEffect(() => {
+    kyc();
+  }, []);
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white shadow-lg rounded-lg">
       <h1 className="text-2xl font-bold mb-6 text-center">KYC Requests</h1>
@@ -113,7 +120,7 @@ export default function KycHolder({ kyc }: { kyc: Array<any> }) {
             <strong>Full Name:</strong> {selectedRequest.FullName}
           </p>
           <p>
-            <strong>Email:</strong> {selectedRequest.email}
+            <strong>Email:</strong> {selectedRequest.user.email}
           </p>
           <p>
             <strong>Country:</strong> {selectedRequest.country}
@@ -148,16 +155,18 @@ export default function KycHolder({ kyc }: { kyc: Array<any> }) {
             </tr>
           </thead>
           <tbody>
-            {kycRequests.map((request) => (
+            {kycRequests.map((request: any) => (
               <tr key={request.id}>
                 <td className="p-4 border-b">{request.FullName}</td>
-                <td className="p-4 border-b">{request.email}</td>
+                <td className="p-4 border-b">{request.user.email}</td>
                 <td className="p-4 border-b">{request.country}</td>
                 <td className="p-4 border-b">{request.IDNO}</td>
                 <td className="p-4 border-b flex gap-2">
                   <Button
                     className="bg-green-500 text-white px-4 py-2 rounded-md"
-                    onClick={() => Approve({ email: request.email })}
+                    onClick={() => {Approve({ email: request.user.email })
+                  kyc
+                  }}
                   >
                     Approve
                   </Button>

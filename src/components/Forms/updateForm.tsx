@@ -43,10 +43,10 @@ const UpdateForm = ({ email, field }: { email: string; field: "username" | "name
     const response = await updateUserProfile(email, input, field);
 
     if (response.success) {
-      toast.success(response.message);
+      toast(response.message);
       router.refresh();
     } else {
-      toast.error(response.message);
+      toast(response.message);
     }
   };
 

@@ -54,12 +54,12 @@ const cardData = [
     content: "200+",
   },
   {
-    title: "Assest Overview",
+    title: "Earnings",
     description: "35%",
     content: "200+",
   },
   {
-    title: "Pending withdrawal",
+    title: "Completed trades",
     description: "40%",
     content: "389",
   },
