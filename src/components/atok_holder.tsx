@@ -10,15 +10,21 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/
 import { toast } from "sonner";
 import { PutBlobResult } from "@vercel/blob";
 import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent } from "@/components/ui/card";
+import { TrendingUp } from "lucide-react";
 
 export default function AtokHolder({ email, name, data }: { email: string, name: string, data: any[] }) {
-  const [showads, setshowads] = useState(false);
+  const [showads, setshowads] = useState(true);
+  const [selectedCoin, setSelectedCoin] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string | null>("buy"); // Selected transaction type for filtering
   const [showdialog, setshowdialog] = useState(false);
   const [showModal, setshowModal] = useState(false);
   const [imgproof, setimgproof] = useState<PutBlobResult | null>(null);
   const idCardFrontRef = useRef<HTMLInputElement>(null);
   const filteredData = data.filter(item => item.type === selectedType)
+  const filteredcoin = filteredData.filter(item => item.coin === selectedCoin)
+  const [btn, setBtn] = useState(false);
   // const [data, setData] = useState<any>([]);
   const [formData, setFormData] = useState({
     proof: "",
@@ -36,7 +42,7 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
   });
 
 
-  const [btn, setBtn] = useState(false);
+
   const handlesell = () => {
     setSelectedType("sell");
     setBtn(true);
@@ -79,7 +85,7 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
 
       const response = await createads(
         email,
-        "atok",
+        selectedCoin,
         formData.price,
         formData.minQty,
         formData.maxQty,
@@ -117,25 +123,46 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
     e.preventDefault();
     setshowModal(true); // Close the modal after purchase
     try {
-      const response = await addtraderequest(
+      if(selectedType === "sell"){
+        const response = await addtraderequest(
         email,
         formData.merchantusername,
         formData.adId,
         formData.amount,
         Number(formData.pricee),
-        "atok",
+        selectedCoin,
+        "sell"
+      )
+            if (response.success) {
+        toast("Trade created successfully!");
+      } else {
+        toast(response.message || "Failed to create trade request.");
+      }
+
+      }else{
+const response = await addtraderequest(
+        email,
+        formData.merchantusername,
+        formData.adId,
+        formData.amount,
+        Number(formData.pricee),
+        selectedCoin,
         "buy"
       )
       if (response.success) {
         toast("Trade created successfully!");
       } else {
-        toast(response.message || "Failed to create trade.");
+        toast(response.message || "Failed to create trade request.");
       }
+      }
+      
     } catch (error) {
       console.error("Error creating trade:", error);
       toast("An unexpected error occurred.");
     }
   }
+  
+
 
   const handleAdSelection = (ad: any) => {
     setFormData((prev) => ({
@@ -157,7 +184,7 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const amount = Number(e.target.value);
     const toReceive = amount * Number(formData.price); // Ensure price is treated as a number
-    const toReceiveProcessing = toReceive - toReceive * 0.02; // Deduct 2% processing fee
+    const toReceiveProcessing = selectedType === "sell" ? toReceive - toReceive * 0.02 : toReceive + toReceive * 0.02; // Deduct 2% processing fee
 
     setFormData((prev) => ({
       ...prev,
@@ -170,11 +197,14 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
   const router = useRouter();
 
   return (
-    <div>
-      <Link href={"/otc"} className="flex flex-box">
+  
+    !showads ? (
+
+      <div>
+      <div className="flex flex-box cursor-pointer" onClick = {() => {setSelectedCoin(""), setshowads(true), setSelectedType("buy"), setshowdialog(false), setshowModal(false), setBtn(false)}}>
         <ArrowBigLeft />
         Advertisement
-      </Link>
+      </div>
       <DropdownMenuSeparator />
       <div className="grid grid-box sm:flex sm:flex-box lg:flex md:flex lg:flex-box md:flex-box lg:gap-4 md:gap-4 sm:gap-6 w-full">
         <div className="flex flex-row w-full pb-3 gap-3">
@@ -303,18 +333,18 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
         <div className={showdialog ? "hidden" : ""}>
           <h2 className="text-2xl font-bold mb-4">Ads List</h2>
 
-          <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-md hidden sm:table">
+          <table className="min-w-full border border-gray-300 rounded-lg shadow-md hidden sm:table">
             <thead>
-              <tr className="bg-gray-100">
+              <tr className="light:bg-gray-100">
                 <th className="p-4 text-left">Username</th>
                 <th className="p-4 text-left">Price</th>
                 <th className="p-4 text-left">Available|limits</th>
-                <th className="p-4 text-left">Payment Method</th>
+                <th className="p-4 text-left" colSpan={2}>Payment Method</th>
               </tr>
             </thead>
             <tbody>
-              {filteredData.length > 0 ? (
-                filteredData.map((ad: any) => (
+              {filteredcoin.length > 0 ? (
+                filteredcoin.map((ad: any) => (
                   <tr key={ad.id} className="border-b">
                     <td className="p-4">{ad.userName}</td>
                     <td className="p-4">{ad.price} USDT</td>
@@ -323,14 +353,14 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
                     <td>
 
                       <Button
-                        className="bg-blue-500 text-white"
+                        className={selectedType === "buy" ? "bg-blue-500 text-white" : "bg-red-500 text-white"}
                         disabled={name == ad.userName ? true : false}
                         onClick={() => {
                           handleAdSelection(ad);
 
                         }}
                       >
-                        Buy
+                        {selectedType === "buy" ? ("buy") : ("sell")}
                       </Button>
                     </td>
                   </tr>
@@ -360,25 +390,25 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">You will receive:</label>
+              <label className="block text-sm font-medium light:text-gray-700">{selectedType === "buy" ? "USDT to send:": "USDT to receive:"}</label>
               <input
                 type="number"
                 name="toreceive"
                 value={formData.toreceive || 0} // Display the calculated value
                 readOnly // Make the input read-only
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100"
+                className="mt-1 block w-full light:border-gray-300 rounded-md shadow-sm light:bg-gray-100"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                What you will receive after deduction of processing fee:
+              <label className="block text-sm font-medium light:text-gray-700">
+                {selectedType === "buy" ? "What you wil send after addition of processing fees": "What you will receive after deduction of processing fee:"}
               </label>
               <input
                 type="number"
                 name="toreceiveprocessing"
                 value={formData.toreceiveprocessing || 0} // Display the calculated value
                 readOnly // Make the input read-only
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-100"
+                className="mt-1 block w-full light:border-gray-300 rounded-md shadow-sm light:bg-gray-100"
               />
             </div>
             <Button type="submit" className="w-full bg-blue-500">
@@ -390,8 +420,8 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
         {/* Mobile View */}
         <div className="block sm:hidden border p-4 rounded-lg shadow-md">
           <div className="gap-4">
-            {data.length > 0 ? (
-              data.map((ad: any) => (
+            {filteredcoin.length > 0 ? (
+              filteredcoin.map((ad: any) => (
                 <div key={ad.id}>
                   <div className={showdialog ? "hidden" : ""}>
                     <div className="flex flex-cols-2 gap-4" >
@@ -403,13 +433,13 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
                       </div>
                       <div className="col-span-1">
                         <Button
-                          className="bg-blue-500 text-white"
+                          className={selectedType === "buy" ? "bg-blue-500 text-white" : "bg-red-500 text-white"}
                           disabled={name == ad.userName ? true : false}
                           onClick={() => {
                             handleAdSelection(ad);
                           }}
                         >
-                          Buy
+                          {selectedType === "buy" ? ("buy") : ("sell")}
                         </Button>
                       </div>
                     </div>
@@ -440,6 +470,269 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
         </div>
       </div>
     </div>
+    ) :
+     (
+       <div>
+      <div className="pb-4" onClick = {() => {setSelectedCoin("atok"), setshowads(false)}}>
+        <Card>
+          <div className="flex flex-box w-full p-2">
+            <CardContent>
+              <div>
+                <Avatar>
+                  <AvatarImage
+                    src="https://atok.ai/_next/image?url=%2Fatok-token%2Ftoken.png&w=1920&q=100"
+                    alt="@shadcn"
+                  />
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+              </div>
+            </CardContent>
+
+            <div>
+              <CardContent>Atok/USDT</CardContent>
+            </div>
+
+            <div className="absolute right-0">
+              <div className="grid grid-box">
+                <CardContent>Start Trading</CardContent>
+
+                <CardContent>
+                  <div className="flex flex-box">
+                    2% fee
+                    <TrendingUp />
+                  </div>
+                </CardContent>
+              </div>
+            </div>
+          </div>
+        </Card>
+        
+      </div>
+
+      <div className="pb-4" onClick = {() => {setSelectedCoin("wow"), setshowads(false)}}>
+        <Card>
+          <div className="flex flex-box w-full p-2">
+            <CardContent>
+              <div>
+                <Avatar>
+                  <AvatarImage
+                    src="https://school.codegator.com.ng/image/ajavyk7p.png"
+                    alt="@shadcn"
+                  />
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+              </div>
+            </CardContent>
+        
+            <div>
+              <CardContent>WOW/USDT</CardContent>
+            </div>
+        
+            <div className="absolute right-0">
+              <div className="grid grid-box">
+                <CardContent>start trading</CardContent>
+        
+                <CardContent>
+                  <div className="flex flex-box">
+                    2% fee
+                    <TrendingUp />
+                  </div>
+                </CardContent>
+              </div>
+            </div>
+          </div>
+        </Card>
+        
+        
+      </div>
+
+      <div className="pb-4" onClick = {() => {setSelectedCoin("sidra"), setshowads(false)}}>
+        <Card>
+          <div className="flex flex-box w-full p-2">
+            <CardContent>
+              <div>
+                <Avatar>
+                  <AvatarImage
+                    src="https://play-lh.googleusercontent.com/NLwEmyxzTKqtR2bvRSugma35UBn-6x-zRNNwHykjV9wVDS3ACezJg-al6A-4W2oWnw"
+                    alt="@shadcn"
+                  />
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+              </div>
+            </CardContent>
+        
+            <div className="">
+              <CardContent>SDA/USDT</CardContent>
+            </div>
+        
+            <div className="absolute right-0">
+              <div className="grid grid-box">
+                <CardContent>Start Trading</CardContent>
+        
+                <CardContent>
+                  <div className="flex flex-box">
+                    2% fee
+                    <TrendingUp />
+                  </div>
+                </CardContent>
+              </div>
+            </div>
+          </div>
+        </Card>
+        
+      </div>
+
+      <div className="pb-4" onClick = {() => {setSelectedCoin("ruby"), setshowads(false)}}>
+        <Card>
+          <div className="flex flex-box w-full p-2">
+            <CardContent>
+              <div>
+                <Avatar>
+                  <AvatarImage
+                    src="https://play-lh.googleusercontent.com/OVJjGaAQNzEBJXeqi8RLvDHKHb-be2bbF95iKsrhltNDSOAYXO-qJKJexTV-OT9h-A=w480-h960-rw"
+                    alt="@shadcn"
+                  />
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+              </div>
+            </CardContent>
+        
+            <div className="">
+              <CardContent>RBL/USDT</CardContent>
+            </div>
+        
+            <div className="absolute right-0">
+              <div className="grid grid-box">
+                <CardContent>Start Trading</CardContent>
+        
+                <CardContent>
+                  <div className="flex flex-box">
+                    2% fee
+                    <TrendingUp />
+                  </div>
+                </CardContent>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        
+        
+      </div>
+
+      <div className="pb-4" onClick = {() => {setSelectedCoin("Opincur"), setshowads(false)}}>
+        <Card>
+          <div className="flex flex-box w-full p-2">
+            <CardContent>
+              <div>
+                <Avatar>
+                  <AvatarImage
+                    src="https://opincur.com/img/logo.png"
+                    alt="@shadcn"
+                  />
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+              </div>
+            </CardContent>
+        
+            <div className="">
+              <CardContent>Opincur/USDT</CardContent>
+            </div>
+        
+            <div className="absolute right-0">
+              <div className="grid grid-box">
+                <CardContent>Start Trading</CardContent>
+        
+                <CardContent>
+                  <div className="flex flex-box">
+                    2% fee
+                    <TrendingUp />
+                  </div>
+                </CardContent>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        
+        
+      </div>
+
+      <div className="pb-4" onClick = {() => {setSelectedCoin("star"), setshowads(false)}}>
+        <Card>
+          <div className="flex flex-box w-full p-2">
+            <CardContent>
+              <div>
+                <Avatar>
+                  <AvatarImage
+                    src="https://miro.medium.com/v2/resize:fit:394/1*dC5IusZmsnRzCxEVdN5Z_A.jpeg"
+                    alt="@shadcn"
+                  />
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+              </div>
+            </CardContent>
+        
+            <div className="">
+              <CardContent>Star Network/USDT</CardContent>
+            </div>
+        
+            <div className="absolute right-0">
+              <div className="grid grid-box">
+                <CardContent>Start Trading</CardContent>
+        
+                <CardContent>
+                  <div className="flex flex-box">
+                    2% fee
+                    <TrendingUp />
+                  </div>
+                </CardContent>
+              </div>
+            </div>
+          </div>
+        </Card>
+        
+      </div>
+
+      <div className="pb-4" onClick = {() => {setSelectedCoin("socio"), setshowads(false)}}>
+        <Card>
+          <div className="flex flex-box w-full p-2">
+            <CardContent>
+              <div>
+                <Avatar>
+                  <AvatarImage
+                    src="https://kalajtomdzamxvkl.public.blob.vercel-storage.com/logo2-6X2L1QaE3Zc3GrRsCHvW0JY0kcA7bx.png"
+                    alt="@shadcn"
+                  />
+                  <AvatarFallback>CN</AvatarFallback>
+                </Avatar>
+              </div>
+            </CardContent>
+        
+            <div className="">
+              <CardContent>Socio</CardContent>
+            </div>
+        
+            <div className="absolute right-0">
+              <div className="grid grid-box">
+                <CardContent>Start Trading</CardContent>
+        
+                <CardContent>
+                  <div className="flex flex-box">
+                    2% fee
+                    <TrendingUp />
+                  </div>
+                </CardContent>
+              </div>
+            </div>
+          </div>
+        </Card>
+        
+      </div>
+    </div>
+    )
+    
+      
   );
 }
 

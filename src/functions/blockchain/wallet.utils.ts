@@ -59,6 +59,14 @@ try {
 }
 
 export async function sendusdt(address: string, amount: string, recipient: string) {
+    if (!amount || Number(amount) <= 0) {
+        throw new Error("Invalid amount provided.");
+    }
+    
+    if (!recipient) {
+        throw new Error("Recipient address is required.");
+    }
+    
     const provider = new ethers.JsonRpcProvider(`https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`);
     const privateK = await prisma.wallets.findUnique({
         where:{address},
@@ -91,6 +99,14 @@ export async function sendusdt(address: string, amount: string, recipient: strin
 }
 
 export async function sendtest(amount: string, recipient: string, id: string) {
+    if (!amount || Number(amount) <= 0) {
+        throw new Error("Invalid amount provided.");
+    }
+    
+    if (!recipient) {
+        throw new Error("Recipient address is required.");
+    }
+    
     // console.log("email from sendtest", email);
     // const user = await prisma.user.findUnique({
     //     where: { email },
@@ -142,6 +158,14 @@ export async function sendtest(amount: string, recipient: string, id: string) {
 }
 
 export async function sendusdttrade(amount: string, recipient: string, id: string) {
+    if (!amount || Number(amount) <= 0) {
+        throw new Error("Invalid amount provided.");
+    }
+    
+    if (!recipient) {
+        throw new Error("Recipient address is required.");
+    }
+    
     const wallets = await prisma.wallets.findUnique({
         where: { userId: id },
         select: { address: true, encrypted_key: true, private_key: true, },
@@ -155,8 +179,8 @@ export async function sendusdttrade(amount: string, recipient: string, id: strin
           if (!walletss) {
             //return{success: true, message: "unable to get wallet info"};
             console.log(walletss);
+            return{success: false, message: walletss}
           }
-          console.log("return null for walletss", walletss);
     const provider = new ethers.JsonRpcProvider(`https://bsc-mainnet.infura.io/v3/80c842e999184bd28fd9d46c6d19afb4`);
    // const decrypt_private_key = await ethers.Wallet.fromEncryptedJson(privateK.private_key, password);
     const wallet = new ethers.Wallet(wallets?.private_key as string, provider);
@@ -175,6 +199,7 @@ export async function sendusdttrade(amount: string, recipient: string, id: strin
         if(!tx){
             return{success: false, message:"unable to send coin"}
         }
+
         return {success: true, message: "sent succcessfully"}
     }
     return{success: false, message: wallet}

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { acceptTrade, confirmbuyer, confirmseen, getadstransactions, gettraderequests, gettraderequestsinfo } from "@/functions/user";
 import { Clock } from "lucide-react";
-import { sendtest } from "@/functions/blockchain/wallet.utils";
+import { sendusdttrade } from "@/functions/blockchain/wallet.utils";
 //import { sendtest } from "@/functions/blockchain/wallet.utils";
 
 export default function PendingTrades({ email, id }: { email: string, id: string }) {
@@ -75,10 +75,10 @@ export default function PendingTrades({ email, id }: { email: string, id: string
       const response = await acceptTrade(tradeId); // Call the API to accept the trade
 
       if (response.success) {
-        toast("Trade accepted successfully.");
+        toast.success("Trade accepted successfully.");
         // Optionally, refresh the pending trades list
       } else {
-        toast(response.message || "Failed to accept trade.");
+        toast.success(response.message || "Failed to accept trade.");
       }
       setShow(true);
     } catch (error) {
@@ -104,21 +104,23 @@ export default function PendingTrades({ email, id }: { email: string, id: string
       if (response?.success) {
         fetchTransactionDetails(tradeId);
         const Op = Number(Price) * Number(Amount);
-        console.log(userid);
-        console.log(merchantid);
-        console.log(Op.toString());
-        if (selectedType != "buy") {
-          const send = await sendtest(Op.toString(), userid, merchantid);
+        if (selectedType !== "buy") {
+          const send = await sendusdttrade(Op.toString(), userid, merchantid);
+          if(!send.success){
+            toast.error(send.message);
+          }else{
+            toast.success("usdt transferred")
+          }
         } else {
-          const send = await sendtest(Op.toString(), merchantid, userid)
+          const send = await sendusdttrade(Op.toString(), merchantid, userid)
         }
 
 
       } else {
-        toast("an unexpected error occured")
+        toast.error("an unexpected error occured")
       }
-    } catch (error) {
-      console.log(error)
+    } catch (error: any) {
+      toast.error(error)
     }
   }
 
