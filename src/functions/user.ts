@@ -72,6 +72,98 @@ export async function updateUserProfile(email: string, value: string, field: "us
   }
 }
 
+export async function updatewallet(email: string, address: string, coin: string){
+  ///get the user info like email, username, and id
+  const user = await prisma.user.findUnique({
+    where: {email},
+    select: {id: true}
+  })
+
+  if(!user){
+    return{ success: false, message:"error fetching user details"}
+  }
+  const userid = user.id
+
+  //check if a row has been created with the user id or email or username
+  const check =  await prisma.userWallet.count({
+    where: {
+      userid
+    }
+  })
+
+  if(!check){
+    return{success: false, message: "unable to check the wallet details of the user"}
+  }
+
+  if(check === 0){
+    if(coin === "atok"){
+    const send = await prisma.userWallet.update({
+      where:{
+        userid
+      },
+      data:{
+        walletAddress: address
+      }
+    })
+  } else if (coin === "wow"){
+const send = await prisma.userWallet.update({
+      where:{
+        userid
+      },
+      data:{
+        walletAddress2: address
+      }
+    })
+  } else if(coin === "sda"){
+    const send = await prisma.userWallet.update({
+      where:{
+        userid
+      },
+      data:{
+        walletAddress3: address
+      }
+    })
+  } else if(coin === "rbl"){
+    const send = await prisma.userWallet.update({
+      where:{
+        userid
+      },
+      data:{
+        walletAddress4: address
+      }
+    })
+  }else if(coin === "opincur"){
+    const send = await prisma.userWallet.update({
+      where:{
+        userid
+      },
+      data:{
+        walletAddress5: address
+      }
+    })
+  }else if(coin === "star"){
+    const send = await prisma.userWallet.update({
+      where:{
+        userid
+      },
+      data:{
+        walletAddress6: address
+      }
+    })
+  }else if(coin === "socio"){
+    const send = await prisma.userWallet.update({
+      where:{
+        userid
+      },
+      data:{
+        walletAddress7: address
+      }
+    })
+  }
+  }
+
+  //if not then create a new a row for the user with the following wallets details
+}
 
 export async function SubmitKyc(
   email: string,
@@ -162,6 +254,24 @@ export async function getKycStatus(email: string) {
     }
 
     return { success: true, message: kyc.Status };
+  } catch (error) {
+    console.error(`Error fetching KYC status for user ${email}:`, error);
+    return { success: false, message: `An error occurred while fetching KYC status` };
+  }
+}
+
+export async function getKycStatus1(email: string) {
+  try {
+    const kyc = await prisma.user.findUnique({
+      where: { email },
+      select: { kycverified: true },
+      });
+
+    if (!kyc) {
+      return { success: false, message: "KYC details not found" };
+    }
+
+    return { success: true, message: kyc.kycverified };
   } catch (error) {
     console.error(`Error fetching KYC status for user ${email}:`, error);
     return { success: false, message: `An error occurred while fetching KYC status` };
@@ -480,8 +590,9 @@ export async function createads(email: string, coin: string, price: string, minQ
 });
 
 const sameTypeAd = existingAds.find(ad => ad.type === type);
+const sameCoinAd = existingAds.find(ad=>ad.coin === coin )
 
-if (sameTypeAd) {
+if (sameTypeAd && sameCoinAd) {
   return {
     success: false,
     message: `You have already created a ${type} ad. Go to 'View Ads' to edit your ad details.`,

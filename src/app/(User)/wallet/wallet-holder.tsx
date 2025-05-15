@@ -74,12 +74,12 @@ const walletAddress = address; // Replace with actual wallet address
         <div className="flex flex-box">
           <div className="flex flex-col w-full gap-4">
             <div className="flex flex-row justify-between items-center">
-              <div className="text-sm font-medium text-gray-700">Total Balance</div>
-              <div className="text-lg font-bold text-gray-900">{balances}</div>
+              <div className="text-sm font-medium light:text-gray-700">Total Balance</div>
+              <div className="text-lg font-bold light:text-gray-900">{balances}</div>
             </div>
             <div className="flex flex-row justify-between items-center">
-              <div className="text-sm font-medium text-gray-700">Available Balance</div>
-              <div className="text-lg font-bold text-gray-900">$0.00</div>
+              <div className="text-sm font-medium light:text-gray-700">Available Balance</div>
+              <div className="text-lg font-bold light:text-gray-900">$0.00</div>
             </div>
           </div>
         </div>
@@ -94,7 +94,7 @@ const walletAddress = address; // Replace with actual wallet address
             onClick={() => setshow(!show)}
           >
             <div className="flex flex-col justify-between items-center p-4 rounded-lg mb-2 w-full">
-                <div className="text-sm font-medium text-gray-700 w-full text-center cursor-pointer">
+                <div className="text-sm font-medium light:text-gray-700 w-full text-center cursor-pointer">
                   Deposit
                 </div>
                 
@@ -113,7 +113,7 @@ const walletAddress = address; // Replace with actual wallet address
           onClick ={() => setshowTransfer(!showTransfer)}
           >
           <div className="flex flex-col justify-between items-center p-4 rounded-lg mb-2 w-full">
-            <div className="text-sm font-medium text-gray-700 w-full text-center cursor-pointer">
+            <div className="text-sm font-medium light:text-gray-700 w-full text-center cursor-pointer">
               Transfer
             </div>
           </div>
@@ -127,13 +127,13 @@ const walletAddress = address; // Replace with actual wallet address
 <CardContent className={!show ? "flex flex-col gap-4 hidden": "flex flex-col gap-4"}>
 <div className="flex flex-col gap-4">
 <h2 className="text-lg font-bold text-center">Deposit USDT</h2>
-<p className="text-sm text-gray-700 text-center">
-  Network: <span className="font-medium">Ethereum Sepolia</span>
+<p className="text-sm light:text-gray-700 text-center">
+  Network: <span className="font-medium">BSC(BEP20)</span>
 </p>
 <div className="flex flex-col items-center gap-2">
-  <p className="text-sm font-medium text-gray-700">Wallet Address:</p>
-  <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-md w-full">
-    <span className="text-sm text-gray-900 truncate">{walletAddress}</span>
+  <p className="text-sm font-medium light:text-gray-700">Wallet Address:</p>
+  <div className="flex items-center gap-2 light:bg-gray-100 p-2 rounded-md w-full">
+    <span className="text-sm light:text-gray-900 truncate">{walletAddress}</span>
     <Button
       variant="outline"
       size="sm"
@@ -147,8 +147,8 @@ const walletAddress = address; // Replace with actual wallet address
     </Button>
   </div>
 </div>
-<p className="text-xs text-gray-500 text-center">
-  Please ensure you are sending USDT on the Ethereum Sepolia network. Sending funds on the wrong network may result in loss of funds.
+<p className="text-xs light:text-gray-500 text-center">
+  Please ensure you are sending USDT on the Binance Smart Chain(BEP20) Network. Sending funds on the wrong network may result in loss of funds.
 </p>
 </div>
 </CardContent>
@@ -156,18 +156,18 @@ const walletAddress = address; // Replace with actual wallet address
 <CardContent className={showTransfer ? "flex flex-col gap-4" : "hidden"}>
 <div className="flex flex-col gap-4">
 <h2 className="text-lg font-bold text-center">Transfer USDT</h2>
-<p className="text-sm text-gray-700 text-center">
-  Network: <span className="font-medium">Ethereum Sepolia</span>
+<p className="text-sm light:text-gray-700 text-center">
+  Network: <span className="font-medium">BSC(BEP20)</span>
 </p>
 <div className="flex flex-col items-center gap-2">
-  <p className="text-sm font-medium text-gray-700">Recipient Address:</p>
-  <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-md w-full">
+  <p className="text-sm font-medium light:text-gray-700">Recipient Address:</p>
+  <div className="flex items-center gap-2 light:bg-gray-100 p-2 rounded-md w-full">
     <input
       type="text"
       placeholder="Enter recipient address"
       value={recipientAddress} // Bind the input value to the state
       onChange={(e) => setRecipientAddress(e.target.value)} // Update state on input change
-      className="flex-grow bg-transparent border-none outline-none text-sm text-gray-900"
+      className="flex-grow bg-transparent border outline-none text-sm light:text-gray-900"
     />
     <Button
       variant="outline"
@@ -189,14 +189,14 @@ const walletAddress = address; // Replace with actual wallet address
   </div>
 </div>
 <div className="flex flex-col items-center gap-2">
-  <p className="text-sm font-medium text-gray-700">Amount:</p>
-  <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-md w-full">
+  <p className="text-sm font-medium light:text-gray-700">Amount:</p>
+  <div className="flex items-center gap-2 light:bg-gray-100 p-2 rounded-md w-full">
     <input
       type="text"
       placeholder="Enter amount to transfer"
       value={transferAmount} // Bind the input value to the state
       onChange={(e) => setTransferAmount(e.target.value)} // Update state on input change
-      className="flex-grow bg-transparent border-none outline-none text-sm text-gray-900"
+      className="flex-grow border outline-none text-sm light:text-gray-900"
     />
   </div>
   </div>
@@ -210,8 +210,8 @@ const walletAddress = address; // Replace with actual wallet address
       {loading ? "Processing..." : "Transfer"}
     </Button>
   </div>
-  <p className="text-xs text-gray-500 text-center">
-    Please ensure you are sending USDT on the Ethereum Sepolia network. Sending funds on the wrong network may result in loss of funds.
+  <p className="text-xs light:text-gray-500 text-center">
+    Please ensure you are sending USDT on the Binance Smart Chain(BEP20) Network. Sending funds on the wrong network may result in loss of funds.
   </p>
 </div>
 </CardContent>

@@ -200,12 +200,12 @@ export default function KycPageholder ({email, kycss}: {email: string, kycss: st
     }
   
     return (
-      <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+      <div className="max-w-2xl mx-auto p-6 light:bg-white shadow-lg rounded-lg">
         <h1 className="text-2xl font-bold mb-6 text-center">KYC Verification</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Full Name */}
           <div>
-            <Label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
+            <Label htmlFor="fullName" className="block text-sm font-medium light:text-gray-700">
               Full Name
             </Label>
             <Input
@@ -222,7 +222,7 @@ export default function KycPageholder ({email, kycss}: {email: string, kycss: st
   
           {/* Country */}
           <div>
-            <Label htmlFor="country" className="block text-sm font-medium text-gray-700">
+            <Label htmlFor="country" className="block text-sm font-medium light:text-gray-700">
               Country
             </Label>
             <Select
@@ -250,7 +250,7 @@ export default function KycPageholder ({email, kycss}: {email: string, kycss: st
   
           {/* ID Card Number */}
           <div>
-            <Label htmlFor="idCardNumber" className="block text-sm font-medium text-gray-700">
+            <Label htmlFor="idCardNumber" className="block text-sm font-medium light:text-gray-700">
               ID Card Number
             </Label>
             <Input
@@ -267,7 +267,7 @@ export default function KycPageholder ({email, kycss}: {email: string, kycss: st
   
           {/* ID Card Front Image */}
           <div>
-            <Label htmlFor="idCardFront" className="block text-sm font-medium text-gray-700">
+            <Label htmlFor="idCardFront" className="block text-sm font-medium light:text-gray-700">
               Upload ID Card (Front)
             </Label>
             <Input
@@ -284,7 +284,7 @@ export default function KycPageholder ({email, kycss}: {email: string, kycss: st
   
           {/* ID Card Back Image */}
           <div>
-            <Label htmlFor="idCardBack" className="block text-sm font-medium text-gray-700">
+            <Label htmlFor="idCardBack" className="block text-sm font-medium light:text-gray-700">
               Upload ID Card (Back)
             </Label>
             <Input
