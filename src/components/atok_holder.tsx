@@ -347,7 +347,7 @@ const response = await addtraderequest(
                   <tr key={ad.id} className="border-b">
                     <td className="p-4">{ad.userName}</td>
                     <td className="p-4">{ad.price} USDT</td>
-                    <td className="p-4">{ad.minQty}-{ad.maxQty} Atok</td>
+                    <td className="p-4">{ad.minQty}-{ad.maxQty} {ad.coin}</td>
                     <td className="p-4">Wallet</td>
                     <td>
 
@@ -427,7 +427,7 @@ const response = await addtraderequest(
                       <div className="col-span-1">
                         <h3 className="text-lg font-bold">{ad.userName}</h3>
                         <p>Price: {ad.price} USDT</p>
-                        <p>Available: {ad.minQty}-{ad.maxQty} PI</p>
+                        <p>Available: {ad.minQty}-{ad.maxQty} {ad.coin}</p>
                         <p>Payment Method: Wallet</p>
                       </div>
                       <div className="col-span-1">
