@@ -4,7 +4,7 @@ import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowBigLeft, Clock } from "lucide-react";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { addtraderequest, createads } from "@/functions/user";
+import { addtraderequest, createads, deletead } from "@/functions/user";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { PutBlobResult } from "@vercel/blob";
@@ -13,7 +13,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp } from "lucide-react";
 
-export default function AtokHolder({ email, name, data }: { email: string, name: string, data: any[] }) {
+export default function AtokHolder({ email, name, data, userads}: { email: string, name: string, data: any[], userads: any[] }) {
+  const [myad, setmyads] = useState(false)
   const [showads, setshowads] = useState(true);
   const [selectedCoin, setSelectedCoin] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string | null>("buy"); // Selected transaction type for filtering
@@ -21,8 +22,12 @@ export default function AtokHolder({ email, name, data }: { email: string, name:
   const [showModal, setshowModal] = useState(false);
   const [imgproof, setimgproof] = useState<PutBlobResult | null>(null);
   const idCardFrontRef = useRef<HTMLInputElement>(null);
-  const filteredData = data.filter(item => item.type === selectedType)
-  const filteredcoin = filteredData.filter(item => item.coin === selectedCoin)
+  let filteredData = data.filter(item => item.type === selectedType)
+  let filteredcoin = filteredData.filter(item => item.coin === selectedCoin)
+  if(myad){
+    filteredData =userads.filter(item => item.type === selectedType)
+    filteredcoin = filteredData.filter(item => item.coin === selectedCoin)
+  }
   const [btn, setBtn] = useState(false);
   // const [data, setData] = useState<any>([]);
   const [formData, setFormData] = useState({
@@ -180,6 +185,19 @@ const response = await addtraderequest(
     setshowdialog(true);
   };
 
+    const handledelete = async(ad: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      adId: ad.id,
+    }));
+    const del = await deletead(formData.adId);
+    if(!del.success){
+      toast.error("unable to delete ad");
+    }else{
+      toast.success("ad deleted successfully")
+    }
+  };
+
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const amount = Number(e.target.value);
     const toReceive = amount * Number(formData.price); // Ensure price is treated as a number
@@ -200,7 +218,7 @@ const response = await addtraderequest(
     !showads ? (
 
       <div>
-      <div className="flex flex-box cursor-pointer" onClick = {() => {setSelectedCoin(""), setshowads(true), setSelectedType("buy"), setshowdialog(false), setshowModal(false), setBtn(false)}}>
+      <div className="flex flex-box cursor-pointer" onClick = {() => {setSelectedCoin(""), setshowads(true), setSelectedType("buy"), setshowdialog(false), setshowModal(false), setBtn(false), setmyads(false)}}>
         <ArrowBigLeft />
         Advertisement
       </div>
@@ -312,7 +330,7 @@ const response = await addtraderequest(
         </div>
         <div className="flex flex-box w-full gap-3 pb-3">
           <div className="w-full">
-            <Button className="w-full">My Ads</Button>
+            <Button className="w-full" onClick={()=> {setmyads(true)}}>My Ads</Button>
           </div>
           <div className="w-full">
             <Button className="w-full">Official Web</Button>
@@ -351,7 +369,12 @@ const response = await addtraderequest(
                     <td className="p-4">Wallet</td>
                     <td>
 
-                      <Button
+                      {myad ? <Button
+              className="bg-red-500 w-full"
+              onClick={() => handledelete(ad)}
+            >
+              delete
+            </Button> :<Button
                         className={selectedType === "buy" ? "bg-blue-500 text-white" : "bg-red-500 text-white"}
                         disabled={name == ad.userName ? true : false}
                         onClick={() => {
@@ -360,7 +383,7 @@ const response = await addtraderequest(
                         }}
                       >
                         {selectedType === "buy" ? ("buy") : ("sell")}
-                      </Button>
+                      </Button>}
                     </td>
                   </tr>
                 ))
@@ -431,7 +454,12 @@ const response = await addtraderequest(
                         <p>Payment Method: Wallet</p>
                       </div>
                       <div className="col-span-1">
-                        <Button
+                        {myad ? <Button
+              className="bg-red-500 w-full"
+              onClick={() => handledelete(ad)}
+            >
+              delete
+            </Button> :<Button
                           className={selectedType === "buy" ? "bg-blue-500 text-white" : "bg-red-500 text-white"}
                           disabled={name == ad.userName ? true : false}
                           onClick={() => {
@@ -439,7 +467,7 @@ const response = await addtraderequest(
                           }}
                         >
                           {selectedType === "buy" ? ("buy") : ("sell")}
-                        </Button>
+                        </Button>}
                       </div>
                     </div>
                   </div>

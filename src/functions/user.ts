@@ -732,21 +732,12 @@ if (sameTypeAd && sameCoinAd) {
     return { success: false, message: "Failed to create ad" };
   }
 }
-export async function getAds(email: string) {
+export async function deletead(id: string){
   try {
-    // Fetch the user by email
-    const user = await prisma.user.findUnique({
-      where: { email },
-      select: { id: true }, // Select only the user ID
-    });
-    if (!user) {
-      return { success: false, message: "User not found" };
-    }
-    const userId = user.id; // Get the user ID
+
     // Fetch ads for the user
-    const ads = await prisma.ads.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" }, // Sort by creation date (latest first)
+    const ads = await prisma.ads.delete({
+      where: { id },
     });
 
     return { success: true, ads };
@@ -760,6 +751,31 @@ export async function getAllAds() {
   try {
     // Fetch all ads
     const ads = await prisma.ads.findMany({
+      orderBy: { createdAt: "desc" }, // Sort by creation date (latest first)
+    });
+
+    if (!ads) {
+      return { success: false, message: "No ads found" };
+    }
+    
+    return { success: true, ads, };
+  } catch (error) {
+    console.error("Error fetching ads:", error);
+    return { success: false, message: "Failed to fetch ads" };
+  }
+}
+
+export async function getUserads(email: string) {
+  try {
+    //fetch user id using email
+    const user = await prisma.user.findUnique({
+      where:{email},
+      select:{id: true}
+    })
+    const userId = user?.id;
+    // Fetch all ads
+    const ads = await prisma.ads.findMany({
+      where: {userId},
       orderBy: { createdAt: "desc" }, // Sort by creation date (latest first)
     });
 
