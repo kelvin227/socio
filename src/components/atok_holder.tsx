@@ -4,7 +4,6 @@ import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowBigLeft, Clock } from "lucide-react";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import Link from "next/link";
 import { addtraderequest, createads } from "@/functions/user";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";

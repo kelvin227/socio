@@ -178,7 +178,6 @@ export async function sendusdttrade(amount: string, recipient: string, id: strin
           // Connect to the Ethereum Sepolia network
           if (!walletss) {
             //return{success: true, message: "unable to get wallet info"};
-            console.log(walletss);
             return{success: false, message: walletss}
           }
     const provider = new ethers.JsonRpcProvider(`https://bsc-mainnet.infura.io/v3/80c842e999184bd28fd9d46c6d19afb4`);
@@ -202,6 +201,6 @@ export async function sendusdttrade(amount: string, recipient: string, id: strin
 
         return {success: true, message: "sent succcessfully"}
     }
-    return{success: false, message: wallet}
+    return{success: false, message: wallet, error: wallet}
     
 }

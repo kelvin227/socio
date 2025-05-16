@@ -169,6 +169,7 @@ model adsTransaction {
   adId          String
   orderId       String  @unique
   coin          String
+  receipt       String
   type          String?
   price         String
   status        String

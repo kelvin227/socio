@@ -104,7 +104,12 @@ export async function updatewallet(email: string, address: string, coin: string)
       data:{
         walletAddress: address
       }
-    })
+      
+    });
+    if(!send){
+        return{success:false, message: "unable able to the atok wallet address"}
+      }
+      return{success: true, message: "atok wallet updated successfully"}
   } else if (coin === "wow"){
 const send = await prisma.userWallet.update({
       where:{
@@ -113,7 +118,11 @@ const send = await prisma.userWallet.update({
       data:{
         walletAddress2: address
       }
-    })
+    });
+     if(!send){
+        return{success:false, message: "unable able to the wow wallet address"}
+      }
+      return{success: true, message: "WOW wallet updated successfully"}
   } else if(coin === "sda"){
     const send = await prisma.userWallet.update({
       where:{
@@ -122,7 +131,11 @@ const send = await prisma.userWallet.update({
       data:{
         walletAddress3: address
       }
-    })
+    });
+     if(!send){
+        return{success:false, message: "unable able to the Sidra wallet address"}
+      }
+      return{success: true, message: "Sidra wallet updated successfully"}
   } else if(coin === "rbl"){
     const send = await prisma.userWallet.update({
       where:{
@@ -131,7 +144,11 @@ const send = await prisma.userWallet.update({
       data:{
         walletAddress4: address
       }
-    })
+    });
+     if(!send){
+        return{success:false, message: "unable able to the Ruby wallet address"}
+      }
+      return{success: true, message: "Ruby wallet updated successfully"}
   }else if(coin === "opincur"){
     const send = await prisma.userWallet.update({
       where:{
@@ -140,7 +157,11 @@ const send = await prisma.userWallet.update({
       data:{
         walletAddress5: address
       }
-    })
+    });
+     if(!send){
+        return{success:false, message: "unable able to the Opincur wallet address"}
+      }
+      return{success: true, message: "Opincur wallet updated successfully"}
   }else if(coin === "star"){
     const send = await prisma.userWallet.update({
       where:{
@@ -149,7 +170,11 @@ const send = await prisma.userWallet.update({
       data:{
         walletAddress6: address
       }
-    })
+    });
+     if(!send){
+        return{success:false, message: "unable able to the Star wallet address"}
+      }
+      return{success: true, message: "Star wallet updated successfully"}
   }else if(coin === "socio"){
     const send = await prisma.userWallet.update({
       where:{
@@ -158,11 +183,96 @@ const send = await prisma.userWallet.update({
       data:{
         walletAddress7: address
       }
-    })
+    });
+     if(!send){
+        return{success:false, message: "unable able to the Socio wallet address"}
+      }
+      return{success: true, message: "Socio wallet updated successfully"}
+  }
+  }else{
+    //if not then create a new a row for the user with the following wallets details
+        if(coin === "atok"){
+    const send = await prisma.userWallet.create({
+      data:{
+        userid,
+        walletAddress: address
+      }
+      
+    });
+    if(!send){
+        return{success:false, message: "unable able to the atok wallet address"}
+      }
+      return{success: true, message: "atok wallet updated successfully"}
+  } else if (coin === "wow"){
+const send = await prisma.userWallet.create({
+      data:{
+        userid,
+        walletAddress2: address
+      }
+    });
+     if(!send){
+        return{success:false, message: "unable able to the wow wallet address"}
+      }
+      return{success: true, message: "WOW wallet updated successfully"}
+  } else if(coin === "sda"){
+    const send = await prisma.userWallet.create({
+      data:{
+        userid,
+        walletAddress3: address
+      }
+    });
+     if(!send){
+        return{success:false, message: "unable able to the Sidra wallet address"}
+      }
+      return{success: true, message: "Sidra wallet updated successfully"}
+  } else if(coin === "rbl"){
+    const send = await prisma.userWallet.create({
+      data:{
+        userid,
+        walletAddress4: address
+      }
+    });
+     if(!send){
+        return{success:false, message: "unable able to the Ruby wallet address"}
+      }
+      return{success: true, message: "Ruby wallet updated successfully"}
+  }else if(coin === "opincur"){
+    const send = await prisma.userWallet.create({
+      data:{
+        userid,
+        walletAddress5: address
+      }
+    });
+     if(!send){
+        return{success:false, message: "unable able to the Opincur wallet address"}
+      }
+      return{success: true, message: "Opincur wallet updated successfully"}
+  }else if(coin === "star"){
+    const send = await prisma.userWallet.create({
+      data:{
+        userid,
+        walletAddress6: address
+      }
+    });
+     if(!send){
+        return{success:false, message: "unable able to the Star wallet address"}
+      }
+      return{success: true, message: "Star wallet updated successfully"}
+  }else if(coin === "socio"){
+    const send = await prisma.userWallet.create({
+      data:{
+        userid,
+        walletAddress7: address
+      }
+    });
+     if(!send){
+        return{success:false, message: "unable able to the Socio wallet address"}
+      }
+      return{success: true, message: "Socio wallet updated successfully"}
   }
   }
 
-  //if not then create a new a row for the user with the following wallets details
+  
 }
 
 export async function SubmitKyc(
@@ -822,6 +932,7 @@ export async function acceptTrade(id: string) {
         merchantID: traderequest.merchantId,
         walletAddress,
         userName: traderequest.merchantName || "", // the username is the merchant username
+        receipt: ""
       },
     });
 
@@ -853,19 +964,19 @@ export async function getadstransactions(ids: string){
 
 }
 
-export async function confirmbuyer(id: string){
+export async function confirmbuyer(id: string, receipt: string){
   try{
-    console.log(`the id is${id}`)
     const gettrans = await prisma.adsTransaction.update({
       where: { orderId: id },
       data:{
-        merchantconfirm: "sent"
+        merchantconfirm: "sent",
+        receipt
       }
     })
     if(!gettrans){
       return{success:false, message: "unable to update transaction"}
     }
-    return{succes: true, gettrans}
+    return{success: true, gettrans}
   }catch(error){
     console.log(error)
   }
@@ -877,6 +988,23 @@ export async function confirmseen(id: string){
       where: { orderId: id },
       data:{
         customerconfirm: "sent"
+      }
+    })
+    if(!gettrans){
+      return{success:false, message: "unable to update transaction"}
+    }
+    return{success: true, gettrans}
+  }catch(error){
+    console.log(error)
+  }
+}
+
+export async function completetrans(id: string){
+  try{
+    const gettrans = await prisma.adsTransaction.update({
+      where: { orderId: id },
+      data:{
+        status: "completed"
       }
     })
     if(!gettrans){
