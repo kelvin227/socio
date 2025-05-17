@@ -1,26 +1,25 @@
 "use server"
 /* eslint-disable */
 import { prisma } from "@/lib/db";
-import type { NextApiRequest, NextApiResponse } from 'next';
 import { EmailTemplate } from '@/components/emails/support';
 import { Resend } from 'resend';
 import { hashPassword } from "@/lib/utils";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export async function sendsupportmails( res: NextApiResponse, email: string) {
-  const { data, error } = await resend.emails.send({
-    from: 'mark <support.Sociootc.com>',
+export async function sendsupportmails( email: string) {
+  const data  = await resend.emails.send({
+    from: 'donnotreply <noreply@sociootc.com>',
     to: [email],
-    subject: 'Hello world',
-    react: EmailTemplate({ firstName: 'John' }),
+    subject: 'Socio OTCs',
+    react: EmailTemplate({ firstName: email }),
   });
 
-  if (error) {
-    return res.status(400).json(error);
+  if(!data) {
+    return{success: false, mesaage: "unable to send email"}
   }
 
-  return res.status(200).json(data);
+  return {success: true, message: "email sent successfully"}
 };
 
 export async function getUserByEmail(email: string) {
@@ -1002,10 +1001,14 @@ export async function acceptTrade(id: string) {
     }
 
     // Update the user's field in the database
-    await prisma.traderequest.update({
+    const updaterequest = await prisma.traderequest.update({
       where: { id },
       data: { status: "Accepted" },
     });
+
+    if(!updaterequest){
+      return{success:false, message:"unable to update trade request"}
+    }
 
     // Create a new ad in the database
     const addTransaction = await prisma.adsTransaction.create({
@@ -1030,7 +1033,18 @@ export async function acceptTrade(id: string) {
     if(!addTransaction){
       return{success: false, message:""}
     }
+    const user = await prisma.user.findUnique({
+      where:{id: traderequest.userId},
+      select:{email: true}
+    })
+    if(!user){
+      return{success: true, message: "Trade request accepted successfully, but unable to get the user email"}
+    }
+    const mail = await sendsupportmails(user.email);
 
+    if(!mail){
+      return{success:true, message: "Trade request accepted successfully, but unable to send user email"}
+    }
     return { success: true, message: `Trade request accepted successfully` };
   } catch (error) {
     console.error(`Error accepting trade request ${id}:`, error);

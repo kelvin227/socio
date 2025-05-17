@@ -30,7 +30,7 @@ export async function createWallet(password: string, email: string) {
     return newWallet;
 }
 
-export default async function getBalance(email: string){//(address: string) {
+export async function checkbalance(email: string){//(address: string) {
     const user = await prisma.user.findUnique({
         where:{email},
         select: {id: true}
@@ -47,6 +47,20 @@ export default async function getBalance(email: string){//(address: string) {
     }
     const address = getaddress?.address;
 
+    const usdt = "0x55d398326f99059ff775485246999027b3197955";
+    const usdtresponse = await fetch (`https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=${usdt}&address=${address}&tag=latest&apikey=${process.env.BSC_API_KEY}`); 
+
+    const response = await fetch(
+        `https://api-sepolia.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest&apikey=${process.env.SEPOLIA_API_KEY}`
+    );
+    const data = await usdtresponse.json();
+    const balance = ethers.formatEther(data.result); // Assuming the API returns the balance in the 'result' field
+    return {success: true, message: balance};
+    //return {success: true, message: balance};
+    
+}
+
+export async function getBalance(address: string){//(address: string) {
     const usdt = "0x55d398326f99059ff775485246999027b3197955";
     const usdtresponse = await fetch (`https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=${usdt}&address=${address}&tag=latest&apikey=${process.env.BSC_API_KEY}`); 
 

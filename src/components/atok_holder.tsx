@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp } from "lucide-react";
-import getBalance from "@/functions/blockchain/wallet.utils";
+import {checkbalance} from "@/functions/blockchain/wallet.utils";
 
 export default function AtokHolder({ email, name, data, userads}: { email: string, name: string, data: any[], userads: any[] }) {
   const [myad, setmyads] = useState(false)
@@ -146,11 +146,11 @@ export default function AtokHolder({ email, name, data, userads}: { email: strin
 
       }else{
         let balance;
-        const checkbalance = await getBalance(email)
-        if(!checkbalance.success){
-          toast.error(checkbalance.message);
+        const checkbalanc = await checkbalance(email)
+        if(!checkbalanc.success){
+          toast.error(checkbalanc.message);
         }else{
-          balance = checkbalance.message;
+          balance = checkbalanc.message;
         }
         if(Number(balance) === formData.amount * Number(formData.pricee)){
 const response = await addtraderequest(
