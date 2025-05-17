@@ -30,7 +30,23 @@ export async function createWallet(password: string, email: string) {
     return newWallet;
 }
 
-export default async function getBalance(address: string) {
+export default async function getBalance(email: string){//(address: string) {
+    const user = await prisma.user.findUnique({
+        where:{email},
+        select: {id: true}
+    })
+    if(!user){
+        return{success:false, message:"unable able to fecth user details"}
+    }
+    const getaddress = await prisma.wallets.findUnique({
+        where:{ userId: user.id},
+        select: {address: true}
+    })
+     if(!getaddress){
+        return{success:false, message:"unable able to fecth wallet address"}
+    }
+    const address = getaddress?.address;
+
     const usdt = "0x55d398326f99059ff775485246999027b3197955";
     const usdtresponse = await fetch (`https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=${usdt}&address=${address}&tag=latest&apikey=${process.env.BSC_API_KEY}`); 
 

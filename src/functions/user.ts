@@ -1,7 +1,27 @@
 "use server"
 /* eslint-disable */
 import { prisma } from "@/lib/db";
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { EmailTemplate } from '@/components/emails/support';
+import { Resend } from 'resend';
 import { hashPassword } from "@/lib/utils";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export async function sendsupportmails( res: NextApiResponse, email: string) {
+  const { data, error } = await resend.emails.send({
+    from: 'mark <support.Sociootc.com>',
+    to: [email],
+    subject: 'Hello world',
+    react: EmailTemplate({ firstName: 'John' }),
+  });
+
+  if (error) {
+    return res.status(400).json(error);
+  }
+
+  return res.status(200).json(data);
+};
 
 export async function getUserByEmail(email: string) {
   const user = await prisma.user.findUnique({
@@ -91,11 +111,7 @@ export async function updatewallet(email: string, address: string, coin: string)
     }
   })
 
-  if(!check){
-    return{success: false, message: "unable to check the wallet details of the user"}
-  }
-
-  if(check === 0){
+  if(check){
     if(coin === "atok"){
     const send = await prisma.userWallet.update({
       where:{
@@ -273,6 +289,40 @@ const send = await prisma.userWallet.create({
   }
 
   
+}
+
+export async function checkwallet(email: string, address: string, coin: string){
+    ///get the user info like email, username, and id
+  const user = await prisma.user.findUnique({
+    where: {email},
+    select: {id: true}
+  })
+
+  if(!user){
+    return{ success: false, message:"error fetching user details"}
+  }
+  const userid = user.id
+
+  //check if a row has been created with the user id or email or username
+  const check =  await prisma.userWallet.count({
+    where: {
+      userid
+    }
+  })
+
+  if(check){
+    const send = await prisma.userWallet.findUnique({
+      where:{
+        userid
+      }
+    });
+    if(!send){
+        return{success:false, message: "unable able to the atok wallet address"}
+      }
+      return{success: true, message: send}
+  
+  }
+
 }
 
 export async function SubmitKyc(
@@ -814,21 +864,46 @@ export async function addtraderequest(email: string, userName: string, adId: str
     const wallet = await prisma.userWallet.findUnique({
       where: { userid: user.id }
     });
+    if(!wallet){
+      return{success: false, message: `Empty wallet address update your wallet address for ${coin}`}
+    }
+
     let walletAddress;
-    if(coin==="ATOK"){
+    if(coin==="atok"){
       walletAddress = wallet?.walletAddress; // Get the user's wallet address
-    }else if(coin==="WOW") {
+      if(walletAddress === null){
+        return{success: false, message:`Update your ${coin} wallet address`}
+      }
+    }else if(coin==="wow") {
       walletAddress = wallet?.walletAddress2; // Get the user's wallet address
-    } else if(coin==="SDA"){
+       if(walletAddress === null){
+        return{success: false, message:`Update your ${coin} wallet address`}
+      }
+    } else if(coin==="sidra"){
       walletAddress = wallet?.walletAddress3; // Get the user's wallet address
-    } else if(coin ==="RBL"){
+       if(walletAddress === null){
+        return{success: false, message:`Update your ${coin} wallet address`}
+      }
+    } else if(coin ==="ruby"){
       walletAddress = wallet?.walletAddress4; // Get the user's wallet address
+       if(walletAddress === null){
+        return{success: false, message:`Update your ${coin} wallet address`}
+      }
     }else if(coin === "Opincur"){
       walletAddress = wallet?.walletAddress5; // Get the user's wallet address
-    }else if(coin === "Star"){
+       if(walletAddress === null){
+        return{success: false, message:`Update your ${coin} wallet address`}
+      }
+    }else if(coin === "star"){
       walletAddress = wallet?.walletAddress6; // Get the user's wallet address
-    }else if(coin ==="Socio"){
+ if(walletAddress === null){
+        return{success: false, message:`Update your ${coin} wallet address`}
+      }
+    }else if(coin ==="socio"){
       walletAddress = wallet?.walletAddress7; // Get the user's wallet address
+       if(walletAddress === null){
+        return{success: false, message:`Update your ${coin} wallet address`}
+      }
     }
 
     const userId = user.id; // Get the user ID
@@ -1031,3 +1106,47 @@ export async function completetrans(id: string){
     console.log(error)
   }
 }
+
+export async function createdispute(userid: string, email: string, tradeid: string, dispute_reason: string){
+  try{
+    const dispute = await prisma.dispute.create({
+      data: {
+        userid,
+        useremail: email,
+        tradeid,
+        orderid: tradeid,
+        status: "pending",
+        dispute_reason
+      },
+    })
+
+    if (!dispute){
+      return{success: false, message: "unable to create dispute order"}
+    }
+    return{success: true, message:"order created successfully"}
+  }catch(error){
+    console.log(error)
+  }
+}
+
+export async function getalldispute(){
+  try{
+    const dispute = await prisma.dispute.findMany({
+      where:{status: "pending"},
+    })
+    if(!dispute){
+      return{success: false, message: "unable to get all dispute"}
+    }
+    return{success:true, message: "dispute fetched successfully", data: dispute}
+  }catch(error){
+    console.log(error)
+  }
+}
+
+export async function sendreminder(email: string){
+
+  
+
+
+}
+

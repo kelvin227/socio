@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp } from "lucide-react";
+import getBalance from "@/functions/blockchain/wallet.utils";
 
 export default function AtokHolder({ email, name, data, userads}: { email: string, name: string, data: any[], userads: any[] }) {
   const [myad, setmyads] = useState(false)
@@ -125,7 +126,7 @@ export default function AtokHolder({ email, name, data, userads}: { email: strin
 
   const handlepurchase = async (e: any) => {
     e.preventDefault();
-    setshowModal(true); // Close the modal after purchase
+     
     try {
       if(selectedType === "sell"){
         const response = await addtraderequest(
@@ -144,6 +145,14 @@ export default function AtokHolder({ email, name, data, userads}: { email: strin
       }
 
       }else{
+        let balance;
+        const checkbalance = await getBalance(email)
+        if(!checkbalance.success){
+          toast.error(checkbalance.message);
+        }else{
+          balance = checkbalance.message;
+        }
+        if(Number(balance) === formData.amount * Number(formData.pricee)){
 const response = await addtraderequest(
         email,
         formData.merchantusername,
@@ -154,9 +163,13 @@ const response = await addtraderequest(
         "buy"
       )
       if (response.success) {
+        setshowModal(true);// Close the modal after purchase
         toast("Trade created successfully!");
       } else {
         toast(response.message || "Failed to create trade request.");
+      }
+      }else{
+        toast.error("insufficient balance")
       }
       }
       
@@ -195,6 +208,7 @@ const response = await addtraderequest(
       toast.error("unable to delete ad");
     }else{
       toast.success("ad deleted successfully")
+      router.refresh();
     }
   };
 
@@ -245,7 +259,7 @@ const response = await addtraderequest(
         </div>
         <div className="w-full pb-3">
           <Dialog>
-            <DialogTrigger className="w-full bg-blue-500 p-1 rounded">Create Ads</DialogTrigger>
+            <DialogTrigger className="w-full bg-blue-500 p-1 rounded" disabled={myad ? true : false}>Create Ads</DialogTrigger>
             <DialogContent>
               <DialogTitle>Create Advertisement</DialogTitle>
               <form onSubmit={handleSubmit} className="space-y-4">

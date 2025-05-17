@@ -35,6 +35,7 @@ model User {
   ads            ads[]
   adsTransaction adsTransaction[]
   traderequest   traderequest[]
+  dispute        dispute[]
 }
 
 model Account {
@@ -182,6 +183,7 @@ model adsTransaction {
   userName      String
   merchantconfirm String @default("pending")
   customerconfirm String @default("pending")
+  dispute dispute[]
 
 
   User User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -197,10 +199,27 @@ model traderequest {
   amount        String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  userId        String   @unique
-  merchantId    String   @unique
+  userId        String   
+  merchantId    String   
   walletAddress String?
   merchantName  String
+  dispute dispute[]
 
   User User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model dispute{
+  id String @id @default(cuid())
+  tradeid String 
+  orderid String
+  userid String
+  status String
+  useremail String
+  dispute_reason String
+  admin_notes String?
+  createdAt DateTime @default(now())
+
+  User User @relation(fields: [userid], references: [id], onDelete: Cascade)
+  trade traderequest @relation(fields: [tradeid], references: [id], onDelete: Cascade)
+  adstrans adsTransaction @relation(fields: [orderid], references: [orderId], onDelete: Cascade)
+  }

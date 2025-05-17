@@ -36,7 +36,7 @@ export default function OTC_handler({email} :{email: string}){
       }
       const submitWallet = await updatewallet(email, address, coins as string)
       if(!submitWallet?.success){
-      toast.error("failed");
+      toast.error(submitWallet?.message);
       }
       else{
         toast.success("address updated successfully")

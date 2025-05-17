@@ -69,6 +69,7 @@ export default function KycHolder() {
       console.error("Error submitting rejection reason:", error);
     }
   };
+  
  useEffect(() => {
     kyc();
   }, []);

@@ -3,12 +3,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { acceptTrade, completetrans, confirmbuyer, confirmseen, getadstransactions, gettraderequests, gettraderequestsinfo } from "@/functions/user";
+import { acceptTrade, completetrans, confirmbuyer, confirmseen, createdispute, getadstransactions, gettraderequests, gettraderequestsinfo } from "@/functions/user";
 import { Clock } from "lucide-react";
 import { sendusdttrade } from "@/functions/blockchain/wallet.utils";
 import { PutBlobResult } from "@vercel/blob";
 import { Dialog } from "@radix-ui/react-dialog";
 import { DialogContent, DialogTrigger } from "./ui/dialog";
+import { Input } from "./ui/input";
 //import { sendtest } from "@/functions/blockchain/wallet.utils";
 
 export default function PendingTrades({ email, id }: { email: string, id: string }) {
@@ -17,6 +18,8 @@ export default function PendingTrades({ email, id }: { email: string, id: string
   const [Amount, setAmount] = useState<string>("");
   const [userid, setuserId] = useState<string>("")
   const [show, setShow] = useState(false);
+  const [ShowDisputeModal, setShowDisputeModal] = useState<boolean>(false);
+  const [disputeReason, setDisputeReason] = useState<string>("")
   const [tradeid, settradeid] = useState<string>("");
   const [status, setstatus] = useState<string>("");
   const [transStatus, setTransStatus] = useState<string>("");
@@ -166,6 +169,20 @@ export default function PendingTrades({ email, id }: { email: string, id: string
     setCoin(coin);
   }
 
+  const handledispute = async (tradeid: string, reason: string) => {
+    const request = await createdispute(id, email, tradeid, reason);
+  }
+  const handleDisputeSubmit = async () => {
+    if (!tradeid) return;
+
+    try {
+      await handledispute(tradeid, disputeReason);
+      setShowDisputeModal(false); // Close the modal after submission
+      setDisputeReason(""); // Clear the rejection reason
+    } catch (error) {
+      console.error("Error submitting rejection reason:", error);
+    }
+  };
   useEffect(() => {
     fetchPendingTrades();
   }, []);
@@ -219,6 +236,42 @@ export default function PendingTrades({ email, id }: { email: string, id: string
     <div className="container mx-auto py-10">
       <h1 className="text-2xl font-bold mb-4">Pending Trades</h1>
       <h1>{transStatus} {customerconfirm}</h1>
+      {/* Rejection Modal */}
+            {ShowDisputeModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+                  <h2 className="text-xl font-bold mb-4">Reject KYC Request</h2>
+                  <p className="mb-4">
+                    Please provide a reason for the on Order Id <strong>{tradeid}</strong>.
+                  </p>
+                  <Input
+                    type="text"
+                    placeholder="Enter rejection reason"
+                    value={disputeReason}
+                    onChange={(e) => setDisputeReason(e.target.value)}
+                    className="w-full mb-4"
+                  />
+                  <div className="flex justify-end gap-4">
+                    <Button
+                      onClick={() => {
+                        setShowDisputeModal(false);
+                        setDisputeReason("");
+                      }}
+                      className="bg-gray-500 text-white px-4 py-2 rounded-md"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={() => handleDisputeSubmit}
+                      className="bg-red-500 text-white px-4 py-2 rounded-md"
+                      disabled={!disputeReason.trim()}
+                    >
+                      Submit
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
 
       {loading ? (
         <p className="text-center text-gray-500">Loading pending trades...</p>
@@ -328,7 +381,8 @@ export default function PendingTrades({ email, id }: { email: string, id: string
             <div className="flex justify-center mb-4">
               <Clock className="text-yellow-500 w-16 h-16" />
             </div>
-            {merchantid === id ? (
+            {selectedType === "buy" ?
+            merchantid === id ? (
               <div>
                 <h1 className="text-2xl font-bold text-yellow-700 mb-2">Send {coin} to user wallet Address</h1>
                 <p className="mb-4">
@@ -347,10 +401,42 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                     name="img"
                     type="file"
                     accept="image/*"
-                    className="mt-1 block w-full"
+                    className={merchantconfirm === "sent"? "hidden" :"mt-1 block w-full"}
                     ref={imgreceipt}
                     required
                   />
+                  <div className="w-full">
+              <div className="grid grid-box w-full gap-4">
+                {status !== "pending" ? (
+                  merchantconfirm === "sent" ?
+                  <Button
+                      className="w-full dark:bg-gray-400 light:text-green-300 text-white"
+                      disabled={true}
+                    >
+                      waiting for buyer to confirm the coin
+                    </Button>
+                  :
+                    <Button
+                      className="w-full dark:bg-gray-400 light:text-green-300"
+                      onClick={() => handlesent(tradeid)}
+                    >
+                      I have Sent The Coin
+                    </Button>
+                ) : (
+                  <Button
+                    className="w-full text-green-300"
+                    onClick={() => fetchTransactionDetails(tradeid)}
+                  >
+                    Waiting for merchant to accept trade
+                  </Button>
+                )}
+                {merchantconfirm || customerconfirm ?<Button className="w-full dark:bg-gray-400 text-blue-300" onClick={handleDisputeSubmit}>
+                  Order dispute
+                </Button>: <Button className="w-full dark:bg-gray-400 text-blue-300">
+                 Cancel
+                </Button>}
+              </div>
+            </div>
               </div>
               
             ) : (
@@ -379,14 +465,10 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                     </DialogContent>
                   </Dialog>
                 </div>
-                
-            </div>
-            )}
 
-            <div className="w-full">
+                <div className="w-full">
               <div className="grid grid-box w-full gap-4">
                 {status !== "pending" ? (
-                  selectedType === "buy" && merchantid !== id ? (
                     <Button
                       className="w-full dark:bg-gray-400 light:text-green-300"
                       disabled={merchantconfirm === "pending"}
@@ -394,14 +476,118 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                     >
                       I have seen coin
                     </Button>
-                  ) : (
+                ) : (
+                  <Button
+                    className="w-full text-green-300"
+                    onClick={() => fetchTransactionDetails(tradeid)}
+                  >
+                    Waiting for merchant to accept trade
+                  </Button>
+                )}
+                {merchantconfirm  || customerconfirm ? <Button className="w-full dark:bg-gray-400 text-blue-300" onClick={() => cancelTrade(id)}>
+                  Cancel
+                </Button>  : <Button className="w-full dark:bg-gray-400 text-blue-300" onClick={handleDisputeSubmit}>
+                  Order dispute
+                </Button>}
+                
+              </div>
+            </div>
+                
+            </div>
+            )
+          : merchantid === id ? (
+            <div>
+        <h1 className="text-2xl font-bold text-yellow-700 mb-2">{coin} will be sent to your wallet address</h1>
+                <p className="mb-4">
+                  To complete the trade, please confirm that agreed amount of {coin} has been sent to your wallet. Once the Deposit is confirmed, the trade will be finalized.
+                </p>
+                <span className="mb-4">User Wallet Address: <span className="font-bold">{pendingTrades[0].walletAddress}</span></span><br />
+                <span className="mb-4">Amount sent: <span className="font-bold">{pendingTrades[0].amount}</span></span><br />
+                <span className="mb-4">Transaction ID: <span className="font-bold">{pendingTrades[0].id}</span></span> <br />
+                <span className="mb-4">Order Time: <span className="font-bold">{new Date(pendingTrades[0].createdAt).toLocaleString()}</span></span><br />
+                <span className="mb-4">Please ensure to double-check the amount before releasing your USDT.</span>
+                <p className="mb-4">If you have any questions, feel free to reach out to the merchant.</p>
+                <p className="mb-4">Thank you for using our trading platform!</p>
+                <p className="mb-4">For any issues, please contact support.</p>
+                <div className="mb-4">
+                  
+                  <Dialog>
+                    <DialogTrigger>
+                      <img src={url} width={200} height={100} alt="Receipt" />
+                    </DialogTrigger>
+                    <DialogContent>
+                      <img src={url} width={500} height={500} alt="Receipt" />
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                <div className="w-full">
+              <div className="grid grid-box w-full gap-4">
+                {status !== "pending" ? (
                     <Button
+                      className="w-full dark:bg-gray-400 light:text-green-300"
+                      disabled={merchantconfirm === "pending"}
+                      onClick={() => handlerecieved(tradeid)}
+                    >
+                      I have seen coin
+                    </Button>
+                  
+                ) : (
+                  <Button
+                    className="w-full text-green-300"
+                    onClick={() => fetchTransactionDetails(tradeid)}
+                  >
+                    Waiting for merchant to accept trade
+                  </Button>
+                )}
+                {merchantconfirm || customerconfirm === "sent" ? <Button className="w-full dark:bg-gray-400 text-blue-300">
+                  Order dispute
+                </Button> : <Button className="w-full dark:bg-gray-400 text-blue-300">
+                  Cancel
+                </Button>}
+              </div>
+            </div>
+                
+            </div>              
+            ) : (
+                
+              <div>
+                <h1 className="text-2xl font-bold text-yellow-700 mb-2">Send {coin} to user wallet Address</h1>
+                <p className="mb-4">
+                  To complete the trade, please send the agreed amount of {coin} to the user&apos;s wallet address. Once the payment is confirmed, the trade will be finalized.
+                </p>
+                <span className="mb-4">User Wallet Address: <span className="font-bold">{pendingTrades[0].walletAddress}</span></span><br />
+                <span className="mb-4">Amount to send: <span className="font-bold">{pendingTrades[0].amount}</span></span><br />
+                <span className="mb-4">Transaction ID: <span className="font-bold">{pendingTrades[0].id}</span></span> <br />
+                <span className="mb-4">Order Time: <span className="font-bold">{new Date(pendingTrades[0].createdAt).toLocaleString()}</span></span><br />
+                <span className="mb-4">Please ensure to double-check the wallet address before sending.</span>
+                <p className="mb-4">If you have any questions, feel free to reach out to the user.</p>
+                <p className="mb-4">Thank you for using our trading platform!</p>
+                <p className="mb-4">For any issues, please contact support.</p>
+              <input
+                    id="img"
+                    name="img"
+                    type="file"
+                    accept="image/*"
+                    className={customerconfirm === "sent" ? "hidden":"mt-1 block w-full"}
+                    ref={imgreceipt}
+                    required
+                  />
+
+                  <div className="w-full">
+              <div className="grid grid-box w-full gap-4">
+                {status !== "pending" ? (
+                    customerconfirm === "sent" ? <Button
+                      className="w-full dark:bg-gray-400 light:text-green-300"
+                      disabled={true}
+                    >
+                      waiting for buyer to cnofirm the coin
+                    </Button> :<Button
                       className="w-full dark:bg-gray-400 light:text-green-300"
                       onClick={() => handlesent(tradeid)}
                     >
                       I have Sent The Coin
                     </Button>
-                  )
                 ) : (
                   <Button
                     className="w-full text-green-300"
@@ -415,6 +601,13 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                 </Button>
               </div>
             </div>
+              </div>
+
+            
+            )
+          }
+
+            
           </div>
         </>
       ) : (
