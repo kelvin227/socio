@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import React, { useState } from 'react';
 import { ethers } from 'ethers';
-import getBalance, { sendtest } from '@/functions/blockchain/wallet.utils';
+import { getBalance, sendtest } from '@/functions/blockchain/wallet.utils';
 
 export default function Wallet({email, address} : {email: string, address: string}) {
   const [balances, setBalance] = useState<string | null>(null); // State to store the balance
