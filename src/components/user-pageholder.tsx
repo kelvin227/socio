@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -25,6 +25,7 @@ import {
   IconTrendingUp,
   //IconTrendingDown,
 } from "@tabler/icons-react"
+import { getfivep2ptransaction } from "@/functions/user";
 
 
 const chartData = [
@@ -47,11 +48,23 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-const cardData = [
+
+  
+export default function PagePlaceholder({ pageName }: { pageName: string }) {
+  const [totalVolume, setTotalVolume] = useState(0);
+  const [oldVolume, setOldVolume] = useState(0);
+  const [percentchange, setPercentChange] = useState(0);
+  // const [totalearnings, settotalearnings] = useState(0);
+  // const [oldearnings, setoldearnings] = useState(0);
+  // const [earningspercent, setearningspercent] = useState(0);
+  // const [totalTrades, setTotalTrades] = useState(0);
+  // const [oldTrades, setOldTrades] = useState(0);
+  // const [Tradespercent, setTradesPercent] =useState(0);
+  const cardData = [
   {
     title: "Volume",
-    description: "56%",
-    content: "200+",
+    description: `${percentchange}%`,
+    content: totalVolume,
   },
   {
     title: "Earnings",
@@ -64,8 +77,31 @@ const cardData = [
     content: "389",
   },
 ];
+  const Volume = async()=> {
+  const response = await getfivep2ptransaction(pageName)
+  if(response.success){
+    setTotalVolume(Number(response.totalVolume));
+    setOldVolume(Number(response.oldtotalVolume));
+  }
+}
+
+const calculatePercantageChange = (oldValue: number, newValue: number)=> {
+  let change;
+  if(oldValue === 0){
+   change = newValue > 0 ? 100 : 0;
+    return setPercentChange(Number(change));
+  }else{
+    change = ((newValue - oldValue) / oldValue * 100).toFixed(2)
+  return setPercentChange(Number(change));
+  }
   
-export default function PagePlaceholder({ pageName }: { pageName: string }) {
+
+}
+
+useEffect(()=> {
+  Volume();
+    calculatePercantageChange(Number(oldVolume), Number(totalVolume));
+}, [])
   return (
     <div className="flex flex-col gap-4 mt-10">
       <h1 className="text-3xl font-bold">{pageName}</h1>

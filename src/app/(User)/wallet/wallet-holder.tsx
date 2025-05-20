@@ -5,11 +5,13 @@ import { toast } from 'sonner';
 import React, { useState } from 'react';
 import { ethers } from 'ethers';
 import { getBalance, sendtest } from '@/functions/blockchain/wallet.utils';
+import { getPrice } from '../../../functions/blockchain/wallet.utils';
 
 export default function Wallet({email, address} : {email: string, address: string}) {
   const [balances, setBalance] = useState<string | null>(null); // State to store the balance
+  const [price, setPrice] = useState<string |null>("")
   const [showTransfer, setshowTransfer] = useState(false); // State to control the visibility of the transfer dialog
-const walletAddress = address; // Replace with actual wallet address
+  const walletAddress = address; // Replace with actual wallet address
 
   const [show, setshow] = useState(false); // State to control the visibility of the deposit dialog
   const [recipientAddress, setRecipientAddress] = useState(""); // State for recipient address
@@ -49,8 +51,11 @@ const walletAddress = address; // Replace with actual wallet address
     const fetchBalance = async () => {
       try {
         const balanceData = await getBalance(address);
+        const priceData = await getPrice();
         if (balanceData.success) {
           setBalance(balanceData.message);
+          const cal = Number(priceData.message) * Number(balanceData.message)
+          setPrice(`$${cal.toString()}`);
         } else {
           setBalance("Error fetching balance");
         }
@@ -79,7 +84,7 @@ const walletAddress = address; // Replace with actual wallet address
             </div>
             <div className="flex flex-row justify-between items-center">
               <div className="text-sm font-medium light:text-gray-700">Available Balance</div>
-              <div className="text-lg font-bold light:text-gray-900">$0.00</div>
+              <div className="text-lg font-bold light:text-gray-900">{price}</div>
             </div>
           </div>
         </div>

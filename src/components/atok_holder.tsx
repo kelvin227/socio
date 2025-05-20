@@ -126,7 +126,7 @@ export default function AtokHolder({ email, name, data, userads}: { email: strin
 
   const handlepurchase = async (e: any) => {
     e.preventDefault();
-     
+    let balance;
     try {
       if(selectedType === "sell"){
         const response = await addtraderequest(
@@ -145,14 +145,15 @@ export default function AtokHolder({ email, name, data, userads}: { email: strin
       }
 
       }else{
-        let balance;
-        const checkbalanc = await checkbalance(email)
+
+        const checkbalanc = await checkbalance(email);
         if(!checkbalanc.success){
           toast.error(checkbalanc.message);
         }else{
           balance = checkbalanc.message;
         }
-        if(Number(balance) === formData.amount * Number(formData.pricee)){
+        let cal =formData.amount * Number(formData.pricee);
+        if(Number(checkbalanc.message) >= cal){
 const response = await addtraderequest(
         email,
         formData.merchantusername,

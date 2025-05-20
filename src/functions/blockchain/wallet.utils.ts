@@ -48,11 +48,8 @@ export async function checkbalance(email: string){//(address: string) {
     const address = getaddress?.address;
 
     const usdt = "0x55d398326f99059ff775485246999027b3197955";
-    const usdtresponse = await fetch (`https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=${usdt}&address=${address}&tag=latest&apikey=${process.env.BSC_API_KEY}`); 
+    const usdtresponse = await fetch(`https://api.etherscan.io/v2/api?chainid=56&module=account&action=tokenbalance&contractaddress=${usdt}&address=${address}&tag=latest&apikey=${process.env.ETHER_API_KEY}`); 
 
-    const response = await fetch(
-        `https://api-sepolia.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest&apikey=${process.env.SEPOLIA_API_KEY}`
-    );
     const data = await usdtresponse.json();
     const balance = ethers.formatEther(data.result); // Assuming the API returns the balance in the 'result' field
     return {success: true, message: balance};
@@ -62,25 +59,46 @@ export async function checkbalance(email: string){//(address: string) {
 
 export async function getBalance(address: string){//(address: string) {
     const usdt = "0x55d398326f99059ff775485246999027b3197955";
-    const usdtresponse = await fetch (`https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=${usdt}&address=${address}&tag=latest&apikey=${process.env.BSC_API_KEY}`); 
-
-    const response = await fetch(
-        `https://api-sepolia.etherscan.io/api?module=account&action=balance&address=${address}&tag=latest&apikey=${process.env.SEPOLIA_API_KEY}`
-    );
+    const usdtresponse = await fetch (`https://api.etherscan.io/v2/api?chainid=56&module=account&action=tokenbalance&contractaddress=${usdt}&address=${address}&tag=latest&apikey=${process.env.ETHER_API_KEY}`); 
     const data = await usdtresponse.json();
     const balance = ethers.formatEther(data.result); // Assuming the API returns the balance in the 'result' field
-    return {success: true, message: balance};
+    
+    
+    return {success: true, message: balance}
     //return {success: true, message: balance};
     
 }
+export async function getPrice(){
+    const url2= `https://api.coingecko.com/api/v3/simple/price?ids=binance-bridged-usdt-bnb-smart-chain&vs_currencies=usd`
+///const url = 'https://api.coingecko.com/api/v3/coins/binance-bridged-usdt-bnb-smart-chain';
+const options = {
+  method: 'GET',
+  headers: {accept: 'application/json', 'x-cg-demo-api-key': `${process.env.COIN_GECKO_KEY}`}
+};
+
+ try {
+        const response = await fetch(url2, options);
+        if (!response.ok) {
+            throw new Error("Failed to fetch price from CoinGecko");
+        }
+        const data = await response.json();
+        const price = data["binance-bridged-usdt-bnb-smart-chain"]?.usd;
+        if (typeof price !== "number") {
+            throw new Error("Unexpected response structure from CoinGecko");
+        }
+        return { success: true, message: price };
+    } catch (error) {
+        console.error("getPrice error:", error);
+        return { success: false, message: error };
+    }
+}
 export async function gettransaction(address: string) {
-   const responses = await fetch(
-    `https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=0x55d398326f99059ff775485246999027b3197955&address=${address}&page=2&offset=5&startblock=0&endblock=999999999&sort=asc&apikey=${process.env.BSC_API_KEY}`
-);
+   
 try {
-      const response = await fetch(
-        `https://api-sepolia.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&sort=desc&apikey=${process.env.SEPOLIA_API_KEY}`
-      );
+    const responses = await fetch(
+    `https://api.etherscan.io/v2/api?chainid=56&module=account&action=tokentx&contractaddress=0x55d398326f99059ff775485246999027b3197955&address=${address}&page=1&offset=5&startblock=0&endblock=999999999&sort=asc&apikey=${process.env.ETHER_API_KEY}`
+);
+ 
       return responses.json();
       
     } catch (error) {
@@ -115,7 +133,7 @@ export async function sendusdt(address: string, amount: string, recipient: strin
         const tx = await wallet.sendTransaction({
             to: recipient,
             value: ethers.parseEther(amount),
-            chainId: 56//11155111 // USDT testnet chain ID
+            chainId: 56,//11155111 // USDT testnet chain ID
         });
         console.log("Transaction Hash:", tx.hash);
         await tx.wait(); // Wait for the transaction to be mined

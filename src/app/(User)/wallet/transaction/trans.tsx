@@ -20,11 +20,12 @@ export const TransactionTable = ({ address, email }: { address: string, email: s
       setLoading(true);
       const response = await gettransaction(address);
       if (response.status === "1") {
+        console.log(response.result)
         const formattedData = response.result.map((tx: any) => ({
           id: tx.hash,
           date: new Date(tx.timeStamp * 1000).toLocaleDateString(),
           txType: tx.to === address.toLowerCase() ? "Deposit" : "Withdraw",
-          asset: "ETH",
+          asset: "USDT",
           amount: ethers.formatEther(tx.value),
         }));
         setTransactions(formattedData);
@@ -135,9 +136,9 @@ const TransactionTableContent = ({ transactions }: { transactions: any[] }) => (
   <div>
     {/* Desktop Table */}
     <div className="hidden md:block">
-      <table className="min-w-full bg-white border border-gray-300 rounded-xl shadow-lg">
+      <table className="min-w-full light:bg-white border border-gray-300 rounded-xl shadow-lg">
         <thead>
-          <tr className="bg-gray-100">
+          <tr className="dark:bg-gray-500 light:bg-gray-100">
             <th className="p-4 text-left">Date</th>
             <th className="p-4 text-left">Transaction Type</th>
             <th className="p-4 text-left">Asset</th>
@@ -159,7 +160,7 @@ const TransactionTableContent = ({ transactions }: { transactions: any[] }) => (
           ))}
         </tbody>
         <tfoot>
-          <tr className="bg-gray-100">
+          <tr className="dark:bg-gray-500 light:bg-gray-100">
             <td colSpan={5} className="p-4 text-center">
               Total Transactions: {transactions.length}
             </td>
