@@ -7,6 +7,7 @@ import {
   TrendingUp,
   ShieldCheck,
   User2,
+  Wallet,
 } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 
@@ -22,6 +23,12 @@ export const NavItems: NavItem[] = [
     name: "Dashboard",
     href: "/dashboard",
     icon: Home,
+    position: "top",
+  },
+    {
+    name: "Wallet and Gas tank",
+    href: "/admin_wallet",
+    icon: Wallet,
     position: "top",
   },
   {

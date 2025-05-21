@@ -135,7 +135,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
         if (selectedType !== "buy") {
           const send = await sendusdttrade(Op.toString(), userid, merchantid);
           if(!send.success){
-            toast.error(send.error);
+            toast.error("hi");
           }else{
             toast.success("usdt transferred");
             const complete = await completetrans(tradeId);
