@@ -70,7 +70,7 @@ model Session {
 
 model VerificationToken {
   token   String
-  expires DateTime
+  expires DateTime @default(now())
   email   String   @unique
   id      String   @id @default(cuid())
 }

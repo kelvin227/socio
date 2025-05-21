@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "VerificationToken" ALTER COLUMN "expires" SET DEFAULT CURRENT_TIMESTAMP;

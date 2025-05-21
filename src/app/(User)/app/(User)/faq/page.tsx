@@ -24,7 +24,7 @@ const FAQPage = () => {
     },
     {
       question: "Are there any fees for using Socio?",
-      answer: "Socio is free to use, but certain premium features may have associated fees.",
+      answer: "Yes, Socio have a 2% trading fee and a wallet withdrawal fee but Note this fee as for transaction purpose on the blockChain you can not avoid paying for them.",
     },
   ];
 
@@ -33,7 +33,7 @@ const FAQPage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+    <div className="max-w-4xl mx-auto p-6 light:bg-white shadow-lg rounded-lg">
       <h1 className="text-2xl font-bold mb-6 text-center">Frequently Asked Questions</h1>
       <div className="space-y-4">
         {faqs.map((faq, index) => (
@@ -49,7 +49,7 @@ const FAQPage = () => {
               </span>
             </div>
             {activeIndex === index && (
-              <p className="mt-2 text-gray-600">{faq.answer}</p>
+              <p className="mt-2 dark:text-gray-300 light:text-gray-600">{faq.answer}</p>
             )}
           </div>
         ))}

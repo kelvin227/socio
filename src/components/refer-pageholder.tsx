@@ -1,4 +1,3 @@
-
 "use client";
 /* eslint-disable */
 import React, { useState } from "react";
@@ -17,7 +16,7 @@ export default function ReferralPage({refer, refferedUsers}: { refer: string, re
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+    <div className="max-w-4xl mx-auto p-6 light:bg-white shadow-lg rounded-lg">
       <h1 className="text-2xl font-bold mb-6 text-center">Referral Program</h1>
 
       {/* Referral Code Section */}
@@ -30,7 +29,7 @@ export default function ReferralPage({refer, refferedUsers}: { refer: string, re
             <Input
               value={referralCode}
               readOnly
-              className="w-full bg-gray-100 cursor-not-allowed"
+              className="w-full light:bg-gray-100 cursor-not-allowed"
             />
             <Button onClick={handleCopy} className="bg-blue-500 text-white">
               Copy
@@ -46,9 +45,9 @@ export default function ReferralPage({refer, refferedUsers}: { refer: string, re
         </CardHeader>
         <CardContent>
           {referredUsers.length > 0 ? (
-            <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-lg">
+            <table className="min-w-full light:bg-white border border-gray-300 rounded-lg shadow-lg">
               <thead>
-                <tr className="bg-gray-100">
+                <tr className="light:bg-gray-100">
                   <th className="p-4 text-left">Name</th>
                   <th className="p-4 text-left">Email</th>
                   <th className="p-4 text-left">Date Referred</th>
@@ -57,9 +56,13 @@ export default function ReferralPage({refer, refferedUsers}: { refer: string, re
               <tbody>
                 {referredUsers.map((user, index) => (
                   <tr key={index}>
-                    <td className="p-4 border-b">{user.name}</td>
+                    <td className="p-4 border-b">{!user.name ? "No name set": user.name}</td>
                     <td className="p-4 border-b">{user.email}</td>
-                    <td className="p-4 border-b">{user.date}</td>
+                    <td className="p-4 border-b">
+                      {user.createdAt
+                        ? new Date(user.createdAt).toLocaleDateString()
+                        : ""}
+                    </td>
                   </tr>
                 ))}
               </tbody>

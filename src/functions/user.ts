@@ -2,8 +2,9 @@
 /* eslint-disable */
 import { prisma } from "@/lib/db";
 import { EmailTemplate } from '@/components/emails/support';
+import { VerificationEmail } from "@/components/emails/verificationCode"
 import { Resend } from 'resend';
-import { hashPassword } from "@/lib/utils";
+import { generateVerificationCode, hashPassword } from "@/lib/utils";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -21,7 +22,20 @@ export async function sendtradeRequestmails(email: string, id: string, amount: s
 
   return { success: true, message: "email sent successfully" }
 };
+export async function sendverificationmail(email: string, code: string) {
+  const data = await resend.emails.send({
+    from: 'Verification Mail <noreply@sociootc.com>',
+    to: [email],
+    subject: 'Your verification has arrived',
+    react: VerificationEmail({ firstName: email, code }),
+  });
 
+  if (!data) {
+    return { success: false, message: "unable to send email" }
+  }
+
+  return { success: true, message: "email sent successfully" }
+};
 // export async function sendtraderequest( email: string) {
 //   const data  = await resend.emails.send({
 //     from: 'donnotreply <noreply@sociootc.com>',
@@ -621,12 +635,12 @@ export async function getfivep2ptransaction(email: string) {
     // Fetch transactions with pagination and search
     const transactions = await prisma.adsTransaction.findMany({
       where: {
-         merchantID: userId?.id,
+        merchantID: userId?.id,
         createdAt: {
           gte: sevenDaysAgo,
           lte: now,
         }
-       }, // Filter by transaction type
+      }, // Filter by transaction type
       take: 5,
       orderBy: {
         createdAt: 'desc',
@@ -638,12 +652,12 @@ export async function getfivep2ptransaction(email: string) {
     }
     const oldtransaction = await prisma.adsTransaction.findMany({
       where: {
-         merchantID: userId?.id,
+        merchantID: userId?.id,
         createdAt: {
           gte: fourteenDaysAgo,
           lte: sevenDaysAgo,
         }
-       }, // Filter by transaction type
+      }, // Filter by transaction type
       take: 5,
       orderBy: {
         createdAt: 'desc',
@@ -654,9 +668,9 @@ export async function getfivep2ptransaction(email: string) {
 
     }
     const totalVolume = transactions.reduce((sum, transactions) => sum + Number(transactions.amount), 0)
-    
+
     const oldtotalVolume = oldtransaction.reduce((sum, oldtransaction) => sum + Number(oldtransaction.amount), 0)
-    return { success: true, message: transactions, totalVolume, oldtotalVolume};
+    return { success: true, message: transactions, totalVolume, oldtotalVolume };
     // Get the total count of transactions for pagination
   } catch (error) {
     console.error("Error fetching transactions:", error);
@@ -1289,3 +1303,76 @@ export async function sendreminder(email: string) {
 
 }
 
+export async function sendcode(email: string) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email }
+    })
+    if (!user) {
+      console.log(user)
+      return { success: false, message: 'unable to get user' }
+    }
+    const getCode = generateVerificationCode();
+    if (!getCode) {
+      console.log(getCode)
+      return { success: false, message: "unable to generate verification code" }
+    }
+    const code = getCode
+    const uploadCode = await prisma.verificationToken.create({
+      data: {
+        token: code,
+        email
+      }
+    })
+    if (!uploadCode) {
+      console.log(uploadCode)
+      return { success: false, message: "unable to upload code" }
+    }
+    const sendmail = await sendverificationmail(email, code);
+    if (!sendmail) {
+      console.log(sendmail)
+      return { success: false, message: "unable to send verification mail" }
+    }
+    return { success: true, message: "verfication mail sent successfully" }
+
+
+  } catch (error) {
+    console.log(error)
+  }
+
+}
+
+export async function checkcode(email: string, vcode: string) {
+  const user = await prisma.user.findUnique({
+    where: { email }
+  })
+  if (!user) {
+    return { success: false, message: "user not found" }
+  }
+  const code = await prisma.verificationToken.findFirst({
+    where: { email },
+    select: { token: true, expires: true }
+  })
+  if (!code) {
+    return { success: false, message: "unable to get token" }
+  }
+  if (vcode !== code.token) {
+    return { success: false, message: "incorrect verification code" }
+  }
+  // Check if code has expired (more than 5 minutes ago)
+  const now = new Date();
+  const expires = new Date(code.expires);
+  const fiveMinutes = 5 * 60 * 1000;
+  if (now.getTime() > expires.getTime() + fiveMinutes) {
+    return { success: false, message: "Your verification code has expired" };
+  }
+  const updateverification = await prisma.user.update({
+    where: { email },
+    data: { emailVerified: true, emailVerifiedAt: now }
+  })
+  if (!updateverification) {
+    return { success: false, message: "unable to verify email please try again later" }
+  }
+  return { success: true, message: "Email verified successfully" }
+
+}

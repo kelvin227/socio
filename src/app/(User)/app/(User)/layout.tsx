@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import { SessionProvider } from "next-auth/react";
 import ContextProvider from "@/components/context-provider";
 
-import "../../app/globals.css";
+import "@/app/globals.css";
 
 import Header from "./header";
 import { NavItems } from "./user_config";

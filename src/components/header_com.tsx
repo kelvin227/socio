@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Menu, Wallet, BadgeCheck, Bell} from "lucide-react";
-import { NavItems } from "../app/(User)/user_config";
+import { NavItems } from "@/app/(User)/app/(User)/user_config";
 import { LogOut } from "../../actions/authactions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { getKycStatus1 } from "@/functions/user";
