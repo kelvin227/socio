@@ -46,12 +46,12 @@ const AddModerator = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+    <div className="max-w-4xl mx-auto p-6 light:bg-white shadow-lg rounded-lg">
       <h1 className="text-2xl font-bold mb-6 text-center">Add Moderator</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Name Field */}
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="name" className="block text-sm font-medium light:text-gray-700">
             Name
           </label>
           <Input
@@ -68,7 +68,7 @@ const AddModerator = () => {
 
         {/* Email Field */}
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="email" className="block text-sm font-medium light:text-gray-700">
             Email
           </label>
           <Input
@@ -85,7 +85,7 @@ const AddModerator = () => {
 
         {/* Role Field */}
         <div>
-          <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="role" className="block text-sm font-medium light:text-gray-700">
             Role
           </label>
           <Input

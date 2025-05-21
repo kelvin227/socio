@@ -96,7 +96,7 @@ export default function UserManagementHolder() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+    <div className="max-w-6xl mx-auto p-6 light:bg-white shadow-lg rounded-lg">
       <h1 className="text-2xl font-bold mb-6 text-center">User Management</h1>
 
       {/* Search Bar */}
@@ -119,7 +119,7 @@ export default function UserManagementHolder() {
 
       {/* User Data */}
       {userData ? (
-        <Card className="bg-gray-50 border border-gray-200">
+        <Card className="light:bg-gray-50 border border-gray-200">
           <CardHeader>
             <CardTitle className="text-lg font-bold">User Details</CardTitle>
           </CardHeader>

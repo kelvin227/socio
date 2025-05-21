@@ -74,13 +74,13 @@ export default function KycHolder() {
     kyc();
   }, []);
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+    <div className="max-w-6xl mx-auto p-6 light:bg-white shadow-lg rounded-lg">
       <h1 className="text-2xl font-bold mb-6 text-center">KYC Requests</h1>
 
       {/* Rejection Modal */}
       {showRejectModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+          <div className="light:bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
             <h2 className="text-xl font-bold mb-4">Reject KYC Request</h2>
             <p className="mb-4">
               Please provide a reason for rejecting the KYC request for <strong>{selectedRequest?.FullName}</strong>.
@@ -115,7 +115,7 @@ export default function KycHolder() {
       )}
 
       {selectedRequest ? (
-        <div className="p-6 bg-gray-50 border border-gray-300 rounded-lg shadow-lg">
+        <div className="p-6 light:bg-gray-50 border border-gray-300 rounded-lg shadow-lg">
           <h2 className="text-xl font-bold mb-4">Full Details</h2>
           <p>
             <strong>Full Name:</strong> {selectedRequest.FullName}
@@ -145,7 +145,7 @@ export default function KycHolder() {
           </Button>
         </div>
       ) : kycRequests.length > 0 ? (
-        <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-lg">
+        <table className="min-w-full light:bg-white border border-gray-300 rounded-lg shadow-lg">
           <thead>
             <tr className="bg-gray-100">
               <th className="p-4 text-left">Full Name</th>

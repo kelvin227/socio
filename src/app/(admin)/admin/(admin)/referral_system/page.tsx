@@ -30,7 +30,7 @@ export default function ReferralStats() {
   // }, []);
 
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+    <div className="max-w-6xl mx-auto p-6 light:bg-white shadow-lg rounded-lg">
       <h1 className="text-2xl font-bold mb-6 text-center">Community Referral Statistics</h1>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Total Referrals */}

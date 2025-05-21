@@ -45,7 +45,7 @@ export default function TransactionLog() {
 
 
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+    <div className="max-w-6xl mx-auto p-6 light:bg-white shadow-lg rounded-lg">
       <h1 className="text-2xl font-bold mb-6 text-center">Transaction Logs</h1>
 
       {/* Search Bar */}
@@ -68,9 +68,9 @@ export default function TransactionLog() {
 
       {/* Transaction Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-300 rounded-lg shadow-lg">
+        <table className="min-w-full light:bg-white border border-gray-300 rounded-lg shadow-lg">
           <thead>
-            <tr className="bg-gray-100">
+            <tr className="dark:bg-gray-700 light:bg-gray-100">
               <th className="p-4 text-left">Transaction ID</th>
               <th className="p-4 text-left">User</th>
               <th className="p-4 text-left">Amount</th>
