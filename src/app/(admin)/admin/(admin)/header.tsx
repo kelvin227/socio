@@ -14,15 +14,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Menu, Wallet, Bell, ArrowDownToLine, ArrowUpToLine, RefreshCcw, History } from "lucide-react";
+import { Menu, Wallet, Bell } from "lucide-react";
 import { NavItems } from "./config";
 import { LogOut } from "../../../../../actions/authactions";
 import { SidebarTrigger } from "@/components/ui/sidebar";

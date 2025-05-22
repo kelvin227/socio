@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import Image from "next/image";
 
 export default function PicForm({ email }: { email: string }) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -81,7 +82,7 @@ export default function PicForm({ email }: { email: string }) {
                 } cursor-pointer`}
                 onClick={() => handleSelectImage(image)}
               >
-                <img
+                <Image
                   src={image}
                   alt={`Profile Option ${index + 1}`}
                   className="w-full h-full rounded-full object-cover"

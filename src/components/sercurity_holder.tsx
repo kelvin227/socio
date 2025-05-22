@@ -89,7 +89,7 @@ export default function Security ({email}:{email: string}){
           className="flex flex-col items-center gap-4 w-full max-w-xs"
           onSubmit={async (e) => {
             e.preventDefault();
-            // @ts-ignore
+            // @ts-expect-error
             const code = e.target.code.value;
             // TODO: Call your verify code function here
             await handleverify(code);
