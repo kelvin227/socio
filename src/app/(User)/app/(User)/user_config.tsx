@@ -6,7 +6,7 @@ import {
   Share,
   User
 } from "lucide-react";
-import { NavItem } from "../(admin)/config";
+import { NavItem } from "../../../(admin)/admin/(admin)/config";
 
 export const NavItems: NavItem[] = [
   {
