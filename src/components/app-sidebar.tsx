@@ -1,5 +1,5 @@
 //import { Calendar, Home, Inbox, Search, Settings } from "lucide-react"
-import { NavItem } from "../app/(admin)/config"
+import { NavItem } from "@/app/(admin)/admin/(admin)/config"
 import {
   Sidebar,
   SidebarContent,
