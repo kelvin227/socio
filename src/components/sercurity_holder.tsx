@@ -13,6 +13,7 @@ import { toast } from "sonner";
 
 export default function Security ({email}:{email: string}){
     const [codeDialog, setCodeDialog] = useState<boolean>(false);
+    const [code] = useState<string>("")
 
     const sendCode = async() => {
         const sendVcode = await sendcode(email);
@@ -89,8 +90,6 @@ export default function Security ({email}:{email: string}){
           className="flex flex-col items-center gap-4 w-full max-w-xs"
           onSubmit={async (e) => {
             e.preventDefault();
-            // @ts-expect-error
-            const code = e.target.code.value;
             // TODO: Call your verify code function here
             await handleverify(code);
             // Example:
@@ -101,6 +100,7 @@ export default function Security ({email}:{email: string}){
           <input
             type="text"
             name="code"
+            value={code}
             maxLength={6}
             required
             autoFocus
