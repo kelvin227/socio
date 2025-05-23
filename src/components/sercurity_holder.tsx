@@ -15,6 +15,8 @@ export default function Security({ email, verified }: { email: string, verified:
     const [codeDialog, setCodeDialog] = useState<boolean>(false);
     const [changepassDialog, setchangepassDialog] = useState<boolean>(false)
     const [code, setCode] = useState<string>("")
+    const [pass, setPass] = useState<string>("")
+    const [confirmPass, setconfirmPass] = useState<string>("");
 
     const sendCode = async () => {
         const sendVcode = await sendcode(email);
@@ -44,6 +46,12 @@ export default function Security({ email, verified }: { email: string, verified:
     }
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setCode(e.target.value);
+    };
+      const handleInputChangepass = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        setPass(e.target.value);
+    };
+      const handleInputChangeconfirmpass = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        setconfirmPass(e.target.value);
     };
 
     return (
@@ -147,21 +155,20 @@ export default function Security({ email, verified }: { email: string, verified:
                     className="flex flex-col items-center gap-4 w-full max-w-xs"
                     onSubmit={async (e) => {
                         e.preventDefault();
-                        // @ts-ignore
-                        const newPass = e.target.newPassword.value;
-                        // @ts-ignore
-                        const confirmPass = e.target.confirmPassword.value;
-                        if (newPass !== confirmPass) {
+                        
+                        if (pass !== confirmPass) {
                             toast.error("Passwords do not match");
                             return;
                         }
-                        await changePassword(newPass);
+                        await changePassword(pass);
                         setchangepassDialog(false);
                     }}
                 >
                     <input
                         type="password"
                         name="newPassword"
+                        value={pass}
+                        onChange={handleInputChangepass}
                         minLength={6}
                         required
                         placeholder="New Password"
@@ -170,6 +177,8 @@ export default function Security({ email, verified }: { email: string, verified:
                     <input
                         type="password"
                         name="confirmPassword"
+                        value={confirmPass}
+                        onChange={handleInputChangeconfirmpass}
                         minLength={6}
                         required
                         placeholder="Confirm New Password"
