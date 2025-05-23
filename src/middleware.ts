@@ -23,7 +23,7 @@
 import { auth } from "@/auth"
 import { stripAppSubdomain } from "./lib/utils";
 
-const PUBLIC_PATHS = ["/auth", "/admin"];
+const PUBLIC_PATHS = ["/auth"];
 export default auth(async (req) => {
 
     const hostname = req.headers.get('host')!;
@@ -64,7 +64,7 @@ export default auth(async (req) => {
                 const isProtectedPath = PROTECTED_PATHS.includes(pathname);
                 const isLoggedin = req.auth
                 if (!isLoggedin && isProtectedPath) {
-                    return NextResponse.redirect(new URL(`/admin`, req.url));
+                    return NextResponse.redirect(new URL(`/auth`, req.url));
                 }
                 return NextResponse.rewrite(new URL(`/admin${req.nextUrl.pathname}`, req.url));
              }

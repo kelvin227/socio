@@ -134,8 +134,8 @@ export default function PendingTrades({ email, id }: { email: string, id: string
         const Op = Number(Price) * Number(Amount);
         if (selectedType !== "buy") {
           const send = await sendusdttrade(Op.toString(), userid, merchantid);
-          if(!send.success){
-            toast.error("hi");
+          if(!send?.success){
+            toast.error(send?.message);
           }else{
             toast.success("usdt transferred");
             const complete = await completetrans(tradeId);
@@ -146,8 +146,18 @@ export default function PendingTrades({ email, id }: { email: string, id: string
             }
           }
         } else {
-          const send = await sendusdttrade(Op.toString(), merchantid, userid)
-        }
+          const send = await sendusdttrade(Op.toString(), merchantid, userid);
+           if(!send?.success){
+            toast.error(send?.message);
+          }else{
+            toast.success("usdt transferred");
+            const complete = await completetrans(tradeId);
+            if(complete?.success){
+              toast.success("transaction completed");
+            }else{
+              toast.error("an error was encountered")
+            }
+        }}
 
 
       } else {

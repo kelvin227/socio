@@ -1373,6 +1373,30 @@ export async function checkcode(email: string, vcode: string) {
   if (!updateverification) {
     return { success: false, message: "unable to verify email please try again later" }
   }
+  await prisma.verificationToken.delete({
+    where:{email}
+  })
   return { success: true, message: "Email verified successfully" }
 
+}
+
+export async function  updatePassword(email: string, newPass:string){
+  const user = await prisma.user.findUnique({
+    where:{email}
+  })
+  if(!user){
+    return{success:false, message:"no user found"}
+  }
+  const hashPass = hashPassword(newPass);
+  if(!hashPass){
+    return{success:false, message:"unable to encrypt password"}
+  }
+  const changepass = await prisma.user.update({
+    where:{email},
+    data:{password: hashPass}
+  })
+  if(!changepass){
+    return{success:false, message:"unable to update password"}
+  }
+  return{success:true, message:"password Updated Successfully"}
 }

@@ -50,7 +50,7 @@ export default function HeaderCom({email}: {email: string}) {
         >
           <span className="w-8 h-8 border bg-accent rounded-full"><Avatar>
                             <AvatarImage
-                              src="https://school.codegator.com.ng/image/logo2.png"
+                              src="https://kalajtomdzamxvkl.public.blob.vercel-storage.com/logo2-6X2L1QaE3Zc3GrRsCHvW0JY0kcA7bx.png"
                               alt="Socio Logo"
                             />
                             <AvatarFallback>CN</AvatarFallback>

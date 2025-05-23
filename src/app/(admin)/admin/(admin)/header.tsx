@@ -29,13 +29,18 @@ export default function Header() {
     <header className="flex items-center h-16 px-4 border-b shrink-0 md:px-6 justify-between">
       <div className="flex items-center gap-4">
         <SidebarTrigger />
-        
+
         <Link
           href="#"
           className="flex items-center gap-2 text-lg font-semibold md:text-base"
           prefetch={false}
-        >
-          <span className="w-8 h-8 border bg-accent rounded-full" />
+        ><span className="w-8 h-8 border bg-accent rounded-full"><Avatar>
+          <AvatarImage
+            src="https://kalajtomdzamxvkl.public.blob.vercel-storage.com/logo2-6X2L1QaE3Zc3GrRsCHvW0JY0kcA7bx.png"
+            alt="Socio Logo"
+          />
+          <AvatarFallback>CN</AvatarFallback>
+        </Avatar></span>
           <span>Socio</span>
         </Link>
       </div>
@@ -60,7 +65,7 @@ export default function Header() {
         </DropdownMenu>
         <DropdownMenu></DropdownMenu>
 
-        
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -76,7 +81,7 @@ export default function Header() {
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="hover:bg-gray-800">
               Button
-              </DropdownMenuLabel>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>USDT Transaction History</DropdownMenuItem>
             <DropdownMenuItem>BNB Transaction History</DropdownMenuItem>
@@ -129,7 +134,7 @@ export default function Header() {
                   className={`h-full relative flex items-center whitespace-nowrap rounded-md ${"hover:bg-neutral-200  hover:text-neutral-700 text-neutral-500 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-white"}`}
                 >
                   <div className="relative font-base text-sm py-1.5 px-2 flex flex-row items-center space-x-2 rounded-md duration-100">
-                    
+
                     <span>{navItem.name}</span>
                   </div>
                 </Link>
