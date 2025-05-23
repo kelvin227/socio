@@ -396,8 +396,10 @@ export async function sendusdttrade(amount: string, recipientid: string, id: str
     const receipt = await tx.wait(); // Waits for 1 block confirmation by default
 
     if (receipt.status === 1) {
-      console.log(`Transaction successful! Block: ${receipt.blockNumber}`);
+      console.log(`Transaction successfull! Block: ${receipt.blockNumber}`);
       // Here you would update your database for the P2P order status
+      console.log("this is the tx:",tx)
+      console.log("this is the receipt:",receipt)
       return {success: true,
         message: 'USDT transfer successful',
         transactionHash: tx.hash,

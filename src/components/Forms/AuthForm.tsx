@@ -1,6 +1,6 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
@@ -30,6 +30,7 @@ import { useMediaQuery } from "usehooks-ts";
 import { Login, SignUp } from "../../../actions/authactions";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 
 const formData = [
   {
@@ -90,6 +91,34 @@ const SigninformSchema = z.object({
   password: z.string(),
 });
 
+// Skeleton Loader Component
+const AuthSkeleton = () => (
+  <div className="w-full max-w-xl flex flex-col gap-8 p-10 animate-pulse">
+    <div className="flex w-full justify-between items-center">
+      <div className="h-10 w-32 bg-gray-200 rounded-full" />
+      <div className="h-8 w-20 bg-gray-200 rounded-full" />
+    </div>
+    <div className="flex flex-col gap-6">
+      <div className="h-12 bg-gray-200 rounded-full" />
+      <div className="h-12 bg-gray-200 rounded-full" />
+      <div className="h-12 bg-gray-200 rounded-full" />
+    </div>
+    <div className="h-12 bg-gray-200 rounded-full" />
+    <div className="flex items-center gap-2">
+      <div className="h-5 w-32 bg-gray-200 rounded-full" />
+    </div>
+  </div>
+);
+const SideAuthSkeleton = () => (
+  <div className="flex max-w-xl w-full gap-5 flex-col justify-center bg-linear-[135deg,#f75959_0%,#f35587_100%] p-10 items-center animate-pulse">
+          <div className="w-24 h-24 bg-gray-200 rounded-full" />
+            <div className="w-60 h-10 bg-gray-200 rounded-full" />
+            <div className="w-40 h-8 bg-gray-200 rounded-full" />
+            <div className=" w-24 h-12 bg-gray-200 rounded-full" />
+          </div>
+)
+
+
 const AuthForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -119,13 +148,22 @@ const AuthForm = () => {
     setShow(!show);
     setloadAni(!loadAni);
   };
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    // Simulate page loading
+    const timer = setTimeout(() => setIsPageLoading(false), 1200);
+    return () => clearTimeout(timer);
+  }, []);
   const handleSubmitForm = async (data: z.infer<typeof formSchema>) => {
+     setIsSubmitting(true);
     const response = await SignUp(
       data.email,
       data.password,
       data.referralCode as string
     );
-
+      setIsSubmitting(false);
     if (response.success) {
       toast(response.message, {
         className: "bg-green-500 text-white",
@@ -140,12 +178,12 @@ const AuthForm = () => {
   };
 
   const handleSignInForm = async (data: z.infer<typeof SigninformSchema>) => {
-
+    setIsSubmitting(true);
     const response = await Login(data.email, data.password, "user");
+    setIsSubmitting(false);
 
     if (response.success) {
       toast.success(response.message);
-
       router.replace("/user_dashboard");
     } else {
       toast.error(response.message);
@@ -155,7 +193,9 @@ const AuthForm = () => {
 
   return (
     <div className="w-full max-w-xl flex flex-col-reverse lg:flex-row shadow-xl lg:max-w-6xl">
-      {show && !loadAni ? (
+      {(isPageLoading || isSubmitting) ? (
+        <AuthSkeleton />
+      ) :show && !loadAni ? (
         // doesnt have a motion effect
         <Form {...signinForm}>
           <form
@@ -203,12 +243,22 @@ const AuthForm = () => {
               size={"lg"}
               className="rounded-full py-6 bg-linear-[135deg,#f75959_0%,#f35587_100%] cursor-pointer"
               type="submit"
+              disabled={isSubmitting}
             >
-              Sign In
+               {isSubmitting ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                  </svg>
+                  Loading...
+                </span>
+              ) : (
+                "Sign In"
+              )}
             </Button>
             <Label className="text-pink-500">
-              <Checkbox className="bg-gray-100" id="agree" />
-              <span>Remember Me</span>
+              <span><Link href={"/reset"}> forgot Password?</Link></span>
             </Label>
           </form>
         </Form>
@@ -285,7 +335,9 @@ const AuthForm = () => {
         </Form>
       )}
 
-      {isClicked && loadAni ? (
+      {(isPageLoading || isSubmitting) ? (
+        <SideAuthSkeleton />
+      ) : isClicked && loadAni ? (
         <motion.div
           initial={{ opacity: 1, ...(isSmallDevice ? { x: -300 } : { x: 0 }) }} // Starting animation state
           animate={{ opacity: 1, ...(isSmallDevice ? { x: 0 } : { x: -580 }) }} // End animation state

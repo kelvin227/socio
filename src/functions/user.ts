@@ -1366,37 +1366,42 @@ export async function checkcode(email: string, vcode: string) {
   if (now.getTime() > expires.getTime() + fiveMinutes) {
     return { success: false, message: "Your verification code has expired" };
   }
-  const updateverification = await prisma.user.update({
-    where: { email },
-    data: { emailVerified: true, emailVerifiedAt: now }
-  })
-  if (!updateverification) {
-    return { success: false, message: "unable to verify email please try again later" }
+  if (!user.emailVerified) {
+    const updateverification = await prisma.user.update({
+      where: { email },
+      data: { emailVerified: true, emailVerifiedAt: now }
+    })
+    if (!updateverification) {
+      return { success: false, message: "unable to verify email please try again later" }
+    }
+    return { success: true, message: "Email verified successfully" }
   }
+
   await prisma.verificationToken.delete({
-    where:{email}
+    where: { email }
   })
-  return { success: true, message: "Email verified successfully" }
+
+  return{success: true, message: "Verfied"}
 
 }
 
-export async function  updatePassword(email: string, newPass:string){
+export async function updatePassword(email: string, newPass: string) {
   const user = await prisma.user.findUnique({
-    where:{email}
+    where: { email }
   })
-  if(!user){
-    return{success:false, message:"no user found"}
+  if (!user) {
+    return { success: false, message: "no user found" }
   }
   const hashPass = hashPassword(newPass);
-  if(!hashPass){
-    return{success:false, message:"unable to encrypt password"}
+  if (!hashPass) {
+    return { success: false, message: "unable to encrypt password" }
   }
   const changepass = await prisma.user.update({
-    where:{email},
-    data:{password: hashPass}
+    where: { email },
+    data: { password: hashPass }
   })
-  if(!changepass){
-    return{success:false, message:"unable to update password"}
+  if (!changepass) {
+    return { success: false, message: "unable to update password" }
   }
-  return{success:true, message:"password Updated Successfully"}
+  return { success: true, message: "password Updated Successfully" }
 }
