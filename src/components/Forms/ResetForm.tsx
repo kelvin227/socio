@@ -1,6 +1,6 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import {
@@ -21,35 +21,12 @@ import {
 } from "../ui/dropdown-menu";
 import { FaChevronDown, FaEarthAmericas } from "react-icons/fa6";
 import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
-import { Label } from "../ui/label";
 import { toast } from "sonner";
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { useMediaQuery } from "usehooks-ts";
-import { Login, SignUp } from "../../../actions/authactions";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import { checkcode, sendcode, updatePassword } from "@/functions/user";
 
-const formSchema = z.object({
-    email: z.string().email("Invalid email address"),
-    referralCode: z
-        .string().min(8, "referral code must be 8 characters long")
-        .regex(/^\S+$/, "Spaces are not allowed"),
-    password: z
-        .string()
-        .min(8, "Password must be at least 8 characters long")
-        .max(32, "Password must not exceed 32 characters")
-        .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-        .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-        .regex(/[0-9]/, "Password must contain at least one number")
-        .regex(
-            /[^A-Za-z0-9]/,
-            "Password must contain at least one special character"
-        ),
-});
+
 
 const signinFormData = [
     {
