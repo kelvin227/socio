@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import React, { useState } from 'react';
 import { ethers } from 'ethers';
-import { getBalance, getBnbBalance, getBnbPrice, sendtest } from '@/functions/blockchain/wallet.utils';
+import { getBalance, getBnbBalance, getBnbPrice, sendusdt } from '@/functions/blockchain/wallet.utils';
 import { getPrice } from '@/functions/blockchain/wallet.utils';
 
 export default function Wallet({ email, address }: { email: string, address: string }) {
@@ -38,7 +38,7 @@ export default function Wallet({ email, address }: { email: string, address: str
     try {
       setLoading(true);
 
-      const provider = await sendtest(transferAmount, recipientAddress, email);
+      const provider = await sendusdt(transferAmount, recipientAddress, email);
 
       // Send the transaction
       console.log(provider)
@@ -93,7 +93,7 @@ export default function Wallet({ email, address }: { email: string, address: str
       <Card>
         <CardContent className={bnbshow || bnbtransfer ? "hidden" : "flex flex-col gap-4"}>
           <div className="flex flex-box gap-4 w-full justify-center items-center">
-            Gas Tank
+            BNB Gas Tank
           </div>
 
           <div className="flex flex-box">
@@ -135,6 +135,7 @@ export default function Wallet({ email, address }: { email: string, address: str
               <Button
                 variant="outline"
                 className=''
+                disabled={true}
                 onClick={() => setbnbtransfer(!showTransfer)}
               >
                 <div className="flex flex-col justify-between items-center p-4 rounded-lg mb-2 w-full">

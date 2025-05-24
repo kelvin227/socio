@@ -144,43 +144,112 @@ export async function gettransaction(address: string) {
     }
 }
 
-export async function sendusdt(address: string, amount: string, recipient: string) {
-    if (!amount || Number(amount) <= 0) {
+export async function sendusdt( amount: string, recipient: string, email: string) {
+    if (!amount || Number(amount) === 0) {
         throw new Error("Invalid amount provided.");
     }
 
     if (!recipient) {
         throw new Error("Recipient address is required.");
     }
-
-    const provider = new ethers.JsonRpcProvider(`https://sepolia.infura.io/v3/${process.env.INFURA_API_KEY}`);
-    const privateK = await prisma.wallets.findUnique({
-        where: { address },
-        select: { private_key: true }
+try {
+    const user = await prisma.user.findUnique({
+        where:{email},
+        select:{id:true}
     })
-    if (!privateK) {
-        throw new Error("Wallet not found");
+    if(!user){
+        return{success: false, message: "unable to get userId"}
     }
-    // const decrypt_private_key = await ethers.Wallet.fromEncryptedJson(privateK.private_key, password);
-    const wallet = new ethers.Wallet(privateK.private_key, provider);
+    const id = user.id
+    const wallets = await prisma.wallets.findUnique({
+        where: { userId: id },
+        select: { address: true, encrypted_key: true, private_key: true },
+    });
+    
 
-    //if (!decrypt_private_key) {
-    //    throw new Error("Invalid password or wallet not found");
-    //}
-    if (wallet) {
-        const tx = await wallet.sendTransaction({
-            to: recipient,
-            value: ethers.parseEther(amount),
-            chainId: 56,//11155111 // USDT testnet chain ID
-        });
-        console.log("Transaction Hash:", tx.hash);
-        await tx.wait(); // Wait for the transaction to be mined
-        console.log("Transaction confirmed in block:", tx.blockNumber);
+     
+    // 1. Setup Provider and Wallet
+    const provider = new ethers.JsonRpcProvider(`https://bsc-mainnet.infura.io/v3/${process.env.INFRUA_API_KEY}`);
+    const wallet = new ethers.Wallet(wallets?.private_key as string, provider);
+
+    // Get the sender's address (for logging/checking)
+    const senderAddress = wallet.address;
+    console.log(`Transfer initiated by ${senderAddress}`);
+
+    // 2. Instantiate USDT Contract
+    const usdtContract = new ethers.Contract(usdtcontractaddress, abi, wallet);
+
+    // 3. Get USDT decimals to format the amount correctly
+    const decimals = await usdtContract.decimals();
+    const amountInWei = ethers.parseUnits(amount.toString(), decimals);
+
+
+    // Optional: Check sender's balance before sending
+    const senderUSDTBalance = await usdtContract.balanceOf(senderAddress);
+    if (senderUSDTBalance <= amountInWei) {
+        return{success:false, message: `Insufficient USDT balance for ${senderAddress}. Has ${ethers.formatUnits(senderUSDTBalance, decimals)} USDT, needs ${amount} USDT.` };
     }
 
-    //const data = await wallet; // Assuming the API returns the balance in the 'result' field
-    console.log(privateK);
-    //return ethers.formatEther(balance);
+    // Optional: Check sender's BNB balance for gas fees
+    const senderBNBBalance = await getBnbBalance(senderAddress);
+    // You might want to estimate gas for the transaction more precisely here.
+    // For a simple transfer, a rough estimate is okay, but it's crucial for users to have enough BNB.
+    const estimatedGasLimit = ethers.formatEther("60000"); // A common estimate for token transfer
+    const gasPrice = await estimateGas(senderAddress, recipient, amount);
+    const gaspriceconvert = parseInt(gasPrice?.gasPrice, 16);
+    const requiredBNB = gaspriceconvert * Number(estimatedGasLimit);
+ console.log(requiredBNB)
+    if (Number(senderBNBBalance.message) < Number(requiredBNB)) {
+        return {success:false,  message: `Insufficient BNB for gas fees in wallet ${senderAddress}. Needs approx. ${requiredBNB} BNB.` };
+    }
+
+
+    // 4. Send the Transaction
+    console.log(`Attempting to transfer ${amount} USDT from ${senderAddress} to ${recipient}`);
+    const tx = await usdtContract.transfer(recipient, amountInWei, {
+        gasLimit: estimatedGasLimit // Explicitly set gas limit or let ethers estimate
+    });
+
+    console.log(`Transaction submitted! Hash: ${tx.hash}`);
+
+    // 5. Wait for Transaction Confirmation (important for reliability)
+    const receipt = await tx.wait(); // Waits for 1 block confirmation by default
+
+    if (receipt.status === 1) {
+      console.log(`Transaction successfull! Block: ${receipt.blockNumber}`);
+      // Here you would update your database for the P2P order status
+      console.log("this is the tx:",tx)
+      console.log("this is the receipt:",receipt)
+      return {success: true,
+        message: 'USDT transfer successful',
+        transactionHash: tx.hash,
+        blockNumber: receipt.blockNumber,
+        recipient,
+        amount: amount,
+        sender: senderAddress
+      };
+    } else {
+      console.error(`Transaction failed! Receipt:`, receipt);
+      return {success: false,
+        message: 'USDT transfer failed on blockchain',
+        transactionHash: tx.hash,
+        receipt: receipt
+      };
+    }
+
+  } catch (error: any) {
+    console.log('Error during USDT transfer:', error);
+    let errorMessage = 'An unexpected error occurred during the transfer.';
+
+    // Try to get more specific error messages from the blockchain or Ethers.js
+    if (error.reason) {
+        errorMessage = `Blockchain Error: ${error.reason}`;
+    } else if (error.message && error.message.includes("insufficient funds for gas")) {
+        errorMessage = "Insufficient BNB for gas fees in the sender's wallet.";
+    } else if (error.code === 'CALL_EXCEPTION') {
+        errorMessage = "Smart contract call failed. Check recipient address and amount.";
+    }
+    };
 
 }
 
