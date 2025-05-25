@@ -119,6 +119,31 @@ export async function updateUserProfile(email: string, value: string, field: "us
     return { success: false, message: `An error occurred while updating the ${field}` };
   }
 }
+export async function updateUserProfilePic(email: string, Value: string){
+  try {
+    // Fetch the user by email
+    const user = await getUserByEmail(email);
+    if (!user) {
+      return { success: false, message: "User not found" };
+    }
+
+    // Validate the new value
+    if (!Value || Value.trim() === "") {
+      return { success: false, message: `please select a profile picture cannot be empty` };
+    }
+
+    const update = await prisma.user.update({
+      where:{email},
+      data:{image: Value}
+    })
+    if(!update){
+      return{success:false, message: "unable to update your profile picture"}
+    }
+    return{success:true, message: "profile picture updated successfully"}
+  }catch(error){
+
+  }
+}
 
 export async function updatewallet(email: string, address: string, coin: string) {
   ///get the user info like email, username, and id

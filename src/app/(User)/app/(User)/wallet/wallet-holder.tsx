@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import React, { useState } from 'react';
 import { ethers } from 'ethers';
-import { getBalance, getBnbBalance, getBnbPrice, sendusdt } from '@/functions/blockchain/wallet.utils';
+import { getBalance, getBnbBalance, getBnbPrice, sendtest, sendusdt } from '@/functions/blockchain/wallet.utils';
 import { getPrice } from '@/functions/blockchain/wallet.utils';
 
 export default function Wallet({ email, address }: { email: string, address: string }) {
@@ -40,8 +40,11 @@ export default function Wallet({ email, address }: { email: string, address: str
 
       const provider = await sendusdt(transferAmount, recipientAddress, email);
 
-      // Send the transaction
-      console.log(provider)
+      if(!provider?.success){
+        toast.error(provider?.message)
+      }else{
+        toast.success(provider.message)
+      }
 
     } catch (error) {
       console.error("Error during transfer:", error);
@@ -50,6 +53,38 @@ export default function Wallet({ email, address }: { email: string, address: str
       setLoading(false);
     }
   };
+
+  const handleBNBTransfer = async () => {
+    
+    if (!recipientAddress || !ethers.isAddress(recipientAddress)) {
+      toast("Invalid recipient address");
+      return;
+    }
+
+    if (!transferAmount || isNaN(Number(transferAmount)) || Number(transferAmount) <= 0) {
+      toast("Invalid transfer amount");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const provider = await sendtest(transferAmount, recipientAddress, email);
+
+      if(!provider?.success){
+        toast.error(provider?.message)
+      }else{
+        toast.success(provider.message)
+      }
+
+    } catch (error) {
+      console.error("Error during transfer:", error);
+      toast("Transfer failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+ 
+  }
 
       const fetchBalance = async () => {
       try {
@@ -135,7 +170,6 @@ export default function Wallet({ email, address }: { email: string, address: str
               <Button
                 variant="outline"
                 className=''
-                disabled={true}
                 onClick={() => setbnbtransfer(!showTransfer)}
               >
                 <div className="flex flex-col justify-between items-center p-4 rounded-lg mb-2 w-full">
@@ -231,7 +265,7 @@ export default function Wallet({ email, address }: { email: string, address: str
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={handleTransfer}
+                onClick={handleBNBTransfer}
                 disabled={loading} // Disable button while loading
               >
                 {loading ? "Processing..." : "Transfer"}

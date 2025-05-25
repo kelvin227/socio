@@ -27,7 +27,7 @@ export default function Profile_pageholder({user}:{user: User})  {
           </CardContent>
           <div className="grid grid-box">
             <CardTitle>Username</CardTitle>
-            <CardDescription>{user?.email}</CardDescription>
+            <CardDescription>{user?.userName}</CardDescription>
           </div>
           <div className="absolute right-0">
             <CardContent>
@@ -45,7 +45,7 @@ export default function Profile_pageholder({user}:{user: User})  {
           </CardContent>
           <div className="grid grid-box">
             <CardTitle>Name</CardTitle>
-            <CardDescription>{user?.name}</CardDescription>
+            <CardDescription>{user?.name || "You have not set a name"}</CardDescription>
           </div>
           <div className="absolute right-0">
             <CardContent>

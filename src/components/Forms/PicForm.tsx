@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import Image from "next/image";
+import { updateUserProfilePic } from "@/functions/user";
 
 export default function PicForm({ email }: { email: string }) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -28,20 +29,15 @@ export default function PicForm({ email }: { email: string }) {
     }
 
     setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("email", email);
-      formData.append("avatar", selectedImage);
+    try {      
+      const response = await updateUserProfilePic(email, selectedImage)
 
-      //const response = await changeprofilepic(email, formData)
-
-     // if (response.ok) {
-     //   toast.success("Profile picture updated successfully!");
-      //  setSelectedImage(null);
-     // } else {
-     //   const data = await response.json();
-     //   toast.error(data.message || "Failed to upload profile picture.");
-      //}
+      if (response?.success) {
+        toast.success("Profile picture updated successfully!");
+        setSelectedImage(null);
+      } else {
+       toast.error(response?.message || "Failed to upload profile picture.");
+      }
     } catch (error) {
       console.error("Error uploading profile picture:", error);
       toast.error("An unexpected error occurred.");
@@ -83,6 +79,8 @@ export default function PicForm({ email }: { email: string }) {
                 onClick={() => handleSelectImage(image)}
               >
                 <Image
+                height={24}
+                width={24}
                   src={image}
                   alt={`Profile Option ${index + 1}`}
                   className="w-full h-full rounded-full object-cover"

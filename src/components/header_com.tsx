@@ -17,13 +17,14 @@ import { Menu, Wallet, BadgeCheck, Bell} from "lucide-react";
 import { NavItems } from "@/app/(User)/app/(User)/user_config";
 import { LogOut } from "../../actions/authactions";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { getKycStatus1 } from "@/functions/user";
+import { getKycStatus1, getUserByEmail } from "@/functions/user";
 import { toast } from "sonner";
 
 
 export default function HeaderCom({email}: {email: string}) {
   const [isOpen, setIsOpen] = useState(false);
   const [kyc, setkyc] = useState(false);
+  const [profilePicUrl, setProfilePicUrl] = useState("")
 
   const fetchkyc = async() => {
     const getkyc = await getKycStatus1(email);
@@ -35,8 +36,13 @@ export default function HeaderCom({email}: {email: string}) {
         }
     }
   }
+  const fetchPP = async() =>{
+    const getPP = await getUserByEmail(email);
+      setProfilePicUrl(getPP?.image as string);
+  }
  useEffect(() => {
     fetchkyc();
+    fetchPP();
   }, []);
   return (
     <header className="flex items-center h-16 px-4 border-b shrink-0 md:px-6 justify-between">
@@ -114,7 +120,7 @@ export default function HeaderCom({email}: {email: string}) {
             >
               <Avatar>
                 <AvatarImage
-                  src="https://github.com/shadcn.png"
+                  src={profilePicUrl || "https://github.com/shadcn.png"}
                   alt="@shadcn"
                 />
                 <AvatarFallback>CN</AvatarFallback>

@@ -134,7 +134,7 @@ export async function gettransaction(address: string) {
 
     try {
         const responses = await fetch(
-            `https://api.etherscan.io/v2/api?chainid=56&module=account&action=tokentx&contractaddress=0x55d398326f99059ff775485246999027b3197955&address=${address}&page=1&offset=5&startblock=0&endblock=999999999&sort=asc&apikey=${process.env.ETHER_API_KEY}`
+            `https://api.etherscan.io/v2/api?chainid=56&module=account&action=tokentx&contractaddress=0x55d398326f99059ff775485246999027b3197955&address=${address}&page=1&offset=5&startblock=0&endblock=999999999&sort=desc&apikey=${process.env.ETHER_API_KEY}`
         );
 
         return responses.json();
@@ -207,7 +207,7 @@ try {
     // 4. Send the Transaction
     console.log(`Attempting to transfer ${amount} USDT from ${senderAddress} to ${recipient}`);
     const tx = await usdtContract.transfer(recipient, amountInWei, {
-        gasLimit: estimatedGasLimit // Explicitly set gas limit or let ethers estimate
+        gasLimit: ethers.parseEther(estimatedGasLimit) // Explicitly set gas limit or let ethers estimate
     });
 
     console.log(`Transaction submitted! Hash: ${tx.hash}`);
@@ -253,7 +253,7 @@ try {
 
 }
 
-export async function sendtest(amount: string, recipient: string, id: string) {
+export async function sendtest(amount: string, recipient: string, email: string) {
     if (!amount || Number(amount) <= 0) {
         throw new Error("Invalid amount provided.");
     }
@@ -262,52 +262,58 @@ export async function sendtest(amount: string, recipient: string, id: string) {
         throw new Error("Recipient address is required.");
     }
 
-    // console.log("email from sendtest", email);
-    // const user = await prisma.user.findUnique({
-    //     where: { email },
-    //     select: { id: true }
-    // });
-    // console.log("user from sendtest", user);
-    // if (!user) {
-    //     //return{success: true, message: "failed to get user info"};
-    //     console.log("error from getting user details", user);
-    // }
+     const user = await prisma.user.findUnique({
+         where: { email },
+         select: { id: true }
+     });
+     console.log("user from sendtest", user);
+     if (!user) {
+         return{success: false, message: "failed to get user info"};
+    }
     const wallets = await prisma.wallets.findUnique({
-        where: { userId: id },
+        where: { userId: user.id },
         select: { address: true, encrypted_key: true, private_key: true, },
     });
-    const walletss = await prisma.wallets.findUnique({
-        where: { userId: recipient },
-        select: { address: true },
-    });
 
-    // Connect to the Ethereum Sepolia network
-    if (!walletss) {
-        //return{success: true, message: "unable to get wallet info"};
-        console.log(walletss);
-    }
-    console.log("return null for walletss", walletss);
-    const provider = new ethers.JsonRpcProvider(`https://sepolia.infura.io/v3/80c842e999184bd28fd9d46c6d19afb4`);
+
+    const provider = new ethers.JsonRpcProvider(`https://bsc-mainnet.infura.io/v3/${process.env.INFRUA_API_KEY}`)
     // const decrypt_private_key = await ethers.Wallet.fromEncryptedJson(privateK.private_key, password);
     const wallet = new ethers.Wallet(wallets?.private_key as string, provider);
 
     //if (!decrypt_private_key) {
     //    throw new Error("Invalid password or wallet not found");
     //}
+
+    // Optional: Check sender's BNB balance for gas fees
+    const senderBNBBalance = await getBnbBalance(wallets?.address as string);
+    // You might want to estimate gas for the transaction more precisely here.
+    // For a simple transfer, a rough estimate is okay, but it's crucial for users to have enough BNB.
+    const estimatedGasLimit = ethers.formatEther("60000"); // A common estimate for token transfer
+    const gasPrice = await estimateGas(wallets?.address as string, recipient, amount);
+    const gaspriceconvert = parseInt(gasPrice?.gasPrice, 16);
+    const requiredBNB = gaspriceconvert * Number(estimatedGasLimit);
+    if (Number(senderBNBBalance.message) < Number(requiredBNB)) {
+        return {success:false,  message: `Insufficient BNB for gas fees in wallet ${wallets?.address}. Needs approx. ${requiredBNB} BNB.` };
+    }
+
+
+    // 4. Send the Transaction
+    console.log(`Attempting to transfer ${amount} USDT from ${wallets?.address} to ${recipient}`);
     if (wallet) {
         const tx = await wallet.sendTransaction({
-            to: walletss?.address,
+            to: recipient,
             value: ethers.parseEther(amount),
+            gasLimit: ethers.parseEther(estimatedGasLimit)
         });
         console.log("error sending a getting user detials", wallet);
         console.log("Transaction Hash:", tx.hash);
+        console.log(tx);
         await tx.wait(); // Wait for the transaction to be mined
-        return { success: true, tx }
+        return { success: true,  message: "BNB sent successfully"}
     }
     return { success: false, message: wallet }
 
     //const data = await wallet; // Assuming the API returns the balance in the 'result' field
-    console.log("error with return", walletss);
     //return ethers.formatEther(balance);
 
 }
@@ -456,7 +462,7 @@ export async function sendusdttrade(amount: string, recipientid: string, id: str
     // 4. Send the Transaction
     console.log(`Attempting to transfer ${amount} USDT from ${senderAddress} to ${recipient}`);
     const tx = await usdtContract.transfer(recipient, amountInWei, {
-        gasLimit: estimatedGasLimit // Explicitly set gas limit or let ethers estimate
+        gasLimit: ethers.parseEther(estimatedGasLimit) // Explicitly set gas limit or let ethers estimate
     });
 
     console.log(`Transaction submitted! Hash: ${tx.hash}`);
