@@ -23,7 +23,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth"
 import { stripAppSubdomain } from "./lib/utils";
 
-const PUBLIC_PATHS = ["/auth"];
+const PUBLIC_PATHS = ["/auth","/"];
 export default auth(async (req) => {
 
     const hostname = req.headers.get('host')!;
