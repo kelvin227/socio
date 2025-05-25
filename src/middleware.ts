@@ -19,7 +19,7 @@
 //    matcher: ['/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)']
 //  }
 
-  import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/auth"
 import { stripAppSubdomain } from "./lib/utils";
 
@@ -67,7 +67,17 @@ export default auth(async (req) => {
                     return NextResponse.redirect(new URL(`/auth`, req.url));
                 }
                 return NextResponse.rewrite(new URL(`/admin${req.nextUrl.pathname}`, req.url));
-             }
+            }
+        case "wwww":
+            {
+                const isPublicPath = PUBLIC_PATHS.some((publicpath) => pathname.startsWith(publicpath));
+                if (!isPublicPath) {
+                    return NextResponse.redirect(new URL(`http://app.${host}${pathname}`, req.url));
+                }
+                console.log("redirecting to app");
+
+                return NextResponse.next();
+            }
         default:
             return NextResponse.next();
     }
