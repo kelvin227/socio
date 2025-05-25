@@ -23,7 +23,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth"
 import { stripAppSubdomain } from "./lib/utils";
 
-const PUBLIC_PATHS = ["/auth","/"];
+const PUBLIC_PATHS = ["/auth"];
 export default auth(async (req) => {
 
     const hostname = req.headers.get('host')!;
@@ -67,16 +67,6 @@ export default auth(async (req) => {
                     return NextResponse.redirect(new URL(`/auth`, req.url));
                 }
                 return NextResponse.rewrite(new URL(`/admin${req.nextUrl.pathname}`, req.url));
-            }
-        case "wwww":
-            {
-                const isPublicPath = PUBLIC_PATHS.some((publicpath) => pathname.startsWith(publicpath));
-                if (!isPublicPath) {
-                    return NextResponse.redirect(new URL(`http://app.${host}${pathname}`, req.url));
-                }
-                console.log("redirecting to app");
-
-                return NextResponse.next();
             }
         default:
             return NextResponse.next();
