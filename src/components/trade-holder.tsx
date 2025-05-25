@@ -10,6 +10,7 @@ import { PutBlobResult } from "@vercel/blob";
 import { Dialog } from "@radix-ui/react-dialog";
 import { DialogContent, DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
+import { useRouter } from "next/navigation";
 //import { sendtest } from "@/functions/blockchain/wallet.utils";
 
 export default function PendingTrades({ email, id }: { email: string, id: string }) {
@@ -32,6 +33,9 @@ export default function PendingTrades({ email, id }: { email: string, id: string
   const [receipt, setreceipt] = useState<PutBlobResult| null>(null);
   const [url, seturl] = useState<string>("null");
   const imgreceipt = useRef<HTMLInputElement>(null);
+  const merchantconfirmRef = useRef(merchantconfirm);
+const customerconfirmRef = useRef(customerconfirm);
+
 
   // Fetch pending trades
   const fetchPendingTrades = async () => {
@@ -197,31 +201,42 @@ export default function PendingTrades({ email, id }: { email: string, id: string
     fetchPendingTrades();
   }, []);
 
-  useEffect(() => {
-    if (!show || !tradeid) return;
+ useEffect(() => {
+  merchantconfirmRef.current = merchantconfirm;
+  customerconfirmRef.current = customerconfirm;
+}, [merchantconfirm, customerconfirm]);
 
-    const interval = setInterval(async () => {
-      const response = await getadstransactions(tradeid);
-      if (response?.success) {
-        const trans = response.gettrans;
+useEffect(() => {
+  if (!show || !tradeid) return;
 
-        setmerchantid(trans?.merchantID || "");
-        setcustomerconfirm(trans?.customerconfirm as string);
-        setMerchantconfirm(trans?.merchantconfirm as string);
-        setTransStatus(trans?.status || "");
-        seturl(trans?.receipt || "");
+  const interval = setInterval(async () => {
+    const response = await getadstransactions(tradeid);
+    if (response?.success) {
+      const trans = response.gettrans;
 
+      setmerchantid(trans?.merchantID || "");
+      setcustomerconfirm(trans?.customerconfirm as string);
+      setMerchantconfirm(trans?.merchantconfirm as string);
+      setTransStatus(trans?.status || "");
+      seturl(trans?.receipt || "");
 
-        if (merchantconfirm === "sent" || customerconfirm === "sent") {
-          clearInterval(interval); // Stop polling once status is no longer pending
+      // Use refs to get the latest values
+      if (id === trans?.merchantID) {
+        if (merchantconfirmRef.current === "sent") {
+          clearInterval(interval);
         }
-
+      } else {
+        if (customerconfirmRef.current === "sent") {
+          clearInterval(interval);
+        }
       }
-    }, 5000); // Every 5 seconds
+    }
+  }, 5000);
 
-    return () => clearInterval(interval); // Cleanup when component unmounts or tradeid changes
-  }, [show, tradeid]);
+  return () => clearInterval(interval);
+}, [show, tradeid, id]);
 
+  const router = useRouter();
 
   // useEffect(() => {
   //   if (!show || !tradeid) return;
@@ -391,7 +406,29 @@ export default function PendingTrades({ email, id }: { email: string, id: string
             <div className="flex justify-center mb-4">
               <Clock className="text-yellow-500 w-16 h-16" />
             </div>
-            {selectedType === "buy" ?
+            {transStatus != "pending"? (<div>
+        <h1 className="text-2xl font-bold text-yellow-700 mb-2">Transaction completed</h1>
+                
+                 <p className="mb-4">If you have any questions, feel free to reach out to the merchant.</p>
+                <p className="mb-4">Thank you for using our trading platform!</p>
+                <p className="mb-4">For any issues, please contact support.</p>
+
+                <div className="w-full">
+              <div className="grid grid-box w-full gap-4">
+                    <Button
+                      className="w-full dark:bg-gray-400 light:text-green-300"
+                      disabled={merchantconfirm === "pending"}
+                      onClick={() => router.replace("/wallet")}
+                    >
+                     view Asset
+                    </Button>
+                <Button className="w-full dark:bg-gray-400 text-blue-300">
+                  Cancel
+                </Button>
+              </div>
+            </div>
+                
+            </div> ) :selectedType === "buy" ?
             merchantid === id ? (
               <div>
                 <h1 className="text-2xl font-bold text-yellow-700 mb-2">Send {coin} to user wallet Address</h1>
