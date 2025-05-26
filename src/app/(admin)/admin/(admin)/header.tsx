@@ -83,8 +83,7 @@ export default function Header() {
               Button
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>USDT Transaction History</DropdownMenuItem>
-            <DropdownMenuItem>BNB Transaction History</DropdownMenuItem>
+            <DropdownMenuItem><Link href={'/wallet/transaction'}>Transaction histroy</Link></DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <DropdownMenu>

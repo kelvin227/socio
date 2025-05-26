@@ -23,12 +23,19 @@ export default function AtokHolder({ email, name, data, userads}: { email: strin
   const [showModal, setshowModal] = useState(false);
   const [imgproof, setimgproof] = useState<PutBlobResult | null>(null);
   const idCardFrontRef = useRef<HTMLInputElement>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
   let filteredData = data.filter(item => item.type === selectedType)
   let filteredcoin = filteredData.filter(item => item.coin === selectedCoin)
   if(myad){
     filteredData =userads.filter(item => item.type === selectedType)
     filteredcoin = filteredData.filter(item => item.coin === selectedCoin)
   }
+  const totalPages = Math.ceil(filteredcoin.length / itemsPerPage);
+  const paginatedAds = filteredcoin.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
   const [btn, setBtn] = useState(false);
   // const [data, setData] = useState<any>([]);
   const [formData, setFormData] = useState({
@@ -146,14 +153,10 @@ export default function AtokHolder({ email, name, data, userads}: { email: strin
 
       }else{
 
-        const checkbalanc = await checkbalance(email);
+        const checkbalanc = await checkbalance(email, formData.amount.toString(), formData.pricee);
         if(!checkbalanc.success){
           toast.error(checkbalanc.message);
         }else{
-          balance = checkbalanc.message;
-        }
-        let cal =formData.amount * Number(formData.pricee);
-        if(Number(checkbalanc.message) >= cal){
 const response = await addtraderequest(
         email,
         formData.merchantusername,
@@ -165,14 +168,12 @@ const response = await addtraderequest(
       )
       if (response.success) {
         setshowModal(true);// Close the modal after purchase
-        toast("Trade created successfully!");
+        toast.success("Trade created successfully!");
       } else {
         toast(response.message || "Failed to create trade request.");
       }
-      }else{
-        toast.error("insufficient balance")
-      }
-      }
+    }
+    }
       
     } catch (error) {
       console.error("Error creating trade:", error);
@@ -376,7 +377,8 @@ const response = await addtraderequest(
             </thead>
             <tbody>
               {filteredcoin.length > 0 ? (
-                filteredcoin.map((ad: any) => (
+                paginatedAds.map((ad: any) => (
+                
                   <tr key={ad.id} className="border-b">
                     <td className="p-4">{ad.userName}</td>
                     <td className="p-4">{ad.price} USDT</td>
@@ -401,16 +403,42 @@ const response = await addtraderequest(
                       </Button>}
                     </td>
                   </tr>
-                ))
-              ) : (
+                
+                   
+          
+                )
+              ) ): (
                 <tr>
                   <td colSpan={4} className="p-4 text-center text-gray-500">
                     No ads found
                   </td>
                 </tr>
               )}
+              
             </tbody>
           </table>
+          {/* Pagination Controls */}
+          {filteredcoin.length > itemsPerPage && (
+            <div className="flex justify-center items-center gap-4 mt-4">
+              <Button
+                className="px-4 py-2"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
+              >
+                Previous
+              </Button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                className="px-4 py-2"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          )}
         </div>
         {/* hiddem dialog */}
         <div className={showdialog && !showModal ? "" : "hidden"}>
@@ -458,7 +486,7 @@ const response = await addtraderequest(
         <div className="block sm:hidden border p-4 rounded-lg shadow-md">
           <div className="gap-4">
             {filteredcoin.length > 0 ? (
-              filteredcoin.map((ad: any) => (
+              paginatedAds.map((ad: any) => (
                 <div key={ad.id}>
                   <div className={showdialog ? "hidden" : ""}>
                     <div className="flex flex-cols-2 gap-4" >
@@ -492,6 +520,28 @@ const response = await addtraderequest(
               <div className="text-center text-gray-500">No ads found</div>
             )}
 
+            {/* Pagination Controls */}
+          {filteredcoin.length > itemsPerPage && (
+            <div className="flex justify-center items-center gap-4 mt-4">
+              <Button
+                className="px-4 py-2"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
+              >
+                Previous
+              </Button>
+              <span>
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                className="px-4 py-2"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          )}
           </div>
         </div>
         {/* Modal for Purchase Confirmation */}
