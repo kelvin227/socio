@@ -1,23 +1,3 @@
-// export { auth as middleware } from "@/auth"
-
-
-// import { auth } from "@/auth"
-
-
-// export default auth((req) => {
-//     const protectedRoutes = []
-//     const session = req?.auth
-//     const pathname = req.nextUrl.pathname
-//     //const isProtectedRoute = protectedRoutes.includes(pathname)
-
-//     if(!session && protectedRoutes.includes(pathname)){
-//         const newURL = new URL("/auth", req.nextUrl.origin);
-//         return Response.redirect(newURL)
-//     }
-// })
-//export const config = {
-//    matcher: ['/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)']
-//  }
 
 import { NextResponse } from "next/server";
 import { auth } from "@/auth"

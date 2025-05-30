@@ -5,6 +5,7 @@ import { EmailTemplate } from '@/components/emails/support';
 import { VerificationEmail } from "@/components/emails/verificationCode"
 import { Resend } from 'resend';
 import { generateVerificationCode, hashPassword } from "@/lib/utils";
+import TradeUpdateEmail from "@/components/emails/trade_update";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -36,22 +37,23 @@ export async function sendverificationmail(email: string, code: string) {
 
   return { success: true, message: "email sent successfully" }
 };
-// export async function sendtraderequest( email: string) {
-//   const data  = await resend.emails.send({
-//     from: 'donnotreply <noreply@sociootc.com>',
-//     to: [email],
-//     subject: 'Socio OTCs',
-//     react: ,
-//   });
 
-//   if(!data) {
-//     return{success: false, mesaage: "unable to send email"}
-//   }
+export async function sendtradeupdate(email: string, coin: string, amount: string, tradeId: string) {
+  const data = await resend.emails.send({
+    from: 'Trade Request update <noreply@sociootc.com>',
+    to: [email],
+    subject: 'Buyer has sent {Coins}',
+    react: TradeUpdateEmail({ firstName: email, coin, amount, tradeId }),
+  });
 
-//   return {success: true, message: "email sent successfully"}
-// };
+  if (!data) {
+    return { success: false, message: "unable to send email" }
+  }
 
-export async function getUserByEmail(email: string) {
+  return { success: true, message: "email sent successfully" }
+};
+
+    export async function getUserByEmail(email: string) {
   const user = await prisma.user.findUnique({
     where: { email: email },
     omit: {
@@ -60,6 +62,7 @@ export async function getUserByEmail(email: string) {
     }
 
   });
+
 
   return user;
 }
@@ -1233,7 +1236,7 @@ export async function getadstransactions(ids: string) {
 
 }
 
-export async function confirmbuyer(id: string, receipt: string) {
+export async function confirmbuyer(id: string, receipt: string, email: string, amount: string, Coins: string) {
   try {
     const gettrans = await prisma.adsTransaction.update({
       where: { orderId: id },
@@ -1245,6 +1248,7 @@ export async function confirmbuyer(id: string, receipt: string) {
     if (!gettrans) {
       return { success: false, message: "unable to update transaction" }
     }
+    const tradeemail = await sendtradeupdate(email, Coins, amount, id)
     return { success: true, gettrans }
   } catch (error) {
     console.log(error)

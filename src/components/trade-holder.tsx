@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { acceptTrade, completetrans, confirmbuyer, confirmseen, createdispute, getadstransactions, gettraderequests, gettraderequestsinfo } from "@/functions/user";
 import { BadgeCheck, Clock, Loader2 } from "lucide-react";
-import { sendusdttrade } from "@/functions/blockchain/wallet.utils";
+import { checkTransactionByHash, sendusdttrade } from "@/functions/blockchain/wallet.utils";
 import { PutBlobResult } from "@vercel/blob";
 import { Dialog } from "@radix-ui/react-dialog";
 import { DialogContent, DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { useRouter } from "next/navigation";
+import { set } from "react-hook-form";
 
 export default function PendingTrades({ email, id }: { email: string, id: string }) {
   const [coin, setCoin] = useState<string>("");
@@ -19,7 +20,10 @@ export default function PendingTrades({ email, id }: { email: string, id: string
   const [userid, setuserId] = useState<string>("");
   const [show, setShow] = useState(false);
   const [ShowDisputeModal, setShowDisputeModal] = useState<boolean>(false);
-  const [disputeReason, setDisputeReason] = useState<string>("");
+  const [disputeReason, setDisputeReason] = useState<string>(""); // transaction hash
+  const [senderwalletaddress, setSenderWalletAddress] = useState<string>("");
+  const [recieverwalletaddress, setReceiverWalletAddress] = useState<string>("");
+  const [AmountSent, setAmountSent] = useState<string>("");
   const [tradeid, settradeid] = useState<string>("");
   const [status, setstatus] = useState<string>("");
   const [transStatus, setTransStatus] = useState<string>("");
@@ -33,6 +37,8 @@ export default function PendingTrades({ email, id }: { email: string, id: string
   const [loading, setLoading] = useState<boolean>(true);
   const [url, seturl] = useState<string>("null");
   const [viewLoading, setViewLoading] = useState<boolean>(false); // For loading spinner on view
+  const [seenLoading, setSeenLoading] = useState(false); // <-- Add this state
+  const [sendLoading, setSendLoading] = useState(false); // <-- Add this state
   const imgreceipt = useRef<HTMLInputElement>(null);
   const merchantconfirmRef = useRef(merchantconfirm);
   const customerconfirmRef = useRef(customerconfirm);
@@ -114,6 +120,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
 
   const handlesent = async (tradeId: string) => {
     try {
+      setSendLoading(true); // Start loading
       if (!imgreceipt.current?.files) {
         throw new Error("no image selected");
       }
@@ -130,7 +137,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
       if (!receiptdetails.url) {
         throw new Error("Receipt is null. Please upload a valid receipt.");
       }
-      const response = await confirmbuyer(tradeId, receiptdetails.url);
+      const response = await confirmbuyer(tradeId, receiptdetails.url, email, Amount, coin);
       if (response?.success) {
         fetchTransactionDetails(tradeId);
         toast.success("successfully updated merchant status plaese wait for the user to check");
@@ -139,11 +146,14 @@ export default function PendingTrades({ email, id }: { email: string, id: string
       }
     } catch (error: any) {
       toast("Error message", error);
+    } finally {
+      setSendLoading(false); // Stop loading
     }
   };
 
   const handlerecieved = async (tradeId: string) => {
     try {
+      setSeenLoading(true); // Start loading
       const response = await confirmseen(tradeId);
       if (response?.success) {
         fetchTransactionDetails(tradeId);
@@ -180,6 +190,8 @@ export default function PendingTrades({ email, id }: { email: string, id: string
       }
     } catch (error: any) {
       toast.error(error);
+    } finally {
+      setSeenLoading(false); // Stop loading
     }
   };
 
@@ -206,17 +218,24 @@ export default function PendingTrades({ email, id }: { email: string, id: string
     setCoin("");
   }
 
-  const handledispute = async (tradeid: string, reason: string) => {
-    await createdispute(id, email, tradeid, reason);
+  const handledispute = () => {
+    setShowDisputeModal(true);
+    //await createdispute(id, email, tradeid, reason);
   };
 
   const handleDisputeSubmit = async () => {
     if (!tradeid) return;
 
     try {
-      await handledispute(tradeid, disputeReason);
-      setShowDisputeModal(false);
+      const response = await checkTransactionByHash(disputeReason, senderwalletaddress, recieverwalletaddress, AmountSent);
+      if(response?.success){
+      
       setDisputeReason("");
+      toast.success(response.message);
+      }else{
+        toast.error(response?.message || "Failed to submit dispute request.");
+      }
+      
     } catch (error) {
       console.error("Error submitting rejection reason:", error);
     }
@@ -294,17 +313,44 @@ export default function PendingTrades({ email, id }: { email: string, id: string
       {/* Rejection Modal */}
       {ShowDisputeModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-            <h2 className="text-xl font-bold mb-4">Dispute KYC Request</h2>
+          <div className="dark:bg-gray-500 light:bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Dispute Request</h2>
             <p className="mb-4">
-              Please provide a reason for the Dispute on Order Id <strong>{tradeid}</strong>.
+              Please provide the transaction hash for the coin you transferred<br/>
+              Trade ID:
+               <strong>{tradeid}</strong>.
             </p>
+            <p className="mb-2">Transation Hash</p>
             <Input
               type="text"
-              placeholder="Enter rejection reason"
+              placeholder="Enter transaction hash"
               value={disputeReason}
               onChange={(e) => setDisputeReason(e.target.value)}
-              className="w-full mb-4"
+              className="w-full mb-4 dark:bg-gray-200 dark:text-black"
+            />
+            <p className="mb-2">Sender's Wallet Address</p>
+            <Input
+              type="text"
+              placeholder="Enter the wallet address you sent the coin from"
+              value={senderwalletaddress}
+              onChange={(e) => setSenderWalletAddress(e.target.value)}
+              className="w-full mb-4 dark:bg-gray-200 dark:text-black"
+            />
+             <p className="mb-2">Reciever's Wallet Address</p>
+            <Input
+              type="text"
+              placeholder="Enter the wallet address you sent the coin to"
+              value={recieverwalletaddress}
+              onChange={(e) => setReceiverWalletAddress(e.target.value)}
+              className="w-full mb-4 dark:bg-gray-200 dark:text-black"
+            />
+            <p className="mb-2 dark:text-white">Amount Sent</p>
+            <Input
+              type="text"
+              placeholder="Enter the amount of coin you sent"
+              value={AmountSent}
+              onChange={(e) => setAmountSent(e.target.value)}
+              className="w-full mb-4 dark:bg-gray-200 dark:text-black"
             />
             <div className="flex justify-end gap-4">
               <Button
@@ -319,7 +365,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
               <Button
                 onClick={handleDisputeSubmit}
                 className="bg-red-500 text-white px-4 py-2 rounded-md"
-                disabled={!disputeReason.trim()}
+                disabled={!disputeReason.trim() || !senderwalletaddress.trim() || !recieverwalletaddress.trim() || !AmountSent.trim()}
               >
                 Submit
               </Button>
@@ -563,8 +609,16 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                         <Button
                           className="w-full dark:bg-gray-400 light:text-green-300"
                           onClick={() => handlesent(tradeid)}
+                          disabled={sendLoading}
                         >
-                          I have Sent The Coin
+                          {sendLoading ? (
+                            <span className="flex items-center gap-2">
+                              <Loader2 className="animate-spin w-4 h-4" />
+                              Sending...
+                            </span>
+                          ) : (
+                            "I have Sent The Coin"
+                          )}
                         </Button>
                     ) : (
                       <Button
@@ -574,7 +628,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                         Waiting for merchant to accept trade
                       </Button>
                     )}
-                    {merchantconfirm || customerconfirm ? <Button className="w-full dark:bg-gray-400 text-blue-300" onClick={handleDisputeSubmit}>
+                    {merchantconfirm || customerconfirm ? <Button className="w-full dark:bg-gray-400 text-blue-300" onClick={() => {setShowDisputeModal(true)}}>
                       Order dispute
                     </Button> : <Button className="w-full dark:bg-gray-400 text-blue-300">
                       Cancel
@@ -617,7 +671,14 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                         disabled={merchantconfirm === "pending"}
                         onClick={() => handlerecieved(tradeid)}
                       >
-                        I have seen coin
+                        {seenLoading ? (
+                          <span className="flex items-center gap-2">
+                            <Loader2 className="animate-spin w-4 h-4" />
+                            Processing...
+                          </span>
+                        ) : (
+                          "I have seen coin"
+                        )}
                       </Button>
                     ) : (
                       <Button
@@ -629,7 +690,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                     )}
                     {merchantconfirm || customerconfirm ? <Button className="w-full dark:bg-gray-400 text-blue-300" onClick={() => cancelTrade(id)}>
                       Cancel
-                    </Button> : <Button className="w-full dark:bg-gray-400 text-blue-300" onClick={handleDisputeSubmit}>
+                    </Button> : <Button className="w-full dark:bg-gray-400 text-blue-300" onClick={() =>handledispute}>
                       Order dispute
                     </Button>}
                   </div>
@@ -650,7 +711,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                   <span className="mb-4">Transaction ID: <span className="font-bold">{tradeid}</span></span> <br />
                   <span className="mb-4">Order Time: <span className="font-bold">{new Date(date as Date).toLocaleString()}</span></span><br />
                   <span className="mb-4">Please ensure to double-check the amount before releasing your USDT.</span>
-                  <p className="mb-4">If you have any questions, feel free to reach out to the merchant.</p>
+                  <p className="mb-4">If you have any questions, feel free to reach out to support.</p>
                   <p className="mb-4">Thank you for using our trading platform!</p>
                   <p className="mb-4">For any issues, please contact support.</p>
                   <div className="mb-4">
@@ -681,7 +742,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                           Waiting for merchant to accept trade
                         </Button>
                       )}
-                      {merchantconfirm || customerconfirm === "sent" ? <Button className="w-full dark:bg-gray-400 text-blue-300">
+                      {merchantconfirm || customerconfirm === "sent" ? <Button className="w-full dark:bg-gray-400 text-blue-300" onClick={() =>     setShowDisputeModal(true)}>
                         Order dispute
                       </Button> : <Button className="w-full dark:bg-gray-400 text-blue-300">
                         Cancel
@@ -737,7 +798,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                           Waiting for merchant to accept trade
                         </Button>
                       )}
-                      <Button className="w-full dark:bg-gray-400 text-blue-300">
+                      <Button className="w-full dark:bg-gray-400 text-blue-300" onClick={() =>  setShowDisputeModal(true)}>
                         Order dispute
                       </Button>
                     </div>
