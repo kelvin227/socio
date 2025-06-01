@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import React from "react";
-    import PendingTrades from "@/components/trade-holder";
+import PendingTrades from "@/components/trade-holder";
 import { prisma } from "@/lib/db";
 import { getadstransactions, gettraderequests, gettraderequestsinfo } from "@/functions/user";
 // import { useCopyToClipboard } from "@uidotdev/usehooks";

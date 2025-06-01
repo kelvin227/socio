@@ -15,7 +15,6 @@ import { useRouter } from "next/navigation";
 export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }: { email: string, id: string, trades: any[], tradeinfo: any, adstrans: any[] }) {
   const [coin, setCoin] = useState<string>("");
   const [Price, setPrice] = useState<string>("");
-  const [gettradeinfo, setTradeInfo] = useState<boolean>(false);
   const [Amount, setAmount] = useState<string>("");
   const [userid, setuserId] = useState<string>("");
   const [show, setShow] = useState(false);
@@ -63,11 +62,6 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
   );
   let filteredData: any[] = [];
   let adstransfiltered:any[]= [];
-  if(gettradeinfo){
-    filteredData =tradeInfo.filter((item: any) => item.id === tradeid)
-    adstransfiltered = adstransactions.filter(item => item.orderid === tradeid)
-  }
-
   const accept = async (tradeId: string) => {
     try {
       const response = await acceptTrade(tradeId);
@@ -162,30 +156,43 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
   };
 
   // Add loading spinner for viewing trade details
-  const handleView = async (type: string, Id: string, stat: string, amount: string, userid: string, coin: string, merchantID: string) => {
+  const handleView = async (type: string, Id: string, stat: string, amount: string, userid: string, coin: string, merchantID: string, Date: Date, wallet: string) => {
     setViewLoading(true);
     setShow(true);
     setSelectedType(type);
-    setTradeInfo(true);
     settradeid(Id);
     setstatus(stat);
     setAmount(amount);
     setuserId(userid);
     setCoin(coin);
     setmerchantid(merchantID);
+    setDate(Date);
+    setWallet(wallet)
+     filteredData = tradeInfo.filter((item: any) => item.id === Id)
+    adstransfiltered = adstransactions.filter(item => item.orderid === Id)
     try{
-      const trans = adstransactions.find(item => item.orderid === Id);
+      console.log(Id)
+      const trans = adstransactions.filter((item) => item.orderId === Id);
+      console.log(adstransactions)
     if (trans) {
-      setTransStatus(trans.status as string);
-      setcustomerconfirm(trans.customerconfirm as string);
-      setMerchantconfirm(trans.merchantconfirm as string);
-      setPrice(trans.price as string);
-      setWallet(trans.walletAddress as string);
-      seturl(trans.receipt || "");
-      setDate(trans.createdAt);
+      // setTransStatus(trans.status as string);
+      // setcustomerconfirm(trans.customerconfirm as string);
+      // setMerchantconfirm(trans.merchantconfirm as string);
+      // setPrice(trans.price as string);
+      // seturl(trans.receipt || "");
+      // setDate(trans.createdAt);
+      trans.map((item: any
+      )=> (
+      console.log(item.merchantconfirm),
+      setTransStatus(item.status as string),
+      setcustomerconfirm(item.customerconfirm as string),
+      setMerchantconfirm(item.merchantconfirm as string),
+      setPrice(item.price as string),
+      seturl(item.receipt || ""),
+      setDate(item.createdAt)
+      ))
     }else{
       toast.error("Trade information not found.");
-      setWallet(adstransfiltered[0]?.walletAddress || "");
     }}catch (error) {
       console.error("Error fetching trade info:", error);
       toast.error("An unexpected error occurred while fetching trade info.");
@@ -354,7 +361,7 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
                     {id === trade.userId ? (
                       <Button
                         className="bg-blue-500 text-white"
-                        onClick={() => handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId)}
+                        onClick={() => handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId, trade.createdAt, trade.walletAddress)}
                         disabled={viewLoading}
                       >
                         {viewLoading ? (
@@ -371,11 +378,12 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
                         className="bg-blue-500 text-white"
                         onClick={() => {
                           if (trade.status === "Accepted") {
-                            handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId);
+                            handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId, trade.createdAt, trade.walletAddress);
                           } else {
                             accept(trade.id);
                             settradeid(trade.id);
-                            handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId);
+                            handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId, trade.createdAt, trade.walletAddress);
+                            router.refresh();
                           }
                         }}
                         disabled={viewLoading}
@@ -443,7 +451,7 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
                   {id === trade.userId ? (
                     <Button
                       className="light:bg-blue-500 dark:text-white"
-                      onClick={() => handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId)}
+                      onClick={() => handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId, trade.createdAt, trade.walletAddress)}
                       disabled={viewLoading}
                     >
                       {viewLoading ? (
@@ -460,7 +468,7 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
                       className="light:bg-blue-500 dark:text-white"
                       onClick={() => {
                         if (trade.status === "Accepted") {
-                          handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId);
+                          handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId, trade.createdAt, trade.walletAddress);
                         } else {
                           accept(trade.id);
                           settradeid(trade.id);
