@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { acceptTrade, completetrans, confirmbuyer, confirmseen, createdispute, getadstransactions, gettraderequests, gettraderequestsinfo } from "@/functions/user";
+import { acceptTrade, completetrans, confirmbuyer, confirmseen, createdispute, getadstransactions, gettraderequestsinfo } from "@/functions/user";
 import { BadgeCheck, Clock, Loader2 } from "lucide-react";
 import { checkTransactionByHash, sendusdttrade } from "@/functions/blockchain/wallet.utils";
 import { PutBlobResult } from "@vercel/blob";
@@ -11,11 +11,11 @@ import { Dialog } from "@radix-ui/react-dialog";
 import { DialogContent, DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { useRouter } from "next/navigation";
-import { set } from "react-hook-form";
 
-export default function PendingTrades({ email, id }: { email: string, id: string }) {
+export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }: { email: string, id: string, trades: any[], tradeinfo: any, adstrans: any[] }) {
   const [coin, setCoin] = useState<string>("");
   const [Price, setPrice] = useState<string>("");
+  const [gettradeinfo, setTradeInfo] = useState<boolean>(false);
   const [Amount, setAmount] = useState<string>("");
   const [userid, setuserId] = useState<string>("");
   const [show, setShow] = useState(false);
@@ -32,7 +32,6 @@ export default function PendingTrades({ email, id }: { email: string, id: string
   const [date, setDate] = useState<Date>();
   const [customerconfirm, setcustomerconfirm] = useState<string>("");
   const [merchantconfirm, setMerchantconfirm] = useState<string>("");
-  const [pendingTrades, setPendingTrades] = useState<any[]>([]);
   const [selectedType, setSelectedType] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [url, seturl] = useState<string>("null");
@@ -46,62 +45,28 @@ export default function PendingTrades({ email, id }: { email: string, id: string
   const itemsPerPage = 5;
   const router = useRouter();
 
+  const pendingtrades = trades || [];//Array.isArray(trades) ? trades : [];
+  const tradeInfo = tradeinfo || [];
+  const adstransactions = adstrans || [];
+  // setTransStatus(trans?.status as string);
+  // setcustomerconfirm(trans?.customerconfirm as string);
+  // setMerchantconfirm(trans?.merchantconfirm as string);
+  // setPrice(trans?.price as string);
+  // setWallet(trans?.walletAddress as string);
+  // seturl(trans?.receipt || "");
+  // setDate(trans?.createdAt);
    // Calculate paginated trades
-  const totalPages = Math.ceil(pendingTrades.length / itemsPerPage);
-  const paginatedTrades = pendingTrades.slice(
+  const totalPages = Math.ceil(pendingtrades.length / itemsPerPage);
+  const paginatedTrades = pendingtrades.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
-  // Fetch pending trades
-  const fetchPendingTrades = async () => {
-    try {
-      setLoading(true);
-      const response = await gettraderequests(email);
-      if (response.success) {
-        setPendingTrades(response.traderequests as any);
-      } else {
-        toast(response.message || "Failed to fetch pending trades.");
-      }
-    } catch (error) {
-      console.error("Error fetching pending trades:", error);
-      toast("An unexpected error occurred.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchTransactionDetails = async (id: string) => {
-    try {
-      const response = await getadstransactions(id);
-      const info = await gettraderequestsinfo(id);
-
-      if (response?.success) {
-        const trans = response.gettrans;
-        const merchantID = trans?.merchantID || "";
-        setmerchantid(merchantID);
-        setTransStatus(trans?.status as string);
-        setcustomerconfirm(trans?.customerconfirm as string);
-        setMerchantconfirm(trans?.merchantconfirm as string);
-        setPrice(trans?.price as string);
-        setWallet(trans?.walletAddress as string);
-        seturl(trans?.receipt || "");
-        setDate(trans?.createdAt);
-        if (info.success) {
-          const moreinfo = info.info;
-          setstatus(moreinfo?.status as string);
-        }
-        toast("Merchant info updated!");
-      } else {
-        toast(response?.message || "Failed to fetch transaction details.");
-      }
-    } catch (error) {
-      console.log("Error fetching transaction details:", error);
-      toast("An unexpected error occurred.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  let filteredData: any[] = [];
+  let adstransfiltered:any[]= [];
+  if(gettradeinfo){
+    filteredData =tradeInfo.filter((item: any) => item.id === tradeid)
+    adstransfiltered = adstransactions.filter(item => item.orderid === tradeid)
+  }
 
   const accept = async (tradeId: string) => {
     try {
@@ -139,8 +104,9 @@ export default function PendingTrades({ email, id }: { email: string, id: string
       }
       const response = await confirmbuyer(tradeId, receiptdetails.url, email, Amount, coin);
       if (response?.success) {
-        fetchTransactionDetails(tradeId);
+      router.refresh()
         toast.success("successfully updated merchant status plaese wait for the user to check");
+        setMerchantconfirm("sent")
       } else {
         toast.error("An unexpected error occured");
       }
@@ -156,7 +122,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
       setSeenLoading(true); // Start loading
       const response = await confirmseen(tradeId);
       if (response?.success) {
-        fetchTransactionDetails(tradeId);
+        router.refresh()
         const Op = Number(Price) * Number(Amount);
         if (selectedType !== "buy") {
           const send = await sendusdttrade(Op.toString(), userid, merchantid);
@@ -196,17 +162,39 @@ export default function PendingTrades({ email, id }: { email: string, id: string
   };
 
   // Add loading spinner for viewing trade details
-  const handleView = async (type: string, Id: string, stat: string, amount: string, userid: string, coin: string) => {
+  const handleView = async (type: string, Id: string, stat: string, amount: string, userid: string, coin: string, merchantID: string) => {
     setViewLoading(true);
     setShow(true);
     setSelectedType(type);
-    await fetchTransactionDetails(Id);
+    setTradeInfo(true);
     settradeid(Id);
     setstatus(stat);
     setAmount(amount);
     setuserId(userid);
     setCoin(coin);
-    setViewLoading(false);
+    setmerchantid(merchantID);
+    try{
+      const trans = adstransactions.find(item => item.orderid === Id);
+    if (trans) {
+      setTransStatus(trans.status as string);
+      setcustomerconfirm(trans.customerconfirm as string);
+      setMerchantconfirm(trans.merchantconfirm as string);
+      setPrice(trans.price as string);
+      setWallet(trans.walletAddress as string);
+      seturl(trans.receipt || "");
+      setDate(trans.createdAt);
+    }else{
+      toast.error("Trade information not found.");
+      setWallet(adstransfiltered[0]?.walletAddress || "");
+    }}catch (error) {
+      console.error("Error fetching trade info:", error);
+      toast.error("An unexpected error occurred while fetching trade info.");
+    }finally{
+      setViewLoading(false);
+    }
+    console.log("merchant ID is", merchantID);
+    console.log("this user id is:", id );
+   // setViewLoading(false);
   };
   const BackView = async() => {
     setShow(false);
@@ -242,45 +230,11 @@ export default function PendingTrades({ email, id }: { email: string, id: string
   };
 
   useEffect(() => {
-    fetchPendingTrades();
-  }, []);
-
-  useEffect(() => {
     merchantconfirmRef.current = merchantconfirm;
     customerconfirmRef.current = customerconfirm;
+    const timer = setTimeout(() => setLoading(false), 1200);
+    return () => clearTimeout(timer);
   }, [merchantconfirm, customerconfirm]);
-
-  useEffect(() => {
-    if (!show || !tradeid) return;
-
-    const interval = setInterval(async () => {
-      const response = await getadstransactions(tradeid);
-      if (response?.success) {
-        const trans = response.gettrans;
-
-        setWallet(trans?.walletAddress as string);
-        setmerchantid(trans?.merchantID || "");
-        setcustomerconfirm(trans?.customerconfirm as string);
-        setMerchantconfirm(trans?.merchantconfirm as string);
-        setTransStatus(trans?.status || "");
-        seturl(trans?.receipt || "");
-        setDate(trans?.createdAt);
-
-        // Use refs to get the latest values
-        if (id === trans?.merchantID) {
-          if (merchantconfirmRef.current === "sent") {
-            clearInterval(interval);
-          }
-        } else {
-          if (customerconfirmRef.current === "sent") {
-            clearInterval(interval);
-          }
-        }
-      }
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [show, tradeid, id]);
 
   // Function to cancel a trade
   const cancelTrade = async (tradeId: string) => {
@@ -297,7 +251,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
 
       if (response.ok) {
         toast.success("Trade canceled successfully.");
-        fetchPendingTrades();
+        router.refresh();
       } else {
         toast.error(data.message || "Failed to cancel trade.");
       }
@@ -309,7 +263,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-4">Pending Trades</h1>
+      <h1 className="text-2xl font-bold mb-4">Pending Trades{merchantid}</h1>
       {/* Rejection Modal */}
       {ShowDisputeModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -376,7 +330,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
 
       {loading ? (
         <p className="text-center text-gray-500">Loading pending trades...</p>
-      ) : pendingTrades.length > 0 ? (
+      ) : paginatedTrades.length > 0 ? (
         <>
           {/* Desktop Table */}
           <table className={`min-w-full lightbg-white border border-gray-300 rounded-lg shadow-md ${show ? "hidden" : "hidden sm:table"}`}>
@@ -400,7 +354,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                     {id === trade.userId ? (
                       <Button
                         className="bg-blue-500 text-white"
-                        onClick={() => handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin)}
+                        onClick={() => handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId)}
                         disabled={viewLoading}
                       >
                         {viewLoading ? (
@@ -417,11 +371,11 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                         className="bg-blue-500 text-white"
                         onClick={() => {
                           if (trade.status === "Accepted") {
-                            handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin);
+                            handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId);
                           } else {
                             accept(trade.id);
                             settradeid(trade.id);
-                            handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin);
+                            handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId);
                           }
                         }}
                         disabled={viewLoading}
@@ -450,7 +404,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
             </tbody>
           </table>
           {/* Pagination Controls */}
-          {pendingTrades.length > itemsPerPage && (
+          {pendingtrades.length > itemsPerPage && (
             <div className="flex justify-center items-center gap-4 mt-4">
               <Button
                 className="px-4 py-2"
@@ -489,7 +443,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                   {id === trade.userId ? (
                     <Button
                       className="light:bg-blue-500 dark:text-white"
-                      onClick={() => handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin)}
+                      onClick={() => handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId)}
                       disabled={viewLoading}
                     >
                       {viewLoading ? (
@@ -506,7 +460,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                       className="light:bg-blue-500 dark:text-white"
                       onClick={() => {
                         if (trade.status === "Accepted") {
-                          handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin);
+                          handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId);
                         } else {
                           accept(trade.id);
                           settradeid(trade.id);
@@ -545,7 +499,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
           ) : (
             <div className={show ? "max-w-md mx-auto p-6 bg-yellow-50 border border-yellow-300 dark:bg-[#1a1a1a] dark:border dark:border-[#333333] shadow-lg rounded-lg text-center  dark:text-white text-gray-600" : "hidden"}>
             
-            {transStatus !== "pending" ? (
+            {transStatus === "completed" ? (
               <div>
                 <div className="flex justify-center mb-4">
               <BadgeCheck className="text-green-500 w-16 h-16" />
@@ -569,7 +523,8 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                   </div>
                 </div>
               </div>
-            ) : selectedType === "buy" ? merchantid === id ? (
+            ) : selectedType === "buy" ? 
+            merchantid === id ? (
               <div>
                 <div className="flex justify-center mb-4">
               <Clock className="text-yellow-500 w-16 h-16" />
@@ -623,7 +578,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                     ) : (
                       <Button
                         className="w-full text-green-300"
-                        onClick={() => fetchTransactionDetails(tradeid)}
+                        onClick={() => router.refresh()}
                       >
                         Waiting for merchant to accept trade
                       </Button>
@@ -683,7 +638,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                     ) : (
                       <Button
                         className="w-full text-green-300"
-                        onClick={() => fetchTransactionDetails(tradeid)}
+                        onClick={() => router.refresh()}
                       >
                         Waiting for merchant to accept trade
                       </Button>
@@ -737,7 +692,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                       ) : (
                         <Button
                           className="w-full text-green-300"
-                          onClick={() => fetchTransactionDetails(tradeid)}
+                          onClick={() => router.refresh()}
                         >
                           Waiting for merchant to accept trade
                         </Button>
@@ -793,7 +748,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                       ) : (
                         <Button
                           className="w-full text-green-300"
-                          onClick={() => fetchTransactionDetails(tradeid)}
+                          onClick={() => router.refresh()}
                         >
                           Waiting for merchant to accept trade
                         </Button>
@@ -805,6 +760,7 @@ export default function PendingTrades({ email, id }: { email: string, id: string
                   </div>
                 </div>
               )
+
             }
           </div>
           )}

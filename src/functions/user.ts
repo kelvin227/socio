@@ -1132,9 +1132,12 @@ export async function gettraderequests(email: string) {
 export async function gettraderequestsinfo(id: string) {
   try {
     // Fetch ads for the user
-    const info = await prisma.traderequest.findUnique({
+    const info = await prisma.traderequest.findMany({
       where: {
-        id
+        OR:[
+          {merchantId: id},
+          {userId: id}
+      ],
       },
     });
 
@@ -1221,8 +1224,11 @@ export async function acceptTrade(id: string) {
 
 export async function getadstransactions(ids: string) {
   try {
-    const gettrans = await prisma.adsTransaction.findUnique({
-      where: { orderId: ids }
+    const gettrans = await prisma.adsTransaction.findMany({
+      where:{
+        OR: [
+        {merchantID: ids}, 
+        {userId: ids}]}
     })
 
     if (!gettrans) {
