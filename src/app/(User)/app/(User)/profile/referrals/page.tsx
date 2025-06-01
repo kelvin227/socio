@@ -3,7 +3,6 @@ import ReferralPage from "@/components/refer-pageholder";
 import { getUserByEmail } from "@/functions/user";
 import { prisma } from "@/lib/db";
 
-/* eslint-disable */
 
 // type KycPageholderProps = {
 //   email: string;

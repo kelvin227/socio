@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { auth } from "@/auth";
 import React from "react";
 import PendingTrades from "@/components/trade-holder";

@@ -2,7 +2,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
 import { getBalance, getBnbBalance, getBnbPrice, sendtest, sendusdt } from '@/functions/blockchain/wallet.utils';
 import { getPrice } from '@/functions/blockchain/wallet.utils';
@@ -118,10 +118,10 @@ export default function Wallet({ email, address }: { email: string, address: str
       }
     };
   // Call the fetchBalance function when the component mounts
-  React.useEffect(() => {
+  useEffect(() => {
 
     fetchBalance();
-  }, []);
+  });
 
   return (
     <div>

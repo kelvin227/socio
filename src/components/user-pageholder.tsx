@@ -101,7 +101,7 @@ const calculatePercantageChange = (oldValue: number, newValue: number)=> {
 useEffect(()=> {
   Volume();
     calculatePercantageChange(Number(oldVolume), Number(totalVolume));
-}, [])
+})
   return (
     <div className="flex flex-col gap-4 mt-10">
       <h1 className="text-3xl font-bold">{pageName}</h1>

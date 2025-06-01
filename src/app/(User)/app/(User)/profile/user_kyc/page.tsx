@@ -2,7 +2,7 @@ import { auth } from "@/auth";
 import KycPageholder from "@/components/kyc_pageholder";
 import { getKycStatus } from "@/functions/user";
 
-/* eslint-disable */
+
 
 
 

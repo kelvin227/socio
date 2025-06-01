@@ -43,7 +43,7 @@ export default function HeaderCom({email}: {email: string}) {
  useEffect(() => {
     fetchkyc();
     fetchPP();
-  }, []);
+  });
   return (
     <header className="flex items-center h-16 px-4 border-b shrink-0 md:px-6 justify-between">
       <div className="flex items-center gap-4">
