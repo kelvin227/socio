@@ -114,37 +114,8 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
   const handlerecieved = async (tradeId: string) => {
     try {
       setSeenLoading(true); // Start loading
-      const response = await confirmseen(tradeId);
-      if (response?.success) {
-        const Op = Number(Price) * Number(Amount);
-        if (selectedType !== "buy") {
-          const send = await sendusdttrade(Op.toString(), userid, merchantid);
-          if (!send?.success) {
-            toast.error(send?.message);
-          } else {
-            toast.success("usdt transferred");
-            const complete = await completetrans(tradeId);
-            if (complete?.success) {
-              toast.success("transaction completed");
-            } else {
-              toast.error("an error was encountered");
-            }
-          }
-        } else {
-          const send = await sendusdttrade(Op.toString(), merchantid, userid);
-          if (!send?.success) {
-            toast.error(send?.message);
-          } else {
-            toast.success("usdt transferred");
-            const complete = await completetrans(tradeId);
-            if (complete?.success) {
-              toast.success("transaction completed");
-            } else {
-              toast.error("an error was encountered");
-            }
-          }
-        }
-      } else {
+      const response = await confirmseen(tradeId, Amount, Price, selectedType, id, merchantid);
+      if (response?.success) {toast.success("Usdt Transfer Successfull")} else {
         toast.error("an unexpected error occured");
       }
     } catch (error: any) {

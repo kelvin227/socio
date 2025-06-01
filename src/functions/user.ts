@@ -6,6 +6,7 @@ import { VerificationEmail } from "@/components/emails/verificationCode"
 import { Resend } from 'resend';
 import { generateVerificationCode, hashPassword } from "@/lib/utils";
 import TradeUpdateEmail from "@/components/emails/trade_update";
+import { sendusdttrade } from "./blockchain/wallet.utils";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -1261,7 +1262,7 @@ export async function confirmbuyer(id: string, receipt: string, email: string, a
   }
 }
 
-export async function confirmseen(id: string) {
+export async function confirmseen(id: string, Amount: string, Price: string, selectedType: string, userid: string, merchantid: string ) {
   try {
     const gettrans = await prisma.adsTransaction.update({
       where: { orderId: id },
@@ -1272,7 +1273,30 @@ export async function confirmseen(id: string) {
     if (!gettrans) {
       return { success: false, message: "unable to update transaction" }
     }
-    return { success: true, gettrans }
+    const Op = Number(Price) * Number(Amount);
+        if (selectedType !== "buy") {
+          const send = await sendusdttrade(Op.toString(), userid, merchantid);
+          if (!send?.success) {
+            return{success:false, message:"error occured while sending usdt"}
+          } 
+        const complete = await completetrans(id);
+            if (!complete?.success) {
+            return{success:false, message:"error occured while completing the transaction"}
+            } 
+          return { success: true }
+        } else {
+          const send = await sendusdttrade(Op.toString(), merchantid, userid);
+          if (!send?.success) {
+            return{success:false, message:"error occured while sending usdt"}
+          } 
+            const complete = await completetrans(id);
+            if (!complete?.success) {
+              return{success:false, message:"error completing transaction"}
+            }
+            
+            return{success:true, message:'Trade Completed successfully'}
+          
+        }
   } catch (error) {
     console.log(error)
   }
