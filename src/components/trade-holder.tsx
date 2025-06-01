@@ -116,7 +116,6 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
       setSeenLoading(true); // Start loading
       const response = await confirmseen(tradeId);
       if (response?.success) {
-        router.refresh()
         const Op = Number(Price) * Number(Amount);
         if (selectedType !== "buy") {
           const send = await sendusdttrade(Op.toString(), userid, merchantid);
