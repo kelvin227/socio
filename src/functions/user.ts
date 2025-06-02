@@ -1279,22 +1279,11 @@ export async function confirmseen(id: string, Amount: string, Price: string, sel
           if (!send?.success) {
             return{success:false, message:"error occured while sending usdt"}
           } 
-        const complete = await completetrans(id);
-            if (!complete?.success) {
-            return{success:false, message:"error occured while completing the transaction"}
-            } 
           return { success: true }
         } else {
           const send = await sendusdttrade(Op.toString(), merchantid, userid);
-          if (!send?.success) {
-            return{success:false, message:"error occured while sending usdt"}
-          } 
-            const complete = await completetrans(id);
-            if (!complete?.success) {
-              return{success:false, message:"error completing transaction"}
-            }
-            
-            return{success:true, message:'Trade Completed successfully'}
+          
+          return{success:true, message:'Trade Completed successfully', fee:send?.fee, transactionhash:send?.transactionhash}
           
         }
   } catch (error) {

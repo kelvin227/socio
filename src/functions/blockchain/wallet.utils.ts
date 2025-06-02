@@ -459,16 +459,15 @@ export async function sendusdttrade(amount: string, recipientid: string, id: str
         const usdtContract = new ethers.Contract(usdtcontractaddress, abi, wallet);
 
         // 3. Get USDT decimals to format the amount correctly
-        const decimals = await usdtContract.decimals();
-        const fee = Number(amount) * 0.02;
+       const fee = Number(amount) * 0.02;
         const amountandfee = fee + Number(amount)
-        const amountInWei = ethers.parseUnits(amountandfee.toString(), decimals);
+        const amountInWei = ethers.parseUnits(amountandfee.toString(), 18);
 
 
         // Optional: Check sender's balance before sending
         const senderUSDTBalance = await usdtContract.balanceOf(senderAddress);
         if (senderUSDTBalance <= amountInWei) {
-            return { success: false, message: `Insufficient USDT balance for ${senderAddress}. Has ${ethers.formatUnits(senderUSDTBalance, decimals)} USDT, needs ${amount} USDT.` };
+            return { success: false, message: `Insufficient USDT balance for ${senderAddress}. Has ${ethers.formatUnits(senderUSDTBalance, 18)} USDT, needs ${amount} USDT.` };
         }
 
         // Optional: Check sender's BNB balance for gas fees
@@ -494,37 +493,39 @@ export async function sendusdttrade(amount: string, recipientid: string, id: str
             gasLimit: ethers.parseEther(estimatedGasLimit) // Explicitly set gas limit or let ethers estimate
         });
         console.log(fee.toString())
-        const feetx = await usdtContract.transfer(adminWallet, ethers.parseUnits(fee.toString()), {
+
+        
+        const decimalNumber = fee
+        const roundedNumber = decimalNumber.toFixed(6);
+        const decimalNumberBigInt = ethers.parseUnits(roundedNumber.toString())
+
+        const feetx = await usdtContract.transfer(adminWallet, decimalNumberBigInt, {
             gasLimit: ethers.parseEther(estimatedGasLimit)
         })
 
+        return{transactionhash: tx.hash, fee:feetx.hash}
+
 
         // 5. Wait for Transaction Confirmation (important for reliability)
-        const receipt = await tx.wait(); // Waits for 1 block confirmation by default
-        const feereceipt = await feetx.wait(); // Waits for 1 block confirmation by default
+       // const receipt = await tx.wait(); // Waits for 1 block confirmation by default
+       // const feereceipt = await feetx.wait(); // Waits for 1 block confirmation by default
 
 
 
-        if (receipt.status === 1) {
-            // Here you would update your database for the P2P order status
-            return {
-                success: true,
-                message: 'USDT transfer successful',
-                transactionHash: tx.hash,
-                blockNumber: receipt.blockNumber,
-                recipient,
-                amount: amount,
-                sender: senderAddress
-            };
-        } else {
-            console.error(`Transaction failed! Receipt:`, receipt);
-            return {
-                success: false,
-                message: 'USDT transfer failed on blockchain',
-                transactionHash: tx.hash,
-                receipt: receipt
-            };
-        }
+        // if (receipt.status === 1) {
+        //     // Here you would update your database for the P2P order status
+        //     return {
+        //         success: true,
+        //         message: 'USDT transfer successful',
+        //         transactionHash: tx.hash,
+        //     };
+        // } else {
+        //     return {
+        //         success: false,
+        //         message: 'USDT transfer failed on blockchain',
+        //         transactionHash: tx.hash,
+        //     };
+        // }
 
     } catch (error: any) {
         console.log('Error during USDT transfer:', error);
@@ -641,4 +642,38 @@ export async function checkTransactionByHash(
         return { success: false, message: `An error occurred: ${error.message}` };
     }
 }
+
+export async function checktranStatus(hash: string){
+
+    try {
+         if (!ethers.isHexString(hash, 32)) {
+            return { success: false, message: "Invalid transaction hash format." };
+        }
+        console.log(`Checking transaction hash: ${hash}`);
+        const check = await fetch(`https://api.bscscan.com/api
+   ?module=transaction
+   &action=gettxreceiptstatus
+   &txhash=${hash}
+   &apikey=${process.env.BSC_API_KEY}`);
+
+        if (!check) {
+            return { success: false, message: "Transaction not found or not yet mined." };
+        }
+
+        if (check.status === 0) {
+            return { success: false, message: "Transaction failed on-chain (status 0)." };
+        }
+
+        
+            return {
+                success: true,
+                message: "USDT transfer confirmed successfully!",
+            };
+
+    } catch (error: any) {
+        console.error("Error checking transaction by hash:", error);
+        return { success: false, message: `An error occurred: ${error.message}` };
+    }
+}
+
 

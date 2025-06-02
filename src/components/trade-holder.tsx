@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { acceptTrade, completetrans, confirmbuyer, confirmseen, createdispute, getadstransactions, gettraderequestsinfo } from "@/functions/user";
 import { BadgeCheck, Clock, Loader2 } from "lucide-react";
-import { checkTransactionByHash, sendusdttrade } from "@/functions/blockchain/wallet.utils";
+import { checkTransactionByHash, checktranStatus, sendusdttrade } from "@/functions/blockchain/wallet.utils";
 import { PutBlobResult } from "@vercel/blob";
 import { Dialog } from "@radix-ui/react-dialog";
 import { DialogContent, DialogTrigger } from "./ui/dialog";
@@ -62,6 +62,29 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
   );
   let filteredData: any[] = [];
   let adstransfiltered:any[]= [];
+
+  const pollTx = async (txHash: string) => {
+  const intervalId = setInterval(async () => {
+    // Call your API to check if the transaction has been confirmed
+    const res = await checktranStatus(txHash);
+
+    if (res.success) {
+      clearInterval(intervalId); // Stop polling once confirmed
+      // Call another API or update UI to complete the transaction
+      const complete = await completetrans(tradeid);
+      if (!complete?.success) {
+      toast.error("error occured while completing the transaction")
+      } else{
+        toast.success("trade completed")
+        setTransStatus("completed")
+      }
+    }
+  }, 5000); // Poll every 5 seconds (adjust as needed)
+};
+
+
+
+
   const accept = async (tradeId: string) => {
     try {
       const response = await acceptTrade(tradeId);
@@ -115,7 +138,12 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
     try {
       setSeenLoading(true); // Start loading
       const response = await confirmseen(tradeId, Amount, Price, selectedType, id, merchantid);
-      if (response?.success) {toast.success("Usdt Transfer Successfull")} else {
+      if (response?.success) {
+        // Start polling
+      pollTx(response.transactionhash);
+      pollTx(response.fee)
+        toast.success("Usdt Transfer Successfull")
+      } else {
         toast.error("an unexpected error occured");
       }
     } catch (error: any) {
@@ -141,19 +169,10 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
      filteredData = tradeInfo.filter((item: any) => item.id === Id)
     adstransfiltered = adstransactions.filter(item => item.orderid === Id)
     try{
-      console.log(Id)
       const trans = adstransactions.filter((item) => item.orderId === Id);
-      console.log(adstransactions)
     if (trans) {
-      // setTransStatus(trans.status as string);
-      // setcustomerconfirm(trans.customerconfirm as string);
-      // setMerchantconfirm(trans.merchantconfirm as string);
-      // setPrice(trans.price as string);
-      // seturl(trans.receipt || "");
-      // setDate(trans.createdAt);
       trans.map((item: any
       )=> (
-      console.log(item.merchantconfirm),
       setTransStatus(item.status as string),
       setcustomerconfirm(item.customerconfirm as string),
       setMerchantconfirm(item.merchantconfirm as string),
@@ -240,7 +259,7 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-4">Pending Trades{merchantid}</h1>
+      <h1 className="text-2xl font-bold mb-4">Pending Trades</h1>
       {/* Rejection Modal */}
       {ShowDisputeModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -601,7 +620,7 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
                     {status !== "pending" ? (
                       <Button
                         className="w-full dark:bg-gray-400 light:text-green-300"
-                        disabled={merchantconfirm === "pending"}
+                        disabled={merchantconfirm === "pending"|| seenLoading}
                         onClick={() => handlerecieved(tradeid)}
                       >
                         {seenLoading ? (
