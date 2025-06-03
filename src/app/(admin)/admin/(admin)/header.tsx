@@ -80,10 +80,10 @@ export default function Header() {
             <DropdownMenuLabel>My Wallet</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="hover:bg-gray-800">
-              Button
+              <Link href={"/admin_wallet"}>Wallet</Link>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem><Link href={'/wallet/transaction'}>Transaction histroy</Link></DropdownMenuItem>
+            <DropdownMenuItem><Link href={'/admin_wallet/transaction'}>Transaction histroy</Link></DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <DropdownMenu>

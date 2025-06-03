@@ -90,10 +90,10 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
       const response = await acceptTrade(tradeId);
       if (response.success) {
         toast.success("Trade accepted successfully.");
+        router.refresh();
       } else {
         toast.success(response.message || "Failed to accept trade.");
       }
-      setShow(true);
     } catch (error) {
       console.error("Error accepting trade:", error);
       toast.error("An unexpected error occurred.");
@@ -166,7 +166,7 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
     setmerchantid(merchantID);
     setDate(Date);
     setWallet(wallet)
-     filteredData = tradeInfo.filter((item: any) => item.id === Id)
+    filteredData = tradeInfo.filter((item: any) => item.id === Id)
     adstransfiltered = adstransactions.filter(item => item.orderid === Id)
     try{
       const trans = adstransactions.filter((item) => item.orderId === Id);
@@ -210,7 +210,8 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
   const handleDisputeSubmit = async () => {
     if (!tradeid) return;
 
-    try {
+    if(coin === "atok"){
+      try {
       const response = await checkTransactionByHash(disputeReason, senderwalletaddress, recieverwalletaddress, AmountSent);
       if(response?.success){
       
@@ -222,6 +223,16 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
       
     } catch (error) {
       console.error("Error submitting rejection reason:", error);
+    }}else{
+
+      const dispute = await createdispute(id, email, tradeid, disputeReason);
+
+      if(dispute?.success){
+        toast.success("dispute created successfully, Please wait for admin to review your dispute")
+      }else{
+        toast.error("An error occured while creating your dispute please try again")
+      }
+
     }
   };
 
@@ -371,9 +382,7 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
                           } else {
                             accept(trade.id);
                             settradeid(trade.id);
-                            handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId, trade.createdAt, trade.walletAddress);
-                            router.refresh();
-                          }
+                                                      }
                         }}
                         disabled={viewLoading}
                       >
@@ -460,7 +469,7 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
                           handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId, trade.createdAt, trade.walletAddress);
                         } else {
                           accept(trade.id);
-                          settradeid(trade.id);
+                          //settradeid(trade.id);
                         }
                       }}
                       disabled={viewLoading}
@@ -681,7 +690,7 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
                       {status !== "pending" ? (
                         <Button
                           className="w-full dark:bg-gray-400 light:text-green-300"
-                          disabled={merchantconfirm === "pending"}
+                          disabled={merchantconfirm === "pending" || seenLoading}
                           onClick={() => handlerecieved(tradeid)}
                         >
                           I have seen coin
