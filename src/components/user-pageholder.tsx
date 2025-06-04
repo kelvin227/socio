@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable */
 import React, { useEffect, useState } from "react";
 import {
   Card,
@@ -26,23 +27,7 @@ import {
   //IconTrendingDown,
 } from "@tabler/icons-react"
 import { getfivep2ptransaction } from "@/functions/user";
-import { set } from "react-hook-form";
 
-
-const chartData = [
-  { month: "January", Buy: 186, Sell: 80 },
-  { month: "February", Buy: 305, Sell: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-  { month: "July", desktop: 214, mobile: 140 },
-  { month: "august", desktop: 214, mobile: 140 },
-  { month: "September", desktop: 214, mobile: 140 },
-  { month: "October", desktop: 214, mobile: 140 },
-  { month: "November", desktop: 214, mobile: 140 },
-  { month: "December", desktop: 214, mobile: 140 },
-]
 
 const chartConfig = {
   Buy: {

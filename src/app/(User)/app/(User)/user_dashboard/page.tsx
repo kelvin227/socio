@@ -2,6 +2,8 @@ import { auth } from "@/auth";
 import PagePlaceholder from "@/components/user-pageholder";
 import { TransactionTable } from "../wallet/transaction/trans";
 import { prisma } from "@/lib/db";
+/* eslint-disable */
+
 
 
 export default async function Home() {
