@@ -26,34 +26,48 @@ import {
   //IconTrendingDown,
 } from "@tabler/icons-react"
 import { getfivep2ptransaction } from "@/functions/user";
+import { set } from "react-hook-form";
 
 
 const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
+  { month: "January", Buy: 186, Sell: 80 },
+  { month: "February", Buy: 305, Sell: 200 },
   { month: "March", desktop: 237, mobile: 120 },
   { month: "April", desktop: 73, mobile: 190 },
   { month: "May", desktop: 209, mobile: 130 },
   { month: "June", desktop: 214, mobile: 140 },
+  { month: "July", desktop: 214, mobile: 140 },
+  { month: "august", desktop: 214, mobile: 140 },
+  { month: "September", desktop: 214, mobile: 140 },
+  { month: "October", desktop: 214, mobile: 140 },
+  { month: "November", desktop: 214, mobile: 140 },
+  { month: "December", desktop: 214, mobile: 140 },
 ]
 
 const chartConfig = {
-  desktop: {
-    label: "Desktop",
+  Buy: {
+    label: "Buy",
     color: "#2563eb",
   },
-  mobile: {
-    label: "Mobile",
+  Sell: {
+    label: "Sell",
     color: "#60a5fa",
   },
 } satisfies ChartConfig
 
 
   
-export default function PagePlaceholder({ pageName }: { pageName: string }) {
-  const [totalVolume, setTotalVolume] = useState(0);
-  const [oldVolume, setOldVolume] = useState(0);
-  const [percentchange, setPercentChange] = useState(0);
+export default function PagePlaceholder({ pageName, barchartdata }: { pageName: string, barchartdata: any[] }) {
+  const [totalVolume, setTotalVolume] = useState<number>(0);
+  const [oldVolume, setOldVolume] = useState<number>(0);
+  const [percentchange, setPercentChange] = useState<number>(0);
+  const [completedtrans, setcompletedtrans] = useState<number>(0)
+  const [totaltrans, settotaltrans] = useState<number>(0);
+  const [previouscomletedtrans, setpreviouscompletedreans] = useState<number>(0);
+  const [previoustotaltrans, setprevioustotaltrans] = useState<number>(0);
+  const [previousCompletionPercentage, setPreviousCompletionPercentage] = useState<number>(0);
+  const [currentCompletionPercentage, setCurrentCompletionPercentage] = useState<number>(0);
+  const [completedtranspercent, setcompletedtranspercent] = useState<number>(0);
   // const [totalearnings, settotalearnings] = useState(0);
   // const [oldearnings, setoldearnings] = useState(0);
   // const [earningspercent, setearningspercent] = useState(0);
@@ -73,8 +87,8 @@ export default function PagePlaceholder({ pageName }: { pageName: string }) {
   },
   {
     title: "Completed trades",
-    description: "40%",
-    content: "389",
+    description: `${completedtranspercent}%`,
+    content: completedtrans,
   },
 ];
   const Volume = async()=> {
@@ -82,25 +96,35 @@ export default function PagePlaceholder({ pageName }: { pageName: string }) {
   if(response.success){
     setTotalVolume(Number(response.totalVolume));
     setOldVolume(Number(response.oldtotalVolume));
+    setcompletedtrans(Number(response.completedtrans))
+    settotaltrans(Number(response.totaltrans));
+    setpreviouscompletedreans(Number(response.previouscompletedtrans));
+    setprevioustotaltrans(Number(response.previousTotaltrans));
   }
 }
 
-const calculatePercantageChange = (oldValue: number, newValue: number)=> {
-  let change;
-  if(oldValue === 0){
-   change = newValue > 0 ? 100 : 0;
-    return setPercentChange(Number(change));
-  }else{
-    change = ((newValue - oldValue) / oldValue * 100).toFixed(2)
-  return setPercentChange(Number(change));
-  }
-  
-
-}
+const calculatePercentage = (completed: number, total: number) => {
+      if (total === 0) return 0; // Avoid division by zero
+      return (completed / total) * 100;
+    };
+const calculatevolumePercentage = (currentVolume: number, oldVolume: number) => {
+      if (oldVolume === 0) return 0; // Avoid division by zero \
+      return ((currentVolume - oldVolume) / oldVolume) * 100;
+    }
+    
 
 useEffect(()=> {
   Volume();
-    calculatePercantageChange(Number(oldVolume), Number(totalVolume));
+    const CPC = calculatevolumePercentage(Number(totalVolume), oldVolume);
+    const completedPercenatge = calculatePercentage(Number(completedtrans), Number(totaltrans));
+    const previouscompletedpercentage = calculatePercentage(Number(previouscomletedtrans), Number(previoustotaltrans));
+    setPreviousCompletionPercentage(previouscompletedpercentage);
+    setCurrentCompletionPercentage(completedPercenatge);
+     // --- Calculate the Change (Absolute Difference in Percentage Points) ---
+    const percentageChange = currentCompletionPercentage - previousCompletionPercentage;
+
+    setcompletedtranspercent(percentageChange);
+    setPercentChange(CPC);
 })
   return (
     <div className="flex flex-col gap-4 mt-10">
@@ -119,7 +143,7 @@ useEffect(()=> {
         ))}
       </div>
       <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-      <BarChart accessibilityLayer data={chartData}>
+      <BarChart accessibilityLayer data={barchartdata}>
       <CartesianGrid vertical={false} />
       <XAxis
       dataKey="month"
@@ -130,8 +154,8 @@ useEffect(()=> {
     />
     <ChartTooltip content={<ChartTooltipContent />} />
     <ChartLegend content={<ChartLegendContent />} />
-        <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4} />
-        <Bar dataKey="mobile" fill="var(--color-mobile)" radius={4} />
+        <Bar dataKey="Buy" fill="var(--color-desktop)" radius={4} />
+        <Bar dataKey="Sell" fill="var(--color-mobile)" radius={4} />
       </BarChart>
     </ChartContainer>
 

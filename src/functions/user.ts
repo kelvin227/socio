@@ -80,7 +80,7 @@ export async function getUserByID(id: string) {
   return user;
 }
 
-export async function updateUserProfile(email: string, value: string, field: "username" | "name") {
+export async function updateUserProfile(email: string, value: string, field: "username" | "name" | "phoneNo") {
   try {
     // Fetch the user by email
     const user = await getUserByEmail(email);
@@ -685,7 +685,8 @@ export async function getfivep2ptransaction(email: string) {
         createdAt: {
           gte: fourteenDaysAgo,
           lte: sevenDaysAgo,
-        }
+        },
+        status:"completed",
       }, // Filter by transaction type
       take: 5,
       orderBy: {
@@ -696,10 +697,66 @@ export async function getfivep2ptransaction(email: string) {
       return { success: false, message: "No old transactions found for the user" };
 
     }
+    const completedtrans = await prisma.adsTransaction.count({
+      where: {
+        merchantID: userId?.id,
+        createdAt: {
+          gte: sevenDaysAgo,
+          lte: now,
+        },
+        status:"completed",
+      }, // Filter by transaction type
+      take: 5,
+      orderBy: {
+        createdAt: 'desc',
+      }
+    })
+
+    const totaltrans = await prisma.adsTransaction.count({
+      where: {
+        merchantID: userId?.id,
+        createdAt: {
+          gte: sevenDaysAgo,
+          lte: now,
+        },
+      }, // Filter by transaction type
+      take: 5,
+      orderBy: {
+        createdAt: 'desc',
+      }
+    })
+    const previouscompletedtrans = await prisma.adsTransaction.count({
+      where: {
+        merchantID: userId?.id,
+        createdAt: {
+          gte: fourteenDaysAgo,
+          lte: sevenDaysAgo,
+        },
+        status:"completed",
+      }, // Filter by transaction type
+      take: 5,
+      orderBy: {
+        createdAt: 'desc',
+      }
+    })
+    const previousTotaltrans = await prisma.adsTransaction.count({
+      where: {
+        merchantID: userId?.id,
+        createdAt: {
+          gte: fourteenDaysAgo,
+          lte: sevenDaysAgo,
+        },
+      }, // Filter by transaction type
+      take: 5,
+      orderBy: {
+        createdAt: 'desc',
+      }
+    })
+    
     const totalVolume = transactions.reduce((sum, transactions) => sum + Number(transactions.amount), 0)
 
     const oldtotalVolume = oldtransaction.reduce((sum, oldtransaction) => sum + Number(oldtransaction.amount), 0)
-    return { success: true, message: transactions, totalVolume, oldtotalVolume };
+    return { success: true, totalVolume, oldtotalVolume, completedtrans, totaltrans, previouscompletedtrans, previousTotaltrans}
     // Get the total count of transactions for pagination
   } catch (error) {
     console.error("Error fetching transactions:", error);
@@ -1276,10 +1333,7 @@ export async function confirmseen(id: string, Amount: string, Price: string, sel
     const Op = Number(Price) * Number(Amount);
         if (selectedType !== "buy") {
           const send = await sendusdttrade(Op.toString(), userid, merchantid);
-          if (!send?.success) {
-            return{success:false, message:"error occured while sending usdt"}
-          } 
-          return { success: true }
+          return { success: true, message: 'Trade Completed successfully', fee: send?.fee, transactionhash: send?.transactionhash }
         } else {
           const send = await sendusdttrade(Op.toString(), merchantid, userid);
           

@@ -85,7 +85,7 @@ export default function Profile_pageholder({user}:{user: User})  {
           </div>
           <div className="absolute right-0">
             <CardContent>
-            {/* <UpdateForm email={user?.email}/> */}
+             <UpdateForm email={user?.email} field="phoneNo"/> 
           </CardContent>
             </div> 
         </div>

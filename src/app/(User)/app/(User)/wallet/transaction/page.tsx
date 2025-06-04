@@ -24,6 +24,6 @@ const session= await auth();
           }
 
  return (
-<TransactionTable address={wallet?.address as string} email={email}/>
+<TransactionTable address={wallet?.address as string} email={email} id={user?.id as string}/>
  );
 }

@@ -13,15 +13,15 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { updateUserProfile } from '@/functions/user'
 
-const UpdateForm = ({ email, field }: { email: string; field: "username" | "name" }) => {
+const UpdateForm = ({ email, field }: { email: string; field: "username" | "name" | "phoneNo"}) => {
   const router = useRouter();
 
   const [signinFormData, setSigninFormData] = useState([
     {
       name: field, // Dynamically set the field name
       type: "text",
-      placeHolder: field === "username" ? "johndoe" : "John Doe",
-      label: field === "username" ? "Username" : "Name",
+      placeHolder: field === "username" ? "johndoe" : field === "name"? "John Doe": field === "phoneNo"? "+977 AB YXX XXX" :"John Doe" ,
+      label: field === "username" ? "johndoe" : field === "name"? "John Doe": field === "phoneNo"? "Phone Number" :"John Doe",
     },
   ]);
 

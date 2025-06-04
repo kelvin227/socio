@@ -6,14 +6,12 @@ import { ethers } from "ethers";
 import { gettransaction } from "@/functions/blockchain/wallet.utils";
 import { getp2ptransaction } from "@/functions/user";
 
-export const TransactionTable = ({ address, email }: { address: string, email: string }) => {
+export const TransactionTable = ({ address, email, id }: { address: string, email: string, id: string }) => {
   const [transactions, setTransactions] = useState<any[]>([]); // Wallet transactions
   const [p2pTransactions, setP2pTransactions] = useState<any[]>([]); // P2P transactions
   const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]); // Filtered wallet transactions
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const [selection, setSelection] = useState<string>("wallet"); // Selection between wallet and P2P transactions
-  const [selectedType, setSelectedType] = useState<string | null>(null); // Selected transaction type for filtering
-
   // Fetch wallet transactions
   const fetchTransactionData = async () => {
     try {
@@ -42,10 +40,11 @@ export const TransactionTable = ({ address, email }: { address: string, email: s
   const fetchP2PTransactionData = async () => {
     try {
       setLoading(true);
-      const response = await getp2ptransaction(address);
+      const response = await getp2ptransaction(email);
       if (response.success) {
         if (Array.isArray(response.message)) {
           setP2pTransactions(response.message);
+          console.log(response.message);
         } else {
           console.error("Unexpected response format:", response.message);
           setP2pTransactions([]);
@@ -60,7 +59,6 @@ export const TransactionTable = ({ address, email }: { address: string, email: s
 
   // Filter wallet transactions by type
   const filterTransactions = (type: string | null) => {
-    setSelectedType(type);
     if (type) {
       const filtered = transactions.filter((tx) => tx.txType === type);
       setFilteredTransactions(filtered);
@@ -117,12 +115,12 @@ export const TransactionTable = ({ address, email }: { address: string, email: s
           <p className="text-center text-gray-500">Loading transactions...</p>
         ) : selection === "wallet" ? (
           filteredTransactions.length > 0 ? (
-            <TransactionTableContent transactions={filteredTransactions} />
+            <TransactionTableContent transactions={filteredTransactions} selection={selection} userid={id} />
           ) : (
             <p className="text-center text-gray-500">No wallet transactions found</p>
           )
         ) : p2pTransactions.length > 0 ? (
-          <TransactionTableContent transactions={p2pTransactions} />
+          <TransactionTableContent transactions={p2pTransactions} selection={selection} userid={id}/>
         ) : (
           <p className="text-center text-gray-500">No P2P transactions found</p>
         )}
@@ -132,7 +130,7 @@ export const TransactionTable = ({ address, email }: { address: string, email: s
 };
 
 // Reusable Component for Transaction Table Content
-const TransactionTableContent = ({ transactions }: { transactions: any[] }) => (
+const TransactionTableContent = ({ transactions, selection, userid }: { transactions: any[], selection: string, userid:string }) => (
   <div>
     {/* Desktop Table */}
     <div className="hidden md:block">
@@ -149,12 +147,14 @@ const TransactionTableContent = ({ transactions }: { transactions: any[] }) => (
         <tbody>
           {transactions.map((transaction) => (
             <tr key={transaction.id}>
-              <td className="p-4 border-b">{transaction.date}</td>
-              <td className="p-4 border-b">{transaction.txType}</td>
-              <td className="p-4 border-b">{transaction.asset}</td>
+              <td className="p-4 border-b">{selection === "p2p" ? new Date(transaction.createdAt * 1000).toLocaleDateString() : transaction.date}</td>
+              <td className="p-4 border-b">{selection === "p2p" ?transaction.type : transaction.txType}</td>
+              <td className="p-4 border-b">{selection === "p2p" ? transaction.coin : transaction.asset}</td>
               <td className="p-4 border-b">{transaction.amount}</td>
               <td className="p-4 border-b">
-                {transaction.txType === "Deposit" ? "USDT Deposit to Wallet" : "USDT Withdraw From Wallet"}
+                {selection === "p2p" ?transaction.type === "buy" ? transaction.userId !== userid ? `Sold ${transaction.amount} ${transaction.coin} to ${transaction.userName}`:
+                `Purchased ${transaction.amount} ${transaction.coin} from ${transaction.userName}` :  transaction.userId === userid ? `Sold ${transaction.amount} ${transaction.coin} to ${transaction.userName}`:
+                `Purchased ${transaction.amount} ${transaction.coin} from ${transaction.userName}` : transaction.txType}
               </td>
             </tr>
           ))}
