@@ -74,7 +74,7 @@ export default function OTC_handler({email} :{email: string}){
     },
     {
       name: "Socio Wallet address",
-      image: "https://miro.medium.com/v2/resize:fit:394/1*dC5IusZmsnRzCxEVdN5Z_A.jpeg",
+      image: "https://kalajtomdzamxvkl.public.blob.vercel-storage.com/logo2-6X2L1QaE3Zc3GrRsCHvW0JY0kcA7bx.png",
     }
   ];
 
