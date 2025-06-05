@@ -12,13 +12,33 @@ export const TransactionTable = ({ address, email, id }: { address: string, emai
   const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]); // Filtered wallet transactions
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const [selection, setSelection] = useState<string>("wallet"); // Selection between wallet and P2P transactions
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // Compute paginated transactions
+  const paginatedTransactions =
+    selection === "wallet"
+      ? filteredTransactions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+      : p2pTransactions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const totalPages =
+    selection === "wallet"
+      ? Math.ceil(filteredTransactions.length / itemsPerPage)
+      : Math.ceil(p2pTransactions.length / itemsPerPage);
+
+  // Reset to first page when selection/filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selection, filteredTransactions, p2pTransactions]);
+
   // Fetch wallet transactions
   const fetchTransactionData = async () => {
     try {
       setLoading(true);
       const response = await gettransaction(address);
       if (response.status === "1") {
-        console.log(response.result)
         const formattedData = response.result.map((tx: any) => ({
           id: tx.hash,
           date: new Date(tx.timeStamp * 1000).toLocaleDateString(),
@@ -44,7 +64,6 @@ export const TransactionTable = ({ address, email, id }: { address: string, emai
       if (response.success) {
         if (Array.isArray(response.message)) {
           setP2pTransactions(response.message);
-          console.log(response.message);
         } else {
           console.error("Unexpected response format:", response.message);
           setP2pTransactions([]);
@@ -115,12 +134,60 @@ export const TransactionTable = ({ address, email, id }: { address: string, emai
           <p className="text-center text-gray-500">Loading transactions...</p>
         ) : selection === "wallet" ? (
           filteredTransactions.length > 0 ? (
-            <TransactionTableContent transactions={filteredTransactions} selection={selection} userid={id} />
+            <>
+              <TransactionTableContent transactions={paginatedTransactions} selection={selection} userid={id} />
+              {/* Pagination Controls */}
+              {filteredTransactions.length > itemsPerPage && (
+                <div className="flex justify-center items-center gap-4 mt-4">
+                  <button
+                    className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((prev) => prev - 1)}
+                  >
+                    Previous
+                  </button>
+                  <span>
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((prev) => prev + 1)}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <p className="text-center text-gray-500">No wallet transactions found</p>
           )
         ) : p2pTransactions.length > 0 ? (
-          <TransactionTableContent transactions={p2pTransactions} selection={selection} userid={id}/>
+          <>
+            <TransactionTableContent transactions={paginatedTransactions} selection={selection} userid={id} />
+            {/* Pagination Controls */}
+            {p2pTransactions.length > itemsPerPage && (
+              <div className="flex justify-center items-center gap-4 mt-4">
+                <button
+                  className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                >
+                  Previous
+                </button>
+                <span>
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <p className="text-center text-gray-500">No P2P transactions found</p>
         )}
@@ -147,7 +214,7 @@ const TransactionTableContent = ({ transactions, selection, userid }: { transact
         <tbody>
           {transactions.map((transaction) => (
             <tr key={transaction.id}>
-              <td className="p-4 border-b">{selection === "p2p" ? new Date(transaction.createdAt * 1000).toLocaleDateString() : transaction.date}</td>
+              <td className="p-4 border-b">{selection === "p2p" ? transaction.createdAt.toLocaleDateString() : transaction.date}</td>
               <td className="p-4 border-b">{selection === "p2p" ?transaction.type : transaction.txType}</td>
               <td className="p-4 border-b">{selection === "p2p" ? transaction.coin : transaction.asset}</td>
               <td className="p-4 border-b">{transaction.amount}</td>

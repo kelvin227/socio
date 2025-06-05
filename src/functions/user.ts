@@ -1333,11 +1333,17 @@ export async function confirmseen(id: string, Amount: string, Price: string, sel
     const Op = Number(Price) * Number(Amount);
         if (selectedType !== "buy") {
           const send = await sendusdttrade(Op.toString(), userid, merchantid);
-          return { success: true, message: 'Trade Completed successfully', fee: send?.fee, transactionhash: send?.transactionhash }
+          if(!send){
+            return { success: false, message: 'unable to send usdt' }
+          }
+          return { success: true, message: 'buyer has comfired the coin', transactionhash: send?.transactionhash }
         } else {
           const send = await sendusdttrade(Op.toString(), merchantid, userid);
+          if(!send){
+            return { success: false, message: 'unable to send usdt' }
+          }
           
-          return{success:true, message:'Trade Completed successfully', fee:send?.fee, transactionhash:send?.transactionhash}
+          return{success:true, message:'buyer has comfirmed the coin', transactionhash:send?.transactionhash}
           
         }
   } catch (error) {

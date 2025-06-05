@@ -158,7 +158,7 @@ export async function gettransaction(address: string) {
 
     try {
         const responses = await fetch(
-            `https://api.etherscan.io/v2/api?chainid=56&module=account&action=tokentx&contractaddress=0x55d398326f99059ff775485246999027b3197955&address=${address}&page=1&offset=5&startblock=0&endblock=999999999&sort=desc&apikey=${process.env.ETHER_API_KEY}`
+            `https://api.etherscan.io/v2/api?chainid=56&module=account&action=tokentx&contractaddress=0x55d398326f99059ff775485246999027b3197955&address=${address}&page=0&offset=5&startblock=0&endblock=999999999&sort=desc&apikey=${process.env.ETHER_API_KEY}`
         );
 
         return responses.json();
@@ -447,6 +447,7 @@ export async function sendusdttrade(amount: string, recipientid: string, id: str
     const recipient = walletss.address
 
     try {
+        
         // 1. Setup Provider and Wallet
         const provider = new ethers.JsonRpcProvider(`https://bsc-mainnet.infura.io/v3/${process.env.INFRUA_API_KEY}`);
         const wallet = new ethers.Wallet(wallets?.private_key as string, provider);
@@ -469,6 +470,9 @@ export async function sendusdttrade(amount: string, recipientid: string, id: str
         if (senderUSDTBalance <= amountInWei) {
             return { success: false, message: `Insufficient USDT balance for ${senderAddress}. Has ${ethers.formatUnits(senderUSDTBalance, 18)} USDT, needs ${amount} USDT.` };
         }
+        const decimalNumber = fee
+        const roundedNumber = decimalNumber.toFixed(6);
+        const feetostring  = roundedNumber.toString()
 
         // Optional: Check sender's BNB balance for gas fees
         const senderBNBBalance = await getBnbBalance(senderAddress);
@@ -476,7 +480,7 @@ export async function sendusdttrade(amount: string, recipientid: string, id: str
         // For a simple transfer, a rough estimate is okay, but it's crucial for users to have enough BNB.
         const estimatedGasLimit = ethers.formatEther("60000"); // A common estimate for token transfer
         const gasPrice = await estimateGas(senderAddress, recipient, amount);
-        const gasPriceForFee = await estimateGas(senderAddress, adminWallet, fee.toString())
+        const gasPriceForFee = await estimateGas(senderAddress, adminWallet, feetostring)
         const gaspriceconvert = parseInt(gasPrice?.gasPrice, 16);
         const gasPriceConvertForFee = parseInt(gasPriceForFee?.gasPrice, 16);
         const requiredBNBForFee = gasPriceConvertForFee * Number(estimatedGasLimit);
@@ -492,18 +496,9 @@ export async function sendusdttrade(amount: string, recipientid: string, id: str
         const tx = await usdtContract.transfer(recipient, ethers.parseUnits(amount), {
             gasLimit: ethers.parseEther(estimatedGasLimit) // Explicitly set gas limit or let ethers estimate
         });
-        console.log(fee.toString())
 
-        
-        const decimalNumber = fee
-        const roundedNumber = decimalNumber.toFixed(6);
-        const decimalNumberBigInt = ethers.parseUnits(roundedNumber.toString())
 
-        const feetx = await usdtContract.transfer(adminWallet, decimalNumberBigInt, {
-            gasLimit: ethers.parseEther(estimatedGasLimit)
-        })
-
-        return{transactionhash: tx.hash, fee:feetx.hash}
+        return{transactionhash: tx.hash}
 
 
         // 5. Wait for Transaction Confirmation (important for reliability)
@@ -542,11 +537,67 @@ export async function sendusdttrade(amount: string, recipientid: string, id: str
     };
 }
 
-//     const totalGasCostBNB = await estimateGas(wallets?.address as string, recipient, amount)
+export async function sendusdttradefee (amount: string, id:string){
+     if (!amount || Number(amount) === 0) {
+        throw new Error("Invalid amount provided.");
+    }
 
-//     return { success: true, message: `${totalGasCostBNB?.message}` }
+    const wallets = await prisma.wallets.findUnique({
+        where: { userId: id },
+        select: { address: true, encrypted_key: true, private_key: true, },
+    });
 
-//}
+    try {
+        
+        // 1. Setup Provider and Wallet
+        const provider = new ethers.JsonRpcProvider(`https://bsc-mainnet.infura.io/v3/${process.env.INFRUA_API_KEY}`);
+        const wallet = new ethers.Wallet(wallets?.private_key as string, provider);
+
+        // Get the sender's address (for logging/checking)
+        const senderAddress = wallet.address;
+        console.log(`Transfer initiated by ${senderAddress}`);
+
+        // 2. Instantiate USDT Contract
+        const usdtContract = new ethers.Contract(usdtcontractaddress, abi, wallet);
+
+        // 3. Get USDT decimals to format the amount correctly
+       const fee = Number(amount);
+        const decimalNumber = fee
+        const roundedNumber = decimalNumber.toFixed(6);
+        const feetostring  = roundedNumber.toString()
+        const decimalNumberBigInt = ethers.parseUnits(roundedNumber.toString())
+
+        // Optional: Check sender's BNB balance for gas fees
+        const senderBNBBalance = await getBnbBalance(senderAddress);
+        // You might want to estimate gas for the transaction more precisely here.
+        // For a simple transfer, a rough estimate is okay, but it's crucial for users to have enough BNB.
+        const estimatedGasLimit = ethers.formatEther("60000"); // A common estimate for token transfer
+        const gasPriceForFee = await estimateGas(senderAddress, adminWallet, feetostring)
+
+        const gasPriceConvertForFee = parseInt(gasPriceForFee?.gasPrice, 16);
+        const requiredBNBForFee = gasPriceConvertForFee * Number(estimatedGasLimit);
+        
+        if (Number(senderBNBBalance.message) < requiredBNBForFee) {
+            return { success: false, message: `Insufficient BNB for gas fees in wallet ${senderAddress}. Needs approx. ${requiredBNBForFee} BNB.` };
+        }
+         const feetx = await usdtContract.transfer(adminWallet, decimalNumberBigInt, {
+            gasLimit: ethers.parseEther(estimatedGasLimit)
+        })
+
+        return{success: true, fee:feetx.hash}
+        } catch (error: any) {
+        let errorMessage = 'An unexpected error occurred during the transfer.';
+
+        // Try to get more specific error messages from the blockchain or Ethers.js
+        if (error.reason) {
+            errorMessage = `Blockchain Error: ${error.reason}`;
+        } else if (error.message && error.message.includes("insufficient funds for gas")) {
+            errorMessage = "Insufficient BNB for gas fees in the sender's wallet.";
+        } else if (error.code === 'CALL_EXCEPTION') {
+            errorMessage = "Smart contract call failed. Check recipient address and amount.";
+        }
+    };
+}
 
 export async function checkTransactionByHash(
     txHash: string,

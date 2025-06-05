@@ -146,6 +146,7 @@ export default function AtokHolder({ email, name, data, userads}: { email: strin
         "sell"
       )
             if (response.success) {
+        setshowModal(true);// Close the modal after purchase
         toast("Trade created successfully!");
       } else {
         toast(response.message || "Failed to create trade request.");
@@ -556,7 +557,7 @@ const response = await addtraderequest(
               Thank you, <span className="font-semibold">{name}</span>, for choose to buy from me. Your trade request has been sent to the buyer.
             </p>
             <p className="text-gray-600">
-              please wait while the buyer is being contacted if the buyer does not response in the next 2 hours your request will be automatically be canceled
+              please wait while the {selectedType ==="buy"? "Seller": "Buyer"} is being contacted if the buyer does not response in the next 5 hours your request will be automatically be canceled
             </p>
           </div>
         </div>
