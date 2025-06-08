@@ -6,7 +6,8 @@ import { VerificationEmail } from "@/components/emails/verificationCode"
 import { Resend } from 'resend';
 import { generateVerificationCode, hashPassword } from "@/lib/utils";
 import TradeUpdateEmail from "@/components/emails/trade_update";
-import { sendusdttrade } from "./blockchain/wallet.utils";
+import { getBalance, sendusdttrade } from "./blockchain/wallet.utils";
+import { CancelMailTemplate } from "@/components/emails/cancelmail";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -16,6 +17,20 @@ export async function sendtradeRequestmails(email: string, id: string, amount: s
     to: [email],
     subject: 'Merchant Has Accepted Your Trade Request- Action Required',
     react: EmailTemplate({ firstName: email, tradeId: id, tradeAmount: amount, tradeCurrency: Coins, tradeStatus: status, merchantName: UserName }),
+  });
+
+  if (!data) {
+    return { success: false, message: "unable to send email" }
+  }
+
+  return { success: true, message: "email sent successfully" }
+};
+export async function sendtradeCancelledmails(email: string, id: string, amount: string, Coins: string, status: string, UserName: string) {
+  const data = await resend.emails.send({
+    from: 'donnotreply <noreply@sociootc.com>',
+    to: [email],
+    subject: 'Merchant Has Cancelled Your Trade Request- Action Required',
+    react: CancelMailTemplate({ firstName: email, tradeId: id, tradeAmount: amount, tradeCurrency: Coins, tradeStatus: status, merchantName: UserName }),
   });
 
   if (!data) {
@@ -914,7 +929,28 @@ export async function createads(email: string, coin: string, price: string, minQ
     const userId = user.id; // Get the user ID
     const username = user.userName; // Get the username
 
+    if(minQty > maxQty){
+      return { success: false, message: "Minimum quantity cannot be greater than maximum quantity" }
+    }
 
+    if(type="sell"){
+    // Check if the user has a wallet balance before creating an ad
+
+    const checkwalletbalance = await prisma.wallets.findUnique({
+      where: { userId }
+    })
+    if (!checkwalletbalance) {
+      return { success: false, message: "You must create a wallet before creating an ad" }
+    }
+    const getwalletbalance = await getBalance(checkwalletbalance.address);
+    if (!getwalletbalance) {
+      return { success: false, message: "Unable to get wallet balance" }
+    }
+    const against = Number(price) * maxQty;
+    if (Number(getwalletbalance.message) < against) {
+      return { success: false, message: `You don't have enough balance to create this ad. Your balance is ${getwalletbalance} ${coin}` }
+    }
+  }
     const wallet = await prisma.userWallet.findUnique({
       where: { userid: user.id }
     });
@@ -1269,6 +1305,64 @@ export async function acceptTrade(id: string) {
       return { success: true, message: "Trade request accepted successfully, but unable to get the user email" }
     }
     const mail = await sendtradeRequestmails(user.email, traderequestId, amount, coin, traderequest.status, traderequest.merchantName);
+
+    if (!mail) {
+      return { success: true, message: "Trade request accepted successfully, but unable to send user email" }
+    }
+    return { success: true, message: `Trade request accepted successfully` };
+  } catch (error) {
+    console.error(`Error accepting trade request ${id}:`, error);
+    return { success: false, message: `An error occurred while accepting trade request` };
+  }
+}
+
+export async function Canceltrade(id: string) {
+  try {
+    // Fetch the user by email
+    const traderequest = await prisma.traderequest.findUnique({
+      where: { id },
+    });
+    if (!traderequest) {
+      return { success: false, message: "Trade request not found" };
+    }
+    const traderequestId = traderequest.id; // Get the user ID
+    const amount = traderequest.amount; // Get the user ID
+    const coin = traderequest.coin; // Get the user ID
+    const status = traderequest.status; // Get the user ID
+
+    if (status === "Accepted") {
+      return { success: false, message: "Trade request already Accepted" };
+    }
+
+    // Update the user's field in the database
+    const updaterequest = await prisma.traderequest.update({
+      where: { id },
+      data: { status: "Cancelled" },
+    });
+
+    if (!updaterequest) {
+      return { success: false, message: "unable to update trade request" }
+    }
+
+    // Create a new ad in the database
+    const addTransaction = await prisma.adsTransaction.update({
+      where: { orderId: traderequestId },
+      data: {
+        status: "cancelled",
+      },
+    });
+
+    if (!addTransaction) {
+      return { success: false, message: "" }
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: traderequest.userId },
+      select: { email: true }
+    })
+    if (!user) {
+      return { success: true, message: "Trade request accepted successfully, but unable to get the user email" }
+    }
+    const mail = await sendtradeCancelledmails(user.email, traderequestId, amount, coin, traderequest.status, traderequest.merchantName);
 
     if (!mail) {
       return { success: true, message: "Trade request accepted successfully, but unable to send user email" }

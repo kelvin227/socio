@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { acceptTrade, completetrans, confirmbuyer, confirmseen, createdispute, getadstransactions, gettraderequestsinfo } from "@/functions/user";
+import { acceptTrade, Canceltrade, completetrans, confirmbuyer, confirmseen, createdispute, getadstransactions, gettraderequestsinfo } from "@/functions/user";
 import { BadgeCheck, Clock, Loader2 } from "lucide-react";
 import { checkTransactionByHash, checktranStatus, sendusdttrade, sendusdttradefee } from "@/functions/blockchain/wallet.utils";
 import { PutBlobResult } from "@vercel/blob";
@@ -281,24 +281,15 @@ const feepollTx = async (txHash: string) => {
   // Function to cancel a trade
   const cancelTrade = async (tradeId: string) => {
     try {
-      const response = await fetch(`/api/trades/cancel`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ tradeId }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success("Trade canceled successfully.");
+      const response = await Canceltrade(tradeId);
+      if (response.success) {
+        toast.success("Trade cancelled successfully.");
         router.refresh();
       } else {
-        toast.error(data.message || "Failed to cancel trade.");
+        toast.success(response.message || "Failed to Cancel trade.");
       }
     } catch (error) {
-      console.error("Error canceling trade:", error);
+      console.error("Error cancelling trade:", error);
       toast.error("An unexpected error occurred.");
     }
   };

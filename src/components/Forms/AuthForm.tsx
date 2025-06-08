@@ -52,6 +52,46 @@ const formData = [
     label: "Referral Code",
   },
 ];
+const formDataFr = [
+  {
+    name: "email",
+    type: "email",
+    placeHolder: "johndoe24@gmai.com",
+    label: "E-mail",
+  },  
+  {
+    name: "password",
+    type: "password",
+    placeHolder: "*****",
+    label: "Mot de passe",
+  },
+  {
+    name: "referralCode",
+    type: "text",
+    placeHolder: "Entrez le code de parrainage",
+    label: "Code de parrainage",
+  },
+];
+const formDataChi = [
+  {
+    name: "email",
+    type: "email",
+    placeHolder: "johndoe@gmail.com",
+    label: "电子邮件",
+  },
+  {
+    name: "password",
+    type: "password",
+    placeHolder: "*****",
+    label: "密码",
+  },
+  {
+    name: "referralCode",
+    type: "text",
+    placeHolder: "输入推荐码",
+    label: "推荐码",
+  },
+];
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -86,6 +126,78 @@ const signinFormData = [
   },
 ];
 
+const signinFormDataFr = [
+  {
+    name: "email",
+    type: "email",
+    placeHolder: "jondo982@gmail.com",
+    label: "E-mail",
+  },
+  {
+    name: "password",
+    type: "password",
+    placeHolder: "*****",
+    label: "Mot de passe",
+  }
+]
+const signinFormDataChi = [
+  {
+    name: "email",
+    type: "email",
+    placeHolder: "jondo982@gmail.com",
+    label: "电子邮件",
+  },
+  {
+    name: "password",
+    type: "password",
+    placeHolder: "*****",
+    label: "密码",
+  }
+]
+const sidemenudata = [
+  {
+    welcome: "Welcome to Socio",
+    already: "Already have an account?",
+    button: "Sign In",
+  },
+]
+const sidemenudataFr = [
+  {
+    welcome: "Bienvenue sur Socio",
+    already: "Vous avez déjà un compte?",
+    button: "Se connecter",
+  },
+]
+const sidemenudataChi = [
+  {
+    welcome: "欢迎来到 Socio",
+    already: "已经有账户?",
+    button: "登入",
+  },
+]
+
+const sidemenudata2 = [
+  {
+    welcome: "Welcome to Socio",
+    already: "Don't have an account?",
+    button: "sign up",
+  },
+]
+const sidemenudata2Fr = [
+  {
+    welcome: "Bienvenue sur Socio",
+    already: "vous n'avez pas de compte ?",
+    button: "s'inscrire",
+  },
+]
+
+const sidemenudata2Chi = [
+  {
+    welcome: "歡迎來到 Socio",
+    already: "沒有賬戶？",
+    button: "報名",
+  },
+]
 const SigninformSchema = z.object({
   email: z.string().email("Invalid email address").trim(),
   password: z.string(),
@@ -120,6 +232,7 @@ const SideAuthSkeleton = () => (
 
 
 const AuthForm = () => {
+   const [Lang, setLang] = useState('En');
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -151,7 +264,56 @@ const AuthForm = () => {
   const [isPageLoading, setIsPageLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Determine the correct signin form data based on the current language
+  const signdata =
+    Lang === "En"
+      ? signinFormData
+      : Lang === "Fr"
+      ? signinFormDataFr
+      : Lang === "Chi"
+      ? signinFormDataChi
+      : signinFormData;
+
+      const signupdata =
+    Lang === "En"
+      ? formData
+      : Lang === "Fr"
+      ? formDataFr
+      : Lang === "Chi"
+      ? formDataChi
+      : formData;
+
+    const sidemenudatalang =
+    Lang === "En"
+      ? sidemenudata
+      : Lang === "Fr"
+      ? sidemenudataFr
+      : Lang === "Chi"
+      ? sidemenudataChi
+      : sidemenudata;
+
+      const sidemenudata2lang =
+    Lang === "En"
+      ? sidemenudata2
+      : Lang === "Fr"
+      ? sidemenudata2Fr
+      : Lang === "Chi"
+      ? sidemenudata2Chi
+      : sidemenudata2;
+
   useEffect(() => {
+    // Check if window is defined (i.e., we are on the client-side)
+    if (typeof window !== 'undefined') {
+      // Get data from local storage
+      const storedValue = localStorage.getItem('userLanguage');
+      if (storedValue) {
+        setLang(storedValue);
+        router.refresh();
+      }
+      // Check if userLanguage is set in local storage
+      console.log("Current Language:", storedValue);
+    }
+
     // Simulate page loading
     const timer = setTimeout(() => setIsPageLoading(false), 1200);
     return () => clearTimeout(timer);
@@ -191,6 +353,25 @@ const AuthForm = () => {
   };
   const isSmallDevice = useMediaQuery("(max-width : 768px)");
 
+  const handleLang =(lang: string) =>{
+    setLang(lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('userLanguage', lang);
+      console.log("Language set to:", lang);
+    }
+    router.refresh();
+    // You might want to trigger a page re-render or a context update here
+    // to apply the language change across your application.
+    // const signdata =
+    // Lang === "En"
+    //   ? signinFormData
+    //   : Lang === "Fr"
+    //   ? signinFormDataFr
+    //   : Lang === "Chi"
+    //   ? signinFormDataChi
+    //   : signinFormData;
+  }
+
   return (
     <div className="w-full max-w-xl flex flex-col-reverse lg:flex-row shadow-xl lg:max-w-6xl">
       {(isPageLoading || isSubmitting) ? (
@@ -203,20 +384,20 @@ const AuthForm = () => {
             className="bg-white w-full flex flex-col gap-8 p-10"
           >
             <div className="flex w-full justify-between">
-              <h1 className="text-4xl font-light">Sign In</h1>
+              <h1 className="text-4xl font-light">{Lang === "Fr" ? "Se connecter": Lang === "Chi"? "登入" :"Sign In"}</h1>
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex gap-2 items-center">
                   <FaEarthAmericas />
                   <FaChevronDown />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem>English</DropdownMenuItem>
-                  <DropdownMenuItem>French</DropdownMenuItem>
-                  <DropdownMenuItem>Chinese</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleLang("En")}>English</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleLang("Fr")}>French</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleLang("Chi")}>Chinese</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            {signinFormData.map((formField, index) => (
+            {signdata.map((formField, index) => (
               <FormField
                 key={index}
                 control={signinForm.control}
@@ -253,12 +434,11 @@ const AuthForm = () => {
                   </svg>
                   Loading...
                 </span>
-              ) : (
-                "Sign In"
+              ) : ( Lang === "Fr" ? "Se connecter" : Lang === "Chi" ? "登入" : "Sign In"
               )}
             </Button>
             <Label className="text-pink-500">
-              <span><Link href={"/reset"}> forgot Password?</Link></span>
+              <span><Link href={"/reset"}>{Lang === "Fr" ? "mot de passe oublié?" : Lang === "Chi" ? "忘密码" :"forgot Password"}</Link></span>
             </Label>
           </form>
         </Form>
@@ -283,20 +463,20 @@ const AuthForm = () => {
               className="bg-white w-full flex flex-col gap-8 p-10"
             >
               <div className="flex w-full justify-between">
-                <h1 className="text-4xl font-light">Sign Up</h1>
+                <h1 className="text-4xl font-light">{Lang === "Fr" ? "s'inscrire": Lang === "Chi"? "報名" :"Sign Up"}</h1>
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="flex gap-2 items-center">
-                    <FaEarthAmericas />
-                    <FaChevronDown />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem>English</DropdownMenuItem>
-                    <DropdownMenuItem>French</DropdownMenuItem>
-                    <DropdownMenuItem>Chinese</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <DropdownMenuTrigger className="flex gap-2 items-center">
+                  <FaEarthAmericas />
+                  <FaChevronDown />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => handleLang("En")}>English</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleLang("Fr")}>French</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleLang("Chi")}>Chinese</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               </div>
-              {formData.map((formField, index) => (
+              {signupdata.map((formField, index) => (
                 <FormField
                   key={index}
                   control={form.control}
@@ -324,11 +504,11 @@ const AuthForm = () => {
                 className="rounded-full py-6 bg-linear-[135deg,#f75959_0%,#f35587_100%]"
                 type="submit"
               >
-                Sign Up
+                {Lang === "Fr" ? "s'inscrire": Lang === "Chi"? "報名" :"Sign Up"}
               </Button>
               <Label className="text-pink-500">
                 <Checkbox className="bg-gray-100" id="agree" />
-                <span>i agree to the terms and conditions</span>
+                <span>{Lang === "Fr" ? "j'accepte les termes et conditions": Lang === "Chi" ? "我同意條款和條件":"i agree to the terms and conditions"}</span>
               </Label>
             </form>
           </motion.div>
@@ -357,16 +537,22 @@ const AuthForm = () => {
                     width={24}
                     height={24}
                    />
-            <h1 className="text-3xl text-center font-bold">Welcome to Socio</h1>
-            <p>Already have an account?</p>
-            <Button
+                   {sidemenudatalang.map ((item, index) => (
+                    <div key={index} className="flex flex-col items-center">
+                    <h1 className="text-3xl text-center font-bold">{item.welcome}</h1>
+                    <p>{item.already}</p>
+                     <Button
               size={"lg"}
               className="rounded-full bg-transparent hover:text-red-500"
               variant={"outline"}
               onClick={handleclicked}
             >
-              Sign In
+              {item.button}
             </Button>
+                    </div>
+                   ))}
+            
+           
           </div>
         </motion.div>
       ) : (
@@ -378,16 +564,20 @@ const AuthForm = () => {
                     width={24}
                     height={24}
                   />
-          <h1 className="text-3xl text-center font-bold">Welcome to Socio</h1>
-          <p>don&apos;t have an account?</p>
-          <Button
-            size={"lg"}
-            className="rounded-full bg-transparent hover:text-red-500"
-            variant={"outline"}
-            onClick={handleclicked}
-          >
-            Sign up
-          </Button>
+          {sidemenudata2lang.map ((item, index) => (
+                    <div key={index} className="flex flex-col items-center">
+                    <h1 className="text-3xl text-center font-bold">{item.welcome}</h1>
+                    <p>{item.already}</p>
+                     <Button
+              size={"lg"}
+              className="rounded-full bg-transparent hover:text-red-500"
+              variant={"outline"}
+              onClick={handleclicked}
+            >
+              {item.button}
+            </Button>
+                    </div>
+                   ))}
         </div>
       )}
     </div>

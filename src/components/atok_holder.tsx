@@ -206,7 +206,7 @@ const response = await addtraderequest(
       ...prev,
       adId: ad.id,
     }));
-    const del = await deletead(formData.adId);
+    const del = await deletead(ad.Id);
     if(!del.success){
       toast.error("unable to delete ad");
     }else{
