@@ -13,7 +13,6 @@ import { useCopyToClipboard } from "@uidotdev/usehooks";
 import { User } from '@prisma/client';
 import UpdateForm from './Forms/updateForm';
 import PicForm from './Forms/PicForm';
-import { useRouter } from 'next/navigation';
 
 // Translation object
 const translations = {
@@ -52,7 +51,6 @@ const translations = {
 };
 
 export default function Profile_pageholder({user}:{user: User})  {
-  const router = useRouter()
    const [Lang, setLang] = useState('En');
    const [copiedText, copyToClipboard] = useCopyToClipboard();
    const hasCopiedText = Boolean(copiedText);

@@ -16,11 +16,9 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Menu, Wallet, BadgeCheck, Bell} from "lucide-react";
 import { NavItems, NavItemsChi } from "@/app/(User)/app/(User)/user_config";
 import { LogOut } from "../../actions/authactions";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { getKycStatus1, getUserByEmail } from "@/functions/user";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { FaChevronDown, FaEarthAmericas } from "react-icons/fa6";
+import {  FaEarthAmericas } from "react-icons/fa6";
 
 // Add translation object at the top
 const translations = {
@@ -93,7 +91,6 @@ export default function HeaderCom({email}: {email: string}) {
     fetchPP();
   });
  const t = translations[Lang as "En" | "Chi"];
- const router = useRouter();
  const handleLang =(lang: string) =>{
     setLang(lang);
     if (typeof window !== 'undefined') {

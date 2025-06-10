@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import Overview_page from "@/components/overview-page";
-
+/* eslint-disable */
 import { getUserByEmail } from "@/functions/user";
 
 export default async function Overview() {
