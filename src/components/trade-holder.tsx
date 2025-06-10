@@ -11,6 +11,7 @@ import { Dialog } from "@radix-ui/react-dialog";
 import { DialogContent, DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }: { email: string, id: string, trades: any[], tradeinfo: any, adstrans: any[] }) {
   const [coin, setCoin] = useState<string>("");
@@ -37,8 +38,6 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
   const [viewLoading, setViewLoading] = useState<boolean>(false); // For loading spinner on view
   const [seenLoading, setSeenLoading] = useState(false); // <-- Add this state
   const [sendLoading, setSendLoading] = useState(false); // <-- Add this state
-  const [txHash, setTxHash] = useState<string>("");
-  const [feetxhash, setfeetxhash] = useState<string>("")
   const imgreceipt = useRef<HTMLInputElement>(null);
   const merchantconfirmRef = useRef(merchantconfirm);
   const customerconfirmRef = useRef(customerconfirm);
@@ -539,7 +538,7 @@ const feepollTx = async (txHash: string) => {
                 <h1 className="text-2xl font-bold text-green-700 mb-2">Transaction completed</h1>
                 <p className="mb-4">If you have any questions, feel free to reach out to the merchant.</p>
                 <p className="mb-4">Thank you for using our trading platform!</p>
-                <p className="mb-4">For any issues, please contact support.</p>
+                <p className="mb-4">For any issues, please <Link href="https://t.me/@gautalo" className="text-blue-500 hover:text-blue-200">contact support</Link>.</p>
                 <div className="w-full">
                   <div className="grid grid-box w-full gap-4">
                     <Button
