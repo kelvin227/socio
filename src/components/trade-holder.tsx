@@ -66,7 +66,7 @@ const feepollTx = async (txHash: string) => {
     if (res.success) {
       clearInterval(intervalId); // Stop polling once confirmed
     }
-  }, 5000); // Poll every 5 seconds (adjust as needed)
+  }, 10000); // Poll every 5 seconds (adjust as needed)
 };
 
   const pollTx = async (txHash: string) => {

@@ -18,95 +18,74 @@ export default async function Profile() {
     throw new Error("an unexpected error occurred can't get username")
   }
   const fetchadpriceatok = await prisma.adsTransaction.findFirst({
-    where: {
-      AND:[
-        {
-          status:"completed"
-        },
-      {
-        coin:"atok",
-      }
-    ]
+   where: {
+      AND: [
+        { status: "completed" },
+        { coin: "atok" }
+      ]
     },
-    select: { price: true},
+    orderBy: { createdAt: "desc" }, // Fetch the latest by creation date
+    select: { price: true },
   })
   const fetchadpricesocio = await prisma.adsTransaction.findFirst({
     where: {
-      AND:[
-        {
-          status:"completed"
-        },
-      {
-        coin:"socio",
-      }
-    ]
+      AND: [
+        { status: "completed" },
+        { coin: "socio" }
+      ]
     },
-    select: { price: true},
+    orderBy: { createdAt: "desc" }, // Fetch the latest by creation date
+    select: { price: true },
   })
   const fetchadpricewow = await prisma.adsTransaction.findFirst({
-    where:{
-     AND:[
-        {
-          status:"completed"
-        },
-      {
-        coin:"wow",
-      }
-    ]
+   where: {
+      AND: [
+        { status: "completed" },
+        { coin: "wow" }
+      ]
     },
-    select: { price: true},
+    orderBy: { createdAt: "desc" }, // Fetch the latest by creation date
+    select: { price: true },
   })
   const fetchadpricesidra = await prisma.adsTransaction.findFirst({
-    where:{
-      AND:[
-        {
-          status:"completed"
-        },
-      {
-        coin:"sidra",
-      }
-    ]
+    where: {
+      AND: [
+        { status: "completed" },
+        { coin: "sidra" }
+      ]
     },
-    select: { price: true},
+    orderBy: { createdAt: "desc" }, // Fetch the latest by creation date
+    select: { price: true },
   })
   const fetchadpriceruby = await prisma.adsTransaction.findFirst({
-    where:{
-      AND:[
-        {
-          status:"completed"
-        },
-      {
-        coin:"ruby",
-      }
-    ]
+    where: {
+      AND: [
+        { status: "completed" },
+        { coin: "ruby" }
+      ]
     },
-    select: { price: true},
+    orderBy: { createdAt: "desc" }, // Fetch the latest by creation date
+    select: { price: true },
   })
   const fetchadpriceopincur= await prisma.adsTransaction.findFirst({
-    where:{
-      AND:[
-        {
-          status:"completed"
-        },
-      {
-        coin:"opincur",
-      }
-    ]
+    where: {
+      AND: [
+        { status: "completed" },
+        { coin: "opincur" }
+      ]
     },
-    select: {price: true},
+    orderBy: { createdAt: "desc" }, // Fetch the latest by creation date
+    select: { price: true },
   })
   const fetchadpricestar = await prisma.adsTransaction.findFirst({
-    where:{
-      AND:[
-        {
-          status:"completed"
-        },
-      {
-        coin:"star",
-      }
-    ]
+    where: {
+      AND: [
+        { status: "completed" },
+        { coin: "star" }
+      ]
     },
-    select: { price: true},
+    orderBy: { createdAt: "desc" }, // Fetch the latest by creation date
+    select: { price: true },
   })
 
 
