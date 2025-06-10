@@ -390,7 +390,7 @@ const AuthForm = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                   <DropdownMenuItem onClick={() => handleLang("En")}>English</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleLang("Fr")}>French</DropdownMenuItem>
+                  {/* <DropdownMenuItem onClick={() => handleLang("Fr")}>French</DropdownMenuItem> */}
                   <DropdownMenuItem onClick={() => handleLang("Chi")}>Chinese</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
