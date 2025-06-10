@@ -5,17 +5,46 @@ import { Button } from "@/components/ui/button";
 import { ArrowBigLeft, Clock } from "lucide-react";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { addtraderequest, createads, deletead } from "@/functions/user";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { PutBlobResult } from "@vercel/blob";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp } from "lucide-react";
-import {checkbalance} from "@/functions/blockchain/wallet.utils";
+import { checkbalance } from "@/functions/blockchain/wallet.utils";
 
-export default function AtokHolder({ email, name, data, userads}: { email: string, name: string, data: any[], userads: any[] }) {
-  const [myad, setmyads] = useState(false)
+export default function AtokHolder({
+  email,
+  name,
+  data,
+  userads,
+  atokPrice,
+  wowPrice,
+  sidraPrice,
+  rubyPrice,
+  opincurPrice,
+  starPrice,
+  socioPrice,
+}: {
+  email: string;
+  name: string;
+  data: any[];
+  userads: any[];
+  atokPrice: string;
+  wowPrice: string;
+  sidraPrice: string;
+  rubyPrice: string;
+  opincurPrice: string;
+  starPrice: string;
+  socioPrice: string;
+}) {
+  const [myad, setmyads] = useState(false);
   const [showads, setshowads] = useState(true);
   const [selectedCoin, setSelectedCoin] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string | null>("buy"); // Selected transaction type for filtering
@@ -24,12 +53,12 @@ export default function AtokHolder({ email, name, data, userads}: { email: strin
   const [imgproof, setimgproof] = useState<PutBlobResult | null>(null);
   const idCardFrontRef = useRef<HTMLInputElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;
-  let filteredData = data.filter(item => item.type === selectedType)
-  let filteredcoin = filteredData.filter(item => item.coin === selectedCoin)
-  if(myad){
-    filteredData =userads.filter(item => item.type === selectedType)
-    filteredcoin = filteredData.filter(item => item.coin === selectedCoin)
+  const itemsPerPage = 5;
+  let filteredData = data.filter((item) => item.type === selectedType);
+  let filteredcoin = filteredData.filter((item) => item.coin === selectedCoin);
+  if (myad) {
+    filteredData = userads.filter((item) => item.type === selectedType);
+    filteredcoin = filteredData.filter((item) => item.coin === selectedCoin);
   }
   const totalPages = Math.ceil(filteredcoin.length / itemsPerPage);
   const paginatedAds = filteredcoin.slice(
@@ -50,10 +79,8 @@ export default function AtokHolder({ email, name, data, userads}: { email: strin
     adId: "",
     pricee: "",
     merchantusername: "",
-    type: "buy"
+    type: "buy",
   });
-
-
 
   const handlesell = () => {
     setSelectedType("sell");
@@ -61,10 +88,12 @@ export default function AtokHolder({ email, name, data, userads}: { email: strin
   };
   const handlebuy = () => {
     setBtn(false);
-    setSelectedType("buy")
+    setSelectedType("buy");
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -72,7 +101,10 @@ export default function AtokHolder({ email, name, data, userads}: { email: strin
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: "idCardFront" | "idCardBack") => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: "idCardFront" | "idCardBack"
+  ) => {
     const file = e.target.files?.[0] || null;
     setFormData((prev) => ({ ...prev, [field]: file }));
   };
@@ -106,8 +138,8 @@ export default function AtokHolder({ email, name, data, userads}: { email: strin
       );
       if (response.success) {
         toast("Ads created successfully!", {
-        className: "bg-green-500 text-white",
-      });
+          className: "bg-green-500 text-white",
+        });
         setFormData({
           proof: "",
           price: "",
@@ -122,67 +154,66 @@ export default function AtokHolder({ email, name, data, userads}: { email: strin
           merchantusername: "",
           type: "buy",
         }); // Reset form
-      } 
-        toast(response.message, {
+      }
+      toast(response.message, {
         className: "bg-red-500 text-white",
       });
     } catch (error) {
       console.error("Error uploading files:", error);
     }
-  }
+  };
 
   const handlepurchase = async (e: any) => {
     e.preventDefault();
     let balance;
     try {
-      if(selectedType === "sell"){
+      if (selectedType === "sell") {
         const response = await addtraderequest(
-        email,
-        formData.merchantusername,
-        formData.adId,
-        formData.amount,
-        Number(formData.pricee),
-        selectedCoin,
-        "sell"
-      )
-            if (response.success) {
-        setshowModal(true);// Close the modal after purchase
-        toast("Trade created successfully!");
+          email,
+          formData.merchantusername,
+          formData.adId,
+          formData.amount,
+          Number(formData.pricee),
+          selectedCoin,
+          "sell"
+        );
+        if (response.success) {
+          setshowModal(true); // Close the modal after purchase
+          toast("Trade created successfully!");
+        } else {
+          toast(response.message || "Failed to create trade request.");
+        }
       } else {
-        toast(response.message || "Failed to create trade request.");
-      }
-
-      }else{
-
-        const checkbalanc = await checkbalance(email, formData.amount.toString(), formData.pricee);
-        if(!checkbalanc.success){
+        const checkbalanc = await checkbalance(
+          email,
+          formData.amount.toString(),
+          formData.pricee
+        );
+        if (!checkbalanc.success) {
           toast.error(checkbalanc.message);
-        }else{
-const response = await addtraderequest(
-        email,
-        formData.merchantusername,
-        formData.adId,
-        formData.amount,
-        Number(formData.pricee),
-        selectedCoin,
-        "buy"
-      )
-      if (response.success) {
-        setshowModal(true);// Close the modal after purchase
-        toast.success("Trade created successfully!");
-      } else {
-        toast(response.message || "Failed to create trade request.");
+        } else {
+          const response = await addtraderequest(
+            email,
+            formData.merchantusername,
+            formData.adId,
+            formData.amount,
+            Number(formData.pricee),
+            selectedCoin,
+            "buy"
+          );
+          if (response.success) {
+            setshowModal(true); // Close the modal after purchase
+            toast.success("Trade created successfully!");
+          } else {
+            toast(response.message || "Failed to create trade request.");
+          }
+        }
       }
-    }
-    }
-      
     } catch (error) {
       console.error("Error creating trade:", error);
       toast("An unexpected error occurred.");
     }
-  }
-  
-
+  };
 
   const handleAdSelection = (ad: any) => {
     setFormData((prev) => ({
@@ -196,21 +227,20 @@ const response = await addtraderequest(
       status: "",
       merchantusername: ad.userName,
       amount: 0, // Reset amount when selecting a new ad
-
     }));
     setshowdialog(true);
   };
 
-    const handledelete = async(ad: any) => {
+  const handledelete = async (ad: any) => {
     setFormData((prev) => ({
       ...prev,
       adId: ad.id,
     }));
     const del = await deletead(ad.id);
-    if(!del.success){
+    if (!del.success) {
       toast.error("unable to delete ad");
-    }else{
-      toast.success("ad deleted successfully")
+    } else {
+      toast.success("ad deleted successfully");
       router.refresh();
     }
   };
@@ -218,24 +248,35 @@ const response = await addtraderequest(
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const amount = Number(e.target.value);
     const toReceive = amount * Number(formData.price); // Ensure price is treated as a number
-    const toReceiveProcessing = selectedType === "sell" ? toReceive - toReceive * 0.02 : toReceive + toReceive * 0.02; // Deduct 2% processing fee
+    const toReceiveProcessing =
+      selectedType === "sell"
+        ? toReceive - toReceive * 0.02
+        : toReceive + toReceive * 0.02; // Deduct 2% processing fee
 
     setFormData((prev) => ({
       ...prev,
       amount, // Update the amount
       toreceive: toReceive, // Set the calculated value for toreceive
       toreceiveprocessing: toReceiveProcessing, // Set the calculated value for toreceiveprocessing
-      }));
+    }));
   };
 
   const router = useRouter();
 
-  return (
-  
-    !showads ? (
-
-      <div>
-      <div className="flex flex-box cursor-pointer" onClick = {() => {setSelectedCoin(""), setshowads(true), setSelectedType("buy"), setshowdialog(false), setshowModal(false), setBtn(false), setmyads(false)}}>
+  return !showads ? (
+    <div>
+      <div
+        className="flex flex-box cursor-pointer"
+        onClick={() => {
+          setSelectedCoin(""),
+            setshowads(true),
+            setSelectedType("buy"),
+            setshowdialog(false),
+            setshowModal(false),
+            setBtn(false),
+            setmyads(false);
+        }}
+      >
         <ArrowBigLeft />
         Advertisement
       </div>
@@ -262,12 +303,19 @@ const response = await addtraderequest(
         </div>
         <div className="w-full pb-3">
           <Dialog>
-            <DialogTrigger className="w-full bg-blue-500 p-1 rounded" disabled={myad ? true : false}>Create Ads</DialogTrigger>
+            <DialogTrigger
+              className="w-full bg-blue-500 p-1 rounded"
+              disabled={myad ? true : false}
+            >
+              Create Ads
+            </DialogTrigger>
             <DialogContent>
               <DialogTitle>Create Advertisement</DialogTitle>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Proof</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Proof
+                  </label>
                   <input
                     id="idCardFront"
                     name="idCardFront"
@@ -280,7 +328,9 @@ const response = await addtraderequest(
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Price</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Price
+                  </label>
                   <input
                     type="number"
                     name="price"
@@ -291,7 +341,9 @@ const response = await addtraderequest(
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Minimum Quantity</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Minimum Quantity
+                  </label>
                   <input
                     type="number"
                     name="minQty"
@@ -302,7 +354,9 @@ const response = await addtraderequest(
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Maximum Quantity</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Maximum Quantity
+                  </label>
                   <input
                     type="number"
                     name="maxQty"
@@ -313,7 +367,9 @@ const response = await addtraderequest(
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-grey-700">Type</label>
+                  <label className="block text-sm font-medium text-grey-700">
+                    Type
+                  </label>
                   <select
                     name="type"
                     value={formData.type}
@@ -327,7 +383,9 @@ const response = await addtraderequest(
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Payment Method</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Payment Method
+                  </label>
                   <select
                     name="payment"
                     value={formData.payment}
@@ -347,22 +405,31 @@ const response = await addtraderequest(
         </div>
         <div className="flex flex-box w-full gap-3 pb-3">
           <div className="w-full">
-            <Button className="w-full" onClick={()=> {setmyads(true)}}>My Ads</Button>
+            <Button
+              className="w-full"
+              onClick={() => {
+                setmyads(true);
+              }}
+            >
+              My Ads
+            </Button>
           </div>
           <div className="w-full">
             <Button className="w-full">Official Web</Button>
           </div>
         </div>
         <div className="w-full pb-3">
-          <Button className="w-full" onClick={
-            () => {
-              router.replace("/otc/advertisement/trades")
-            }
-          }>Active trades</Button>
+          <Button
+            className="w-full"
+            onClick={() => {
+              router.replace("/otc/advertisement/trades");
+            }}
+          >
+            Active trades
+          </Button>
         </div>
       </div>
       <div className="container mx-auto py-10">
-
         {/* Ads Table */}
         <div className={showdialog ? "hidden" : ""}>
           <h2 className="text-2xl font-bold mb-4">Ads List</h2>
@@ -373,49 +440,54 @@ const response = await addtraderequest(
                 <th className="p-4 text-left">Username</th>
                 <th className="p-4 text-left">Price</th>
                 <th className="p-4 text-left">Available|limits</th>
-                <th className="p-4 text-left" colSpan={2}>Payment Method</th>
+                <th className="p-4 text-left" colSpan={2}>
+                  Payment Method
+                </th>
               </tr>
             </thead>
             <tbody>
               {filteredcoin.length > 0 ? (
                 paginatedAds.map((ad: any) => (
-                
                   <tr key={ad.id} className="border-b">
                     <td className="p-4">{ad.userName}</td>
                     <td className="p-4">{ad.price} USDT</td>
-                    <td className="p-4">{ad.minQty}-{ad.maxQty} {ad.coin}</td>
+                    <td className="p-4">
+                      {ad.minQty}-{ad.maxQty} {ad.coin}
+                    </td>
                     <td className="p-4">Wallet</td>
                     <td>
-
-                      {myad ? <Button
-              className="bg-red-500 w-full"
-              onClick={() => handledelete(ad)}
-            >
-              delete
-            </Button> :<Button
-                        className={selectedType === "buy" ? "bg-blue-500 text-white" : "bg-red-500 text-white"}
-                        disabled={name == ad.userName ? true : false}
-                        onClick={() => {
-                          handleAdSelection(ad);
-
-                        }}
-                      >
-                        {selectedType === "buy" ? ("buy") : ("sell")}
-                      </Button>}
+                      {myad ? (
+                        <Button
+                          className="bg-red-500 w-full"
+                          onClick={() => handledelete(ad)}
+                        >
+                          delete
+                        </Button>
+                      ) : (
+                        <Button
+                          className={
+                            selectedType === "buy"
+                              ? "bg-blue-500 text-white"
+                              : "bg-red-500 text-white"
+                          }
+                          disabled={name == ad.userName ? true : false}
+                          onClick={() => {
+                            handleAdSelection(ad);
+                          }}
+                        >
+                          {selectedType === "buy" ? "buy" : "sell"}
+                        </Button>
+                      )}
                     </td>
                   </tr>
-                
-                   
-          
-                )
-              ) ): (
+                ))
+              ) : (
                 <tr>
                   <td colSpan={4} className="p-4 text-center text-gray-500">
                     No ads found
                   </td>
                 </tr>
               )}
-              
             </tbody>
           </table>
           {/* Pagination Controls */}
@@ -445,7 +517,9 @@ const response = await addtraderequest(
         <div className={showdialog && !showModal ? "" : "hidden"}>
           <form onSubmit={handlepurchase} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Amount</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Amount
+              </label>
               <input
                 type="number"
                 name="amount"
@@ -456,7 +530,9 @@ const response = await addtraderequest(
               />
             </div>
             <div>
-              <label className="block text-sm font-medium light:text-gray-700">{selectedType === "buy" ? "USDT to send:": "USDT to receive:"}</label>
+              <label className="block text-sm font-medium light:text-gray-700">
+                {selectedType === "buy" ? "USDT to send:" : "USDT to receive:"}
+              </label>
               <input
                 type="number"
                 name="toreceive"
@@ -467,7 +543,9 @@ const response = await addtraderequest(
             </div>
             <div>
               <label className="block text-sm font-medium light:text-gray-700">
-                {selectedType === "buy" ? "What you wil send after addition of processing fees": "What you will receive after deduction of processing fee:"}
+                {selectedType === "buy"
+                  ? "What you wil send after addition of processing fees"
+                  : "What you will receive after deduction of processing fee:"}
               </label>
               <input
                 type="number"
@@ -490,28 +568,38 @@ const response = await addtraderequest(
               paginatedAds.map((ad: any) => (
                 <div key={ad.id}>
                   <div className={showdialog ? "hidden" : ""}>
-                    <div className="flex flex-cols-2 gap-4" >
+                    <div className="flex flex-cols-2 gap-4">
                       <div className="col-span-1">
                         <h3 className="text-lg font-bold">{ad.userName}</h3>
                         <p>Price: {ad.price} USDT</p>
-                        <p>Available: {ad.minQty}-{ad.maxQty} {ad.coin}</p>
+                        <p>
+                          Available: {ad.minQty}-{ad.maxQty} {ad.coin}
+                        </p>
                         <p>Payment Method: Wallet</p>
                       </div>
                       <div className="col-span-1">
-                        {myad ? <Button
-              className="bg-red-500 w-full"
-              onClick={() => handledelete(ad)}
-            >
-              delete
-            </Button> :<Button
-                          className={selectedType === "buy" ? "bg-blue-500 text-white" : "bg-red-500 text-white"}
-                          disabled={name == ad.userName ? true : false}
-                          onClick={() => {
-                            handleAdSelection(ad);
-                          }}
-                        >
-                          {selectedType === "buy" ? ("buy") : ("sell")}
-                        </Button>}
+                        {myad ? (
+                          <Button
+                            className="bg-red-500 w-full"
+                            onClick={() => handledelete(ad)}
+                          >
+                            delete
+                          </Button>
+                        ) : (
+                          <Button
+                            className={
+                              selectedType === "buy"
+                                ? "bg-blue-500 text-white"
+                                : "bg-red-500 text-white"
+                            }
+                            disabled={name == ad.userName ? true : false}
+                            onClick={() => {
+                              handleAdSelection(ad);
+                            }}
+                          >
+                            {selectedType === "buy" ? "buy" : "sell"}
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -522,27 +610,27 @@ const response = await addtraderequest(
             )}
 
             {/* Pagination Controls */}
-          {filteredcoin.length > itemsPerPage && (
-            <div className="flex justify-center items-center gap-4 mt-4">
-              <Button
-                className="px-4 py-2"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((prev) => prev - 1)}
-              >
-                Previous
-              </Button>
-              <span>
-                Page {currentPage} of {totalPages}
-              </span>
-              <Button
-                className="px-4 py-2"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((prev) => prev + 1)}
-              >
-                Next
-              </Button>
-            </div>
-          )}
+            {filteredcoin.length > itemsPerPage && (
+              <div className="flex justify-center items-center gap-4 mt-4">
+                <Button
+                  className="px-4 py-2"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                >
+                  Previous
+                </Button>
+                <span>
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                  className="px-4 py-2"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </div>
         </div>
         {/* Modal for Purchase Confirmation */}
@@ -552,21 +640,34 @@ const response = await addtraderequest(
             <div className="flex justify-center mb-4">
               <Clock className="text-yellow-500 w-16 h-16" />
             </div>
-            <h1 className="text-2xl font-bold text-yellow-700 mb-2">trade Pending</h1>
+            <h1 className="text-2xl font-bold text-yellow-700 mb-2">
+              trade Pending
+            </h1>
             <p className="text-gray-700 mb-4">
-              Thank you, <span className="font-semibold">{name}</span>, for choose to buy from me. Your trade request has been sent to the buyer.
+              Thank you, <span className="font-semibold">{name}</span>, for
+              choose to buy from me. Your trade request has been sent to the
+              buyer.
             </p>
             <p className="text-gray-600">
-              please wait while the {selectedType ==="buy"? "Seller": "Buyer"} is being contacted if the buyer does not response in the next 5 hours your request will be automatically be canceled
+              please wait while the{" "}
+              {selectedType === "buy" ? "Seller" : "Buyer"} is being contacted
+              if the buyer does not response in the next 5 hours your request
+              will be automatically be canceled
             </p>
           </div>
         </div>
       </div>
     </div>
-    ) :
-     (
-       <div>
-      <div className="pb-4" onClick = {() => {setSelectedCoin("atok"), setshowads(false)}}>
+  ) : (
+    <div>
+
+      {/* Atok */}
+      <div
+        className="pb-4"
+        onClick={() => {
+          setSelectedCoin("atok"), setshowads(false);
+        }}
+      >
         <Card>
           <div className="flex flex-box w-full p-2">
             <CardContent>
@@ -583,6 +684,10 @@ const response = await addtraderequest(
 
             <div>
               <CardContent>Atok/USDT</CardContent>
+              <div className="lg:flex lg:flex-box">
+                <CardContent>Last Traded Price:</CardContent>
+                <CardContent>{atokPrice}USDT</CardContent>
+              </div>
             </div>
 
             <div className="absolute right-0">
@@ -599,10 +704,16 @@ const response = await addtraderequest(
             </div>
           </div>
         </Card>
-        
       </div>
 
-      <div className="pb-4" onClick = {() => {setSelectedCoin("wow"), setshowads(false)}}>
+      {/* Wow */}
+
+      <div
+        className="pb-4"
+        onClick={() => {
+          setSelectedCoin("wow"), setshowads(false);
+        }}
+      >
         <Card>
           <div className="flex flex-box w-full p-2">
             <CardContent>
@@ -616,15 +727,19 @@ const response = await addtraderequest(
                 </Avatar>
               </div>
             </CardContent>
-        
+
             <div>
               <CardContent>WOW/USDT</CardContent>
+              <div className="lg:flex lg:flex-box">
+                <CardContent>Last Traded Price:</CardContent>
+                <CardContent>{wowPrice} USDT</CardContent>
+              </div>
             </div>
-        
+
             <div className="absolute right-0">
               <div className="grid grid-box">
                 <CardContent>start trading</CardContent>
-        
+
                 <CardContent>
                   <div className="flex flex-box">
                     2% fee
@@ -635,11 +750,16 @@ const response = await addtraderequest(
             </div>
           </div>
         </Card>
-        
-        
       </div>
 
-      <div className="pb-4" onClick = {() => {setSelectedCoin("sidra"), setshowads(false)}}>
+      {/* Sidra */}
+
+      <div
+        className="pb-4"
+        onClick={() => {
+          setSelectedCoin("sidra"), setshowads(false);
+        }}
+      >
         <Card>
           <div className="flex flex-box w-full p-2">
             <CardContent>
@@ -653,15 +773,19 @@ const response = await addtraderequest(
                 </Avatar>
               </div>
             </CardContent>
-        
+
             <div className="">
               <CardContent>SDA/USDT</CardContent>
+              <div className="lg:flex lg:flex-box">
+                <CardContent>Last Traded Price:</CardContent>
+                <CardContent>{sidraPrice} USDT</CardContent>
+              </div>
             </div>
-        
+
             <div className="absolute right-0">
               <div className="grid grid-box">
                 <CardContent>Start Trading</CardContent>
-        
+
                 <CardContent>
                   <div className="flex flex-box">
                     2% fee
@@ -672,10 +796,15 @@ const response = await addtraderequest(
             </div>
           </div>
         </Card>
-        
       </div>
 
-      <div className="pb-4" onClick = {() => {setSelectedCoin("ruby"), setshowads(false)}}>
+      {/* Ruby */}
+      <div
+        className="pb-4"
+        onClick={() => {
+          setSelectedCoin("ruby"), setshowads(false);
+        }}
+      >
         <Card>
           <div className="flex flex-box w-full p-2">
             <CardContent>
@@ -689,15 +818,19 @@ const response = await addtraderequest(
                 </Avatar>
               </div>
             </CardContent>
-        
+
             <div className="">
               <CardContent>RBL/USDT</CardContent>
+              <div className="lg:flex lg:flex-box">
+                <CardContent>Last Traded Price:</CardContent>
+                <CardContent>{rubyPrice} USDT</CardContent>
+              </div>
             </div>
-        
+
             <div className="absolute right-0">
               <div className="grid grid-box">
                 <CardContent>Start Trading</CardContent>
-        
+
                 <CardContent>
                   <div className="flex flex-box">
                     2% fee
@@ -708,12 +841,15 @@ const response = await addtraderequest(
             </div>
           </div>
         </Card>
-
-        
-        
       </div>
 
-      <div className="pb-4" onClick = {() => {setSelectedCoin("Opincur"), setshowads(false)}}>
+      {/* Opincur */}
+      <div
+        className="pb-4"
+        onClick={() => {
+          setSelectedCoin("Opincur"), setshowads(false);
+        }}
+      >
         <Card>
           <div className="flex flex-box w-full p-2">
             <CardContent>
@@ -727,15 +863,19 @@ const response = await addtraderequest(
                 </Avatar>
               </div>
             </CardContent>
-        
+
             <div className="">
               <CardContent>Opincur/USDT</CardContent>
+              <div className="lg:flex lg:flex-box">
+                <CardContent>Last Traded Price:</CardContent>
+                <CardContent>{opincurPrice} USDT</CardContent>
+              </div>
             </div>
-        
+
             <div className="absolute right-0">
               <div className="grid grid-box">
                 <CardContent>Start Trading</CardContent>
-        
+
                 <CardContent>
                   <div className="flex flex-box">
                     2% fee
@@ -746,12 +886,15 @@ const response = await addtraderequest(
             </div>
           </div>
         </Card>
-
-        
-        
       </div>
 
-      <div className="pb-4" onClick = {() => {setSelectedCoin("star"), setshowads(false)}}>
+      {/* Star Network */}
+      <div
+        className="pb-4"
+        onClick={() => {
+          setSelectedCoin("star"), setshowads(false);
+        }}
+      >
         <Card>
           <div className="flex flex-box w-full p-2">
             <CardContent>
@@ -765,15 +908,19 @@ const response = await addtraderequest(
                 </Avatar>
               </div>
             </CardContent>
-        
+
             <div className="">
               <CardContent>Star Network/USDT</CardContent>
+              <div className="lg:flex lg:flex-box">
+                <CardContent>Last Traded Price:</CardContent>
+                <CardContent>{starPrice} USDT</CardContent>
+              </div>
             </div>
-        
+
             <div className="absolute right-0">
               <div className="grid grid-box">
                 <CardContent>Start Trading</CardContent>
-        
+
                 <CardContent>
                   <div className="flex flex-box">
                     2% fee
@@ -784,10 +931,15 @@ const response = await addtraderequest(
             </div>
           </div>
         </Card>
-        
       </div>
 
-      <div className="pb-4" onClick = {() => {setSelectedCoin("socio"), setshowads(false)}}>
+      {/* socio coin */}
+      <div
+        className="pb-4"
+        onClick={() => {
+          setSelectedCoin("socio"), setshowads(false);
+        }}
+      >
         <Card>
           <div className="flex flex-box w-full p-2">
             <CardContent>
@@ -801,15 +953,19 @@ const response = await addtraderequest(
                 </Avatar>
               </div>
             </CardContent>
-        
+
             <div className="">
-              <CardContent>Socio</CardContent>
+              <CardContent>Socio/USDT</CardContent>
+              <div className="lg:flex lg:flex-box">
+                <CardContent>Last Traded Price:</CardContent>
+                <CardContent>{socioPrice}USDT</CardContent>
+              </div>
             </div>
-        
+
             <div className="absolute right-0">
               <div className="grid grid-box">
                 <CardContent>Start Trading</CardContent>
-        
+
                 <CardContent>
                   <div className="flex flex-box">
                     2% fee
@@ -820,16 +976,13 @@ const response = await addtraderequest(
             </div>
           </div>
         </Card>
-        
       </div>
     </div>
-    )
-    
-      
   );
 }
 
-{/* <div>
+{
+  /* <div>
                             price: {ad.price} USDT
                             <br />
                             Available: {ad.minQty}-{ad.maxQty} Atok
@@ -843,4 +996,5 @@ const response = await addtraderequest(
                             <br />
                             <h2>Note from the Buyer: hello thanks for trading with kelvin</h2>
 
-                          </div> */}
+                          </div> */
+}

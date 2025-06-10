@@ -31,7 +31,7 @@ export default function RootLayout({
           <SessionProvider> {/* Fixed missing session prop */}
             {/* <TooltipProvider> */}
               <SidebarProvider> 
-                <AppSidebar navItems={NavItems} /> 
+                {/* <AppSidebar navItems={NavItems} />  */}
                 <main className="w-full">
                   <Header />
                   <div className="ml-5 mt-4 mr-3">

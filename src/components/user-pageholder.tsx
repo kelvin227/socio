@@ -27,22 +27,27 @@ import {
   //IconTrendingDown,
 } from "@tabler/icons-react"
 import { getfivep2ptransaction } from "@/functions/user";
+import { useRouter } from "next/navigation";
 
-
-const chartConfig = {
-  Buy: {
-    label: "Buy",
-    color: "#2563eb",
-  },
-  Sell: {
-    label: "Sell",
-    color: "#60a5fa",
-  },
-} satisfies ChartConfig
+const monthTranslations: Record<string, { En: string; Chi: string }> = {
+  January: { En: "January", Chi: "一月" },
+  February: { En: "February", Chi: "二月" },
+  March: { En: "March", Chi: "三月" },
+  April: { En: "April", Chi: "四月" },
+  May: { En: "May", Chi: "五月" },
+  June: { En: "June", Chi: "六月" },
+  July: { En: "July", Chi: "七月" },
+  August: { En: "August", Chi: "八月" },
+  September: { En: "September", Chi: "九月" },
+  October: { En: "October", Chi: "十月" },
+  November: { En: "November", Chi: "十一月" },
+  December: { En: "December", Chi: "十二月" },
+};
 
 
   
 export default function PagePlaceholder({ pageName, barchartdata }: { pageName: string, barchartdata: any[] }) {
+  const [Lang, setLang] = useState('En');
   const [totalVolume, setTotalVolume] = useState<number>(0);
   const [oldVolume, setOldVolume] = useState<number>(0);
   const [percentchange, setPercentChange] = useState<number>(0);
@@ -59,19 +64,34 @@ export default function PagePlaceholder({ pageName, barchartdata }: { pageName: 
   // const [totalTrades, setTotalTrades] = useState(0);
   // const [oldTrades, setOldTrades] = useState(0);
   // const [Tradespercent, setTradesPercent] =useState(0);
+  const translatedData = barchartdata.map((item: any) => ({
+  ...item,
+  month: monthTranslations[item.month]?.[Lang as "En" | "Chi"] || item.month,
+}));
+  const chartConfig = {
+  Buy: {
+    label: Lang === "Chi" ? "買" :"Buy",
+    color: "#2563eb",
+  },
+  Sell: {
+    label: Lang === "Chi"? "賣":"Sell",
+    color: "#60a5fa",
+  },
+} satisfies ChartConfig
+
   const cardData = [
   {
-    title: "Volume",
+    title: Lang === "Chi"?"體積":"Volume",
     description: `${percentchange}%`,
     content: totalVolume,
   },
   {
-    title: "Earnings",
+    title: Lang === "Chi" ? "效益" :"Earnings",
     description: "35%",
     content: "200+",
   },
   {
-    title: "Completed trades",
+    title: Lang === "Chi" ? "已完成的交易" :"Completed trades",
     description: `${completedtranspercent}%`,
     content: completedtrans,
   },
@@ -110,6 +130,16 @@ useEffect(()=> {
 
     setcompletedtranspercent(percentageChange);
     setPercentChange(CPC);
+    // Check if window is defined (i.e., we are on the client-side)
+    if (typeof window !== 'undefined') {
+      // Get data from local storage
+      const storedValue = localStorage.getItem('userLanguage');
+      if (storedValue) {
+        setLang(storedValue);
+      }
+      // Check if userLanguage is set in local storage
+      console.log("Current Language:", storedValue);
+    }
 })
   return (
     <div className="flex flex-col gap-4 mt-10">
@@ -128,7 +158,7 @@ useEffect(()=> {
         ))}
       </div>
       <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-      <BarChart accessibilityLayer data={barchartdata}>
+      <BarChart accessibilityLayer data={translatedData}>
       <CartesianGrid vertical={false} />
       <XAxis
       dataKey="month"

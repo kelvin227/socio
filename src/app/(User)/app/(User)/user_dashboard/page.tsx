@@ -93,8 +93,6 @@ export default async function Home() {
       }
       // Any other 'type' values will simply be ignored
     });
-
-
   return (
     <div>
       <PagePlaceholder pageName={session?.user?.email as string} barchartdata={monthlyAggregates as any} />

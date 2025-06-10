@@ -20,7 +20,7 @@ const FAQPage = () => {
     },
     {
       question: "How can I contact support?",
-      answer: "You can contact our support team via the 'Contact Us' page or email us at support@socio.com.",
+      answer: "You can contact our support team via the 'Contact Us' page or email us at otcsocio@gmail.com.",
     },
     {
       question: "Are there any fees for using Socio?",

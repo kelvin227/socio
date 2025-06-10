@@ -310,9 +310,7 @@ const AuthForm = () => {
         setLang(storedValue);
         router.refresh();
       }
-      // Check if userLanguage is set in local storage
-      console.log("Current Language:", storedValue);
-    }
+        }
 
     // Simulate page loading
     const timer = setTimeout(() => setIsPageLoading(false), 1200);

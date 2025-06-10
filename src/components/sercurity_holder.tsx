@@ -1,3 +1,4 @@
+// filepath: [sercurity_holder.tsx](http://_vscodecontentref_/4)
 "use client";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,8 +9,53 @@ import {
 } from "@/components/ui/card";
 import { checkcode, sendcode, updatePassword } from "@/functions/user";
 import { Key, Mail, RectangleEllipsis } from "lucide-react";
-import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+
+// Translation object
+const translations = {
+  En: {
+    emailVerification: "Email Address Verification",
+    verifyEmail: "verify your email address",
+    verified: "Verified",
+    edit: "Edit",
+    loginPassword: "Login password",
+    changeLoginPassword: "change your login password",
+    changePassword: "Change Password",
+    pinCode: "Pin Code",
+    changePin: "change your pin code for transaction",
+    enterVerificationCode: "Enter Verification Code",
+    enterVerificationDesc: "Please enter the 6-digit verification code sent to your email address.",
+    verify: "Verify",
+    cancel: "Cancel",
+    changePasswordTitle: "Change Password",
+    changePasswordDesc: "Enter your new password below. Make sure it is strong and secure.",
+    newPassword: "New Password",
+    confirmNewPassword: "Confirm New Password",
+    passwordsNoMatch: "Passwords do not match",
+  },
+  Chi: {
+    emailVerification: "電子郵件地址驗證",
+    verifyEmail: "驗證您的電子郵件地址",
+    verified: "已驗證",
+    edit: "編輯",
+    loginPassword: "登錄密碼",
+    changeLoginPassword: "更改您的登錄密碼",
+    changePassword: "更改密碼",
+    pinCode: "PIN碼",
+    changePin: "更改您的交易PIN碼",
+    enterVerificationCode: "輸入驗證碼",
+    enterVerificationDesc: "請輸入發送到您電子郵件地址的6位驗證碼。",
+    verify: "驗證",
+    cancel: "取消",
+    changePasswordTitle: "更改密碼",
+    changePasswordDesc: "請在下方輸入您的新密碼。請確保它足夠強且安全。",
+    newPassword: "新密碼",
+    confirmNewPassword: "確認新密碼",
+    passwordsNoMatch: "密碼不匹配",
+  }
+};
 
 export default function Security({ email, verified }: { email: string, verified: boolean }) {
     const [codeDialog, setCodeDialog] = useState<boolean>(false);
@@ -17,7 +63,12 @@ export default function Security({ email, verified }: { email: string, verified:
     const [code, setCode] = useState<string>("")
     const [pass, setPass] = useState<string>("")
     const [confirmPass, setconfirmPass] = useState<string>("");
+    const [Lang, setLang] = useState<string>("En");
+    const router = useRouter();
 
+    const t = translations[Lang as "En" | "Chi"];
+
+    
     const sendCode = async () => {
         const sendVcode = await sendcode(email);
         if (sendVcode?.success) {
@@ -54,6 +105,17 @@ export default function Security({ email, verified }: { email: string, verified:
         setconfirmPass(e.target.value);
     };
 
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+          const storedValue = localStorage.getItem('userLanguage');
+          if (storedValue) {
+            setLang(storedValue);
+            router.refresh();
+          }
+        }
+    }, []);
+
     return (
         <div>
             <div className={codeDialog ? "hidden" : ""}>
@@ -63,12 +125,12 @@ export default function Security({ email, verified }: { email: string, verified:
                             <Mail size={50} />
                         </CardContent>
                         <div className="grid grid-box">
-                            <CardTitle>Email Address Verification</CardTitle>
-                            <CardDescription>verify your email address</CardDescription>
+                            <CardTitle>{t.emailVerification}</CardTitle>
+                            <CardDescription>{t.verifyEmail}</CardDescription>
                         </div>
                         <div className="absolute right-0">
                             <CardContent>
-                                {verified ? <Button disabled={true}>Verified</Button> : <Button onClick={sendCode}>Edit</Button>}
+                                {verified ? <Button disabled={true}>{t.verified}</Button> : <Button onClick={sendCode}>{t.edit}</Button>}
                             </CardContent>
                         </div>
                     </div>
@@ -81,12 +143,12 @@ export default function Security({ email, verified }: { email: string, verified:
                                 <RectangleEllipsis size={50} />
                             </CardContent>
                             <div className="grid grid-box">
-                                <CardTitle>Login password</CardTitle>
-                                <CardDescription>change your login password</CardDescription>
+                                <CardTitle>{t.loginPassword}</CardTitle>
+                                <CardDescription>{t.changeLoginPassword}</CardDescription>
                             </div>
                             <div className="absolute right-0">
                                 <CardContent>
-                                    <Button onClick={() => setchangepassDialog(true)}>Change Password</Button>
+                                    <Button onClick={() => setchangepassDialog(true)}>{t.changePassword}</Button>
                                 </CardContent>
                             </div>
                         </div>
@@ -98,30 +160,25 @@ export default function Security({ email, verified }: { email: string, verified:
                                 <Key size={50} />
                             </CardContent>
                             <div className="grid grid-box">
-                                <CardTitle>Pin Code</CardTitle>
-                                <CardDescription>change your pin code for transaction</CardDescription>
+                                <CardTitle>{t.pinCode}</CardTitle>
+                                <CardDescription>{t.changePin}</CardDescription>
                             </div>
                         </div>
                     </Card>
                 </div>
-
             </div>
 
-            {/* dialog for the email verfication process */}
+            {/* dialog for the email verification process */}
             <div className={codeDialog ? "flex flex-col items-center justify-center min-h-[300px] light:bg-white rounded-lg shadow-lg p-8" : "hidden"}>
-                <h2 className="text-xl font-bold mb-4">Enter Verification Code</h2>
+                <h2 className="text-xl font-bold mb-4">{t.enterVerificationCode}</h2>
                 <p className="mb-4 text-gray-600 text-center">
-                    Please enter the 6-digit verification code sent to your email address.
+                    {t.enterVerificationDesc}
                 </p>
                 <form
                     className="flex flex-col items-center gap-4 w-full max-w-xs"
                     onSubmit={async (e) => {
                         e.preventDefault();
-                        // TODO: Call your verify code function here
                         await handleverify(code);
-                        // Example:
-                        // const result = await verifyCode(email, code);
-                        // if (result.success) { ... }
                     }}
                 >
                     <input
@@ -132,7 +189,7 @@ export default function Security({ email, verified }: { email: string, verified:
                         required
                         onChange={handleInputChange}></input>
                     <Button type="submit" className="w-full bg-blue-600 text-white rounded-md">
-                        Verify
+                        {t.verify}
                     </Button>
                     <Button
                         type="button"
@@ -140,24 +197,23 @@ export default function Security({ email, verified }: { email: string, verified:
                         className="w-full"
                         onClick={() => setCodeDialog(false)}
                     >
-                        Cancel
+                        {t.cancel}
                     </Button>
                 </form>
             </div>
 
             {/* dialog for the Changing password process */}
             <div className={changepassDialog && !codeDialog ? "flex flex-col items-center justify-center min-h-[300px] light:bg-white rounded-lg shadow-lg p-8" : "hidden"}>
-                <h2 className="text-xl font-bold mb-4">Change Password</h2>
+                <h2 className="text-xl font-bold mb-4">{t.changePasswordTitle}</h2>
                 <p className="mb-4 text-gray-600 text-center">
-                    Enter your new password below. Make sure it is strong and secure.
+                    {t.changePasswordDesc}
                 </p>
                 <form
                     className="flex flex-col items-center gap-4 w-full max-w-xs"
                     onSubmit={async (e) => {
                         e.preventDefault();
-                        
                         if (pass !== confirmPass) {
-                            toast.error("Passwords do not match");
+                            toast.error(t.passwordsNoMatch);
                             return;
                         }
                         await changePassword(pass);
@@ -171,7 +227,7 @@ export default function Security({ email, verified }: { email: string, verified:
                         onChange={handleInputChangepass}
                         minLength={6}
                         required
-                        placeholder="New Password"
+                        placeholder={t.newPassword}
                         className="w-full px-4 py-2 border border-gray-300 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <input
@@ -181,11 +237,11 @@ export default function Security({ email, verified }: { email: string, verified:
                         onChange={handleInputChangeconfirmpass}
                         minLength={6}
                         required
-                        placeholder="Confirm New Password"
+                        placeholder={t.confirmNewPassword}
                         className="w-full px-4 py-2 border border-gray-300 rounded-md text-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <Button type="submit" className="w-full bg-green-600 text-white rounded-md">
-                        Change Password
+                        {t.changePassword}
                     </Button>
                     <Button
                         type="button"
@@ -193,11 +249,10 @@ export default function Security({ email, verified }: { email: string, verified:
                         className="w-full"
                         onClick={() => setchangepassDialog(false)}
                     >
-                        Cancel
+                        {t.cancel}
                     </Button>
                 </form>
             </div>
         </div>
     );
 };
-
