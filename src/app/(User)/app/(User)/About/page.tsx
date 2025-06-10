@@ -30,7 +30,7 @@ const AboutPage = () => {
       <p className=" dark:text-gray-300 light:text-gray-700">
         Have questions or need support? Feel free to reach out to us at{" "}
         <a href="mailto:support@socio.com" className="text-blue-500 underline">
-          support@socio.com
+          otcsocio@gmail.com
         </a>. We&apos;re here to help!
       </p>
     </div>
