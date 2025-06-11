@@ -1,6 +1,6 @@
 "use client";
 /* eslint-disable */
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowBigLeft, Clock } from "lucide-react";
 import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -18,6 +18,104 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { TrendingUp } from "lucide-react";
 import { checkbalance } from "@/functions/blockchain/wallet.utils";
+
+// Translation object
+const translations = {
+  En: {
+    advertisement: "Advertisement",
+    buy: "Buy",
+    sell: "Sell",
+    createAds: "Create Ads",
+    createAdvertisement: "Create Advertisement",
+    proof: "Proof",
+    price: "Price",
+    minQty: "Minimum Quantity",
+    maxQty: "Maximum Quantity",
+    type: "Type",
+    paymentMethod: "Payment Method",
+    submit: "Submit",
+    myAds: "My Ads",
+    officialWeb: "Official Web",
+    activeTrades: "Active trades",
+    adsList: "Ads List",
+    username: "Username",
+    availableLimits: "Available|limits",
+    noAdsFound: "No ads found",
+    delete: "Delete",
+    usdtToSend: "USDT to send:",
+    usdtToReceive: "USDT to receive:",
+    afterFeeSend: "What you wil send after addition of processing fees",
+    afterFeeReceive: "What you will receive after deduction of processing fee:",
+    waitingForConfirmation: "Waiting For Confirmation",
+    tradePending: "Trade Pending",
+    thankYou: "Thank you,",
+    chooseToBuy: "for choose to buy from me. Your trade request has been sent to the buyer.",
+    pleaseWait: "please wait while the",
+    seller: "Seller",
+    buyer: "Buyer",
+    isContacted: "is being contacted if the buyer does not response in the next 5 hours your request will be automatically be canceled",
+    startTrading: "Start Trading",
+    lastTradedPrice: "Last Traded Price:",
+    fee: "2% fee",
+    page: "Page",
+    of: "of",
+    previous: "Previous",
+    next: "Next",
+    submitSuccess: "Ads created successfully!",
+    submitFail: "Failed to create ad.",
+    tradeSuccess: "Trade created successfully!",
+    tradeFail: "Failed to create trade request.",
+    adDeleteSuccess: "ad deleted successfully",
+    adDeleteFail: "unable to delete ad",
+  },
+  Chi: {
+    advertisement: "廣告",
+    buy: "買入",
+    sell: "賣出",
+    createAds: "創建廣告",
+    createAdvertisement: "創建廣告",
+    proof: "證明",
+    price: "價格",
+    minQty: "最小數量",
+    maxQty: "最大數量",
+    type: "類型",
+    paymentMethod: "支付方式",
+    submit: "提交",
+    myAds: "我的廣告",
+    officialWeb: "官方網站",
+    activeTrades: "進行中的交易",
+    adsList: "廣告列表",
+    username: "用戶名",
+    availableLimits: "可用/限額",
+    noAdsFound: "暫無廣告",
+    delete: "刪除",
+    usdtToSend: "需發送 USDT：",
+    usdtToReceive: "將收到 USDT：",
+    afterFeeSend: "加上手續費後需發送金額",
+    afterFeeReceive: "扣除手續費後將收到金額：",
+    waitingForConfirmation: "等待確認",
+    tradePending: "交易待處理",
+    thankYou: "感謝，",
+    chooseToBuy: "選擇向我購買。您的交易請求已發送給買家。",
+    pleaseWait: "請稍候，",
+    seller: "賣家",
+    buyer: "買家",
+    isContacted: "正在聯繫，如買家 5 小時內未響應，請求將自動取消。",
+    startTrading: "開始交易",
+    lastTradedPrice: "最新成交價：",
+    fee: "2% 手續費",
+    page: "頁",
+    of: "共",
+    previous: "上一頁",
+    next: "下一頁",
+    submitSuccess: "廣告創建成功！",
+    submitFail: "創建廣告失敗。",
+    tradeSuccess: "交易創建成功！",
+    tradeFail: "創建交易請求失敗。",
+    adDeleteSuccess: "廣告刪除成功",
+    adDeleteFail: "無法刪除廣告",
+  }
+};
 
 export default function AtokHolder({
   email,
@@ -44,10 +142,12 @@ export default function AtokHolder({
   starPrice: string;
   socioPrice: string;
 }) {
+  const [Lang, setLang] = useState('En');
+  const t = translations[Lang as "En" | "Chi"];
   const [myad, setmyads] = useState(false);
   const [showads, setshowads] = useState(true);
   const [selectedCoin, setSelectedCoin] = useState<string>("");
-  const [selectedType, setSelectedType] = useState<string | null>("buy"); // Selected transaction type for filtering
+  const [selectedType, setSelectedType] = useState<string | null>("buy");
   const [showdialog, setshowdialog] = useState(false);
   const [showModal, setshowModal] = useState(false);
   const [imgproof, setimgproof] = useState<PutBlobResult | null>(null);
@@ -66,14 +166,13 @@ export default function AtokHolder({
     currentPage * itemsPerPage
   );
   const [btn, setBtn] = useState(false);
-  // const [data, setData] = useState<any>([]);
   const [formData, setFormData] = useState({
     proof: "",
     price: "",
-    minQty: 0, // Ensure minQty is a number
-    maxQty: 0, // Ensure maxQty is a number
+    minQty: 0,
+    maxQty: 0,
     payment: "",
-    amount: 0, // Add amount field for purchase
+    amount: 0,
     toreceive: 0,
     toreceiveprocessing: 0,
     adId: "",
@@ -97,7 +196,7 @@ export default function AtokHolder({
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "minQty" || name === "maxQty" ? Number(value) : value, // Parse minQty and maxQty as numbers
+      [name]: name === "minQty" || name === "maxQty" ? Number(value) : value,
     }));
   };
 
@@ -112,7 +211,6 @@ export default function AtokHolder({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Upload front ID card
       if (!idCardFrontRef.current?.files) {
         throw new Error("no image selected");
       }
@@ -137,7 +235,7 @@ export default function AtokHolder({
         formData.type
       );
       if (response.success) {
-        toast("Ads created successfully!", {
+        toast(t.submitSuccess, {
           className: "bg-green-500 text-white",
         });
         setFormData({
@@ -153,7 +251,7 @@ export default function AtokHolder({
           pricee: "",
           merchantusername: "",
           type: "buy",
-        }); // Reset form
+        });
       }
       toast(response.message, {
         className: "bg-red-500 text-white",
@@ -178,10 +276,10 @@ export default function AtokHolder({
           "sell"
         );
         if (response.success) {
-          setshowModal(true); // Close the modal after purchase
-          toast("Trade created successfully!");
+          setshowModal(true);
+          toast(t.tradeSuccess);
         } else {
-          toast(response.message || "Failed to create trade request.");
+          toast(response.message || t.tradeFail);
         }
       } else {
         const checkbalanc = await checkbalance(
@@ -202,10 +300,10 @@ export default function AtokHolder({
             "buy"
           );
           if (response.success) {
-            setshowModal(true); // Close the modal after purchase
-            toast.success("Trade created successfully!");
+            setshowModal(true);
+            toast.success(t.tradeSuccess);
           } else {
-            toast(response.message || "Failed to create trade request.");
+            toast(response.message || t.tradeFail);
           }
         }
       }
@@ -218,7 +316,7 @@ export default function AtokHolder({
   const handleAdSelection = (ad: any) => {
     setFormData((prev) => ({
       ...prev,
-      price: ad.price, // Set the price of the selected ad
+      price: ad.price,
       minQty: ad.minQty,
       maxQty: ad.maxQty,
       payment: ad.payment,
@@ -226,7 +324,7 @@ export default function AtokHolder({
       pricee: ad.price,
       status: "",
       merchantusername: ad.userName,
-      amount: 0, // Reset amount when selecting a new ad
+      amount: 0,
     }));
     setshowdialog(true);
   };
@@ -238,30 +336,38 @@ export default function AtokHolder({
     }));
     const del = await deletead(ad.id);
     if (!del.success) {
-      toast.error("unable to delete ad");
+      toast.error(t.adDeleteFail);
     } else {
-      toast.success("ad deleted successfully");
+      toast.success(t.adDeleteSuccess);
       router.refresh();
     }
   };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const amount = Number(e.target.value);
-    const toReceive = amount * Number(formData.price); // Ensure price is treated as a number
+    const toReceive = amount * Number(formData.price);
     const toReceiveProcessing =
       selectedType === "sell"
         ? toReceive - toReceive * 0.02
-        : toReceive + toReceive * 0.02; // Deduct 2% processing fee
+        : toReceive + toReceive * 0.02;
 
     setFormData((prev) => ({
       ...prev,
-      amount, // Update the amount
-      toreceive: toReceive, // Set the calculated value for toreceive
-      toreceiveprocessing: toReceiveProcessing, // Set the calculated value for toreceiveprocessing
+      amount,
+      toreceive: toReceive,
+      toreceiveprocessing: toReceiveProcessing,
     }));
   };
 
   const router = useRouter();
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedValue = localStorage.getItem('userLanguage');
+      if (storedValue) {
+        setLang(storedValue);
+      }
+    }
+  }, []);
 
   return !showads ? (
     <div>
@@ -278,7 +384,7 @@ export default function AtokHolder({
         }}
       >
         <ArrowBigLeft />
-        Advertisement
+        {t.advertisement}
       </div>
       <DropdownMenuSeparator />
       <div className="grid grid-box sm:flex sm:flex-box lg:flex md:flex lg:flex-box md:flex-box lg:gap-4 md:gap-4 sm:gap-6 w-full">
@@ -288,16 +394,15 @@ export default function AtokHolder({
               className={btn ? "w-full" : "w-full bg-green-500"}
               onClick={handlebuy}
             >
-              Buy
+              {t.buy}
             </Button>
           </div>
-
           <div className="w-full">
             <Button
               className={btn ? "bg-red-500 w-full" : "w-full"}
               onClick={handlesell}
             >
-              Sell
+              {t.sell}
             </Button>
           </div>
         </div>
@@ -307,14 +412,14 @@ export default function AtokHolder({
               className="w-full bg-blue-500 p-1 rounded"
               disabled={myad ? true : false}
             >
-              Create Ads
+              {t.createAds}
             </DialogTrigger>
             <DialogContent>
-              <DialogTitle>Create Advertisement</DialogTitle>
+              <DialogTitle>{t.createAdvertisement}</DialogTitle>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Proof
+                    {t.proof}
                   </label>
                   <input
                     id="idCardFront"
@@ -329,7 +434,7 @@ export default function AtokHolder({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Price
+                    {t.price}
                   </label>
                   <input
                     type="number"
@@ -342,7 +447,7 @@ export default function AtokHolder({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Minimum Quantity
+                    {t.minQty}
                   </label>
                   <input
                     type="number"
@@ -355,7 +460,7 @@ export default function AtokHolder({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Maximum Quantity
+                    {t.maxQty}
                   </label>
                   <input
                     type="number"
@@ -368,7 +473,7 @@ export default function AtokHolder({
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-grey-700">
-                    Type
+                    {t.type}
                   </label>
                   <select
                     name="type"
@@ -377,14 +482,13 @@ export default function AtokHolder({
                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                     required
                   >
-                    <option value="buy">Buy</option>
-                    <option value="sell">Sell</option>
+                    <option value="buy">{t.buy}</option>
+                    <option value="sell">{t.sell}</option>
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Payment Method
+                    {t.paymentMethod}
                   </label>
                   <select
                     name="payment"
@@ -397,7 +501,7 @@ export default function AtokHolder({
                   </select>
                 </div>
                 <Button type="submit" className="w-full bg-blue-500">
-                  Submit
+                  {t.submit}
                 </Button>
               </form>
             </DialogContent>
@@ -411,11 +515,11 @@ export default function AtokHolder({
                 setmyads(true);
               }}
             >
-              My Ads
+              {t.myAds}
             </Button>
           </div>
           <div className="w-full">
-            <Button className="w-full">Official Web</Button>
+            <Button className="w-full">{t.officialWeb}</Button>
           </div>
         </div>
         <div className="w-full pb-3">
@@ -425,23 +529,22 @@ export default function AtokHolder({
               router.replace("/otc/advertisement/trades");
             }}
           >
-            Active trades
+            {t.activeTrades}
           </Button>
         </div>
       </div>
       <div className="container mx-auto py-10">
         {/* Ads Table */}
         <div className={showdialog ? "hidden" : ""}>
-          <h2 className="text-2xl font-bold mb-4">Ads List</h2>
-
+          <h2 className="text-2xl font-bold mb-4">{t.adsList}</h2>
           <table className="min-w-full border border-gray-300 rounded-lg shadow-md hidden sm:table">
             <thead>
               <tr className="light:bg-gray-100">
-                <th className="p-4 text-left">Username</th>
-                <th className="p-4 text-left">Price</th>
-                <th className="p-4 text-left">Available|limits</th>
+                <th className="p-4 text-left">{t.username}</th>
+                <th className="p-4 text-left">{t.price}</th>
+                <th className="p-4 text-left">{t.availableLimits}</th>
                 <th className="p-4 text-left" colSpan={2}>
-                  Payment Method
+                  {t.paymentMethod}
                 </th>
               </tr>
             </thead>
@@ -461,7 +564,7 @@ export default function AtokHolder({
                           className="bg-red-500 w-full"
                           onClick={() => handledelete(ad)}
                         >
-                          delete
+                          {t.delete}
                         </Button>
                       ) : (
                         <Button
@@ -475,7 +578,7 @@ export default function AtokHolder({
                             handleAdSelection(ad);
                           }}
                         >
-                          {selectedType === "buy" ? "buy" : "sell"}
+                          {selectedType === "buy" ? t.buy : t.sell}
                         </Button>
                       )}
                     </td>
@@ -484,7 +587,7 @@ export default function AtokHolder({
               ) : (
                 <tr>
                   <td colSpan={4} className="p-4 text-center text-gray-500">
-                    No ads found
+                    {t.noAdsFound}
                   </td>
                 </tr>
               )}
@@ -498,17 +601,17 @@ export default function AtokHolder({
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((prev) => prev - 1)}
               >
-                Previous
+                {t.previous}
               </Button>
               <span>
-                Page {currentPage} of {totalPages}
+                {t.page} {currentPage} {t.of} {totalPages}
               </span>
               <Button
                 className="px-4 py-2"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((prev) => prev + 1)}
               >
-                Next
+                {t.next}
               </Button>
             </div>
           )}
@@ -524,43 +627,42 @@ export default function AtokHolder({
                 type="number"
                 name="amount"
                 value={formData.amount}
-                onChange={handleAmountChange} // Trigger calculation on amount change
+                onChange={handleAmountChange}
                 className="mt-1 block w-full border-gray-300 rounded-md shadow-sm"
                 required
               />
             </div>
             <div>
               <label className="block text-sm font-medium light:text-gray-700">
-                {selectedType === "buy" ? "USDT to send:" : "USDT to receive:"}
+                {selectedType === "buy" ? t.usdtToSend : t.usdtToReceive}
               </label>
               <input
                 type="number"
                 name="toreceive"
-                value={formData.toreceive || 0} // Display the calculated value
-                readOnly // Make the input read-only
+                value={formData.toreceive || 0}
+                readOnly
                 className="mt-1 block w-full light:border-gray-300 rounded-md shadow-sm light:bg-gray-100"
               />
             </div>
             <div>
               <label className="block text-sm font-medium light:text-gray-700">
                 {selectedType === "buy"
-                  ? "What you wil send after addition of processing fees"
-                  : "What you will receive after deduction of processing fee:"}
+                  ? t.afterFeeSend
+                  : t.afterFeeReceive}
               </label>
               <input
                 type="number"
                 name="toreceiveprocessing"
-                value={formData.toreceiveprocessing || 0} // Display the calculated value
-                readOnly // Make the input read-only
+                value={formData.toreceiveprocessing || 0}
+                readOnly
                 className="mt-1 block w-full light:border-gray-300 rounded-md shadow-sm light:bg-gray-100"
               />
             </div>
             <Button type="submit" className="w-full bg-blue-500">
-              Submit
+              {t.submit}
             </Button>
           </form>
         </div>
-
         {/* Mobile View */}
         <div className="block sm:hidden border p-4 rounded-lg shadow-md">
           <div className="gap-4">
@@ -571,11 +673,11 @@ export default function AtokHolder({
                     <div className="flex flex-cols-2 gap-4">
                       <div className="col-span-1">
                         <h3 className="text-lg font-bold">{ad.userName}</h3>
-                        <p>Price: {ad.price} USDT</p>
+                        <p>{t.price}: {ad.price} USDT</p>
                         <p>
-                          Available: {ad.minQty}-{ad.maxQty} {ad.coin}
+                          {t.availableLimits}: {ad.minQty}-{ad.maxQty} {ad.coin}
                         </p>
-                        <p>Payment Method: Wallet</p>
+                        <p>{t.paymentMethod}: Wallet</p>
                       </div>
                       <div className="col-span-1">
                         {myad ? (
@@ -583,7 +685,7 @@ export default function AtokHolder({
                             className="bg-red-500 w-full"
                             onClick={() => handledelete(ad)}
                           >
-                            delete
+                            {t.delete}
                           </Button>
                         ) : (
                           <Button
@@ -597,7 +699,7 @@ export default function AtokHolder({
                               handleAdSelection(ad);
                             }}
                           >
-                            {selectedType === "buy" ? "buy" : "sell"}
+                            {selectedType === "buy" ? t.buy : t.sell}
                           </Button>
                         )}
                       </div>
@@ -606,9 +708,8 @@ export default function AtokHolder({
                 </div>
               ))
             ) : (
-              <div className="text-center text-gray-500">No ads found</div>
+              <div className="text-center text-gray-500">{t.noAdsFound}</div>
             )}
-
             {/* Pagination Controls */}
             {filteredcoin.length > itemsPerPage && (
               <div className="flex justify-center items-center gap-4 mt-4">
@@ -617,17 +718,17 @@ export default function AtokHolder({
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage((prev) => prev - 1)}
                 >
-                  Previous
+                  {t.previous}
                 </Button>
                 <span>
-                  Page {currentPage} of {totalPages}
+                  {t.page} {currentPage} {t.of} {totalPages}
                 </span>
                 <Button
                   className="px-4 py-2"
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage((prev) => prev + 1)}
                 >
-                  Next
+                  {t.next}
                 </Button>
               </div>
             )}
@@ -635,31 +736,29 @@ export default function AtokHolder({
         </div>
         {/* Modal for Purchase Confirmation */}
         <div className={showModal ? "" : "hidden"}>
-          Waiting For Confirmation
+          {t.waitingForConfirmation}
           <div className="max-w-md mx-auto p-6 bg-yellow-50 border border-yellow-300 shadow-lg rounded-lg text-center">
             <div className="flex justify-center mb-4">
               <Clock className="text-yellow-500 w-16 h-16" />
             </div>
             <h1 className="text-2xl font-bold text-yellow-700 mb-2">
-              trade Pending
+              {t.tradePending}
             </h1>
             <p className="text-gray-700 mb-4">
-              Thank you, <span className="font-semibold">{name}</span>, for
-              choose to buy from me. Your trade request has been sent to the
-              buyer.
+              {t.thankYou} <span className="font-semibold">{name}</span>, {t.chooseToBuy}
             </p>
             <p className="text-gray-600">
-              please wait while the{" "}
-              {selectedType === "buy" ? "Seller" : "Buyer"} is being contacted
-              if the buyer does not response in the next 5 hours your request
-              will be automatically be canceled
+              {t.pleaseWait}
+              {selectedType === "buy" ? t.seller : t.buyer} {t.isContacted}
             </p>
           </div>
         </div>
       </div>
     </div>
   ) : (
+    // ...existing coin selection cards (unchanged, can be translated similarly if needed)...
     <div>
+     <div>
 
       {/* Atok */}
       <div
@@ -685,18 +784,18 @@ export default function AtokHolder({
             <div>
               <CardContent>Atok/USDT</CardContent>
               <div className="lg:flex lg:flex-box">
-                <CardContent>Last Traded Price:</CardContent>
+                <CardContent>{t.lastTradedPrice}</CardContent>
                 <CardContent>{atokPrice}USDT</CardContent>
               </div>
             </div>
 
             <div className="absolute right-0">
               <div className="grid grid-box">
-                <CardContent>Start Trading</CardContent>
+                <CardContent>{t.startTrading}</CardContent>
 
                 <CardContent>
                   <div className="flex flex-box">
-                    2% fee
+                    {t.fee}
                     <TrendingUp />
                   </div>
                 </CardContent>
@@ -731,18 +830,18 @@ export default function AtokHolder({
             <div>
               <CardContent>WOW/USDT</CardContent>
               <div className="lg:flex lg:flex-box">
-                <CardContent>Last Traded Price:</CardContent>
+                <CardContent>{t.lastTradedPrice}</CardContent>
                 <CardContent>{wowPrice} USDT</CardContent>
               </div>
             </div>
 
             <div className="absolute right-0">
               <div className="grid grid-box">
-                <CardContent>start trading</CardContent>
+                <CardContent>{t.startTrading}</CardContent>
 
                 <CardContent>
                   <div className="flex flex-box">
-                    2% fee
+                  {t.fee}
                     <TrendingUp />
                   </div>
                 </CardContent>
@@ -777,18 +876,18 @@ export default function AtokHolder({
             <div className="">
               <CardContent>SDA/USDT</CardContent>
               <div className="lg:flex lg:flex-box">
-                <CardContent>Last Traded Price:</CardContent>
+                <CardContent>{t.lastTradedPrice}</CardContent>
                 <CardContent>{sidraPrice} USDT</CardContent>
               </div>
             </div>
 
             <div className="absolute right-0">
               <div className="grid grid-box">
-                <CardContent>Start Trading</CardContent>
+                <CardContent>{t.startTrading}</CardContent>
 
                 <CardContent>
                   <div className="flex flex-box">
-                    2% fee
+                    {t.fee}
                     <TrendingUp />
                   </div>
                 </CardContent>
@@ -822,18 +921,18 @@ export default function AtokHolder({
             <div className="">
               <CardContent>RBL/USDT</CardContent>
               <div className="lg:flex lg:flex-box">
-                <CardContent>Last Traded Price:</CardContent>
+                <CardContent>{t.lastTradedPrice}</CardContent>
                 <CardContent>{rubyPrice} USDT</CardContent>
               </div>
             </div>
 
             <div className="absolute right-0">
               <div className="grid grid-box">
-                <CardContent>Start Trading</CardContent>
+                <CardContent>{t.startTrading}</CardContent>
 
                 <CardContent>
                   <div className="flex flex-box">
-                    2% fee
+                    {t.fee}
                     <TrendingUp />
                   </div>
                 </CardContent>
@@ -867,18 +966,18 @@ export default function AtokHolder({
             <div className="">
               <CardContent>Opincur/USDT</CardContent>
               <div className="lg:flex lg:flex-box">
-                <CardContent>Last Traded Price:</CardContent>
+                <CardContent>{t.lastTradedPrice}</CardContent>
                 <CardContent>{opincurPrice} USDT</CardContent>
               </div>
             </div>
 
             <div className="absolute right-0">
               <div className="grid grid-box">
-                <CardContent>Start Trading</CardContent>
+                <CardContent>{t.startTrading}</CardContent>
 
                 <CardContent>
                   <div className="flex flex-box">
-                    2% fee
+                    {t.fee}
                     <TrendingUp />
                   </div>
                 </CardContent>
@@ -912,18 +1011,18 @@ export default function AtokHolder({
             <div className="">
               <CardContent>Star Network/USDT</CardContent>
               <div className="lg:flex lg:flex-box">
-                <CardContent>Last Traded Price:</CardContent>
+                <CardContent>{t.lastTradedPrice}</CardContent>
                 <CardContent>{starPrice} USDT</CardContent>
               </div>
             </div>
 
             <div className="absolute right-0">
               <div className="grid grid-box">
-                <CardContent>Start Trading</CardContent>
+                <CardContent>{t.startTrading}</CardContent>
 
                 <CardContent>
                   <div className="flex flex-box">
-                    2% fee
+                  {t.fee}
                     <TrendingUp />
                   </div>
                 </CardContent>
@@ -957,18 +1056,18 @@ export default function AtokHolder({
             <div className="">
               <CardContent>Socio/USDT</CardContent>
               <div className="lg:flex lg:flex-box">
-                <CardContent>Last Traded Price:</CardContent>
+                <CardContent>{t.lastTradedPrice}</CardContent>
                 <CardContent>{socioPrice}USDT</CardContent>
               </div>
             </div>
 
             <div className="absolute right-0">
               <div className="grid grid-box">
-                <CardContent>Start Trading</CardContent>
+                <CardContent>{t.startTrading}</CardContent>
 
                 <CardContent>
                   <div className="flex flex-box">
-                    2% fee
+                    {t.fee}
                     <TrendingUp />
                   </div>
                 </CardContent>
@@ -978,23 +1077,6 @@ export default function AtokHolder({
         </Card>
       </div>
     </div>
+    </div>
   );
-}
-
-{
-  /* <div>
-                            price: {ad.price} USDT
-                            <br />
-                            Available: {ad.minQty}-{ad.maxQty} Atok
-                            <br />
-                            Payment Method: Wallet
-                            <br />
-                            Time limit: 15 MINS
-                            <br />
-                            Processing Fee: 2%
-                            <br />
-                            <br />
-                            <h2>Note from the Buyer: hello thanks for trading with kelvin</h2>
-
-                          </div> */
 }
