@@ -1524,14 +1524,16 @@ export async function checktranStatus(
       await prisma.tradeprocess.update({
         where: { orderid },
         data: { sendfeeusdt: "sent", checkusdtfeesent: "completed" },
+        
       });
+      await completetrans(orderid);
     }else{
         await prisma.tradeprocess.update({
         where: { orderid },
         data: { sendusdt: "sent", checkusdtsent: "completed" },
       });
     }
-    await completetrans(orderid);
+    
 
     return {
       success: true,
