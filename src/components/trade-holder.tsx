@@ -3,9 +3,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { acceptTrade, Canceltrade, completetrans, confirmbuyer, confirmseen, createdispute, getadstransactions, gettraderequestsinfo } from "@/functions/user";
+import { acceptTrade, Canceltrade, completetrans, confirmbuyer, confirmseen, createdispute } from "@/functions/user";
 import { BadgeCheck, Clock, Loader2 } from "lucide-react";
-import { checkTransactionByHash, checktranStatus, sendusdttrade, sendusdttradefee } from "@/functions/blockchain/wallet.utils";
+import { checkTransactionByHash, checktranStatus, sendusdttradefee } from "@/functions/blockchain/wallet.utils";
 import { PutBlobResult } from "@vercel/blob";
 import { Dialog } from "@radix-ui/react-dialog";
 import { DialogContent, DialogTrigger } from "./ui/dialog";
@@ -141,6 +141,7 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
   const [senderwalletaddress, setSenderWalletAddress] = useState<string>("");
   const [recieverwalletaddress, setReceiverWalletAddress] = useState<string>("");
   const [AmountSent, setAmountSent] = useState<string>("");
+  const [adsid, setadsid] = useState<string>("");
   const [tradeid, settradeid] = useState<string>("");
   const [status, setstatus] = useState<string>("");
   const [transStatus, setTransStatus] = useState<string>("");
@@ -162,7 +163,7 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
   const itemsPerPage = 5;
   const router = useRouter();
 
-  const pendingtrades = trades || [];//Array.isArray(trades) ? trades : [];
+  const pendingtrades = tradeinfo || [];//Array.isArray(trades) ? trades : [];
   const tradeInfo = tradeinfo || [];
   const adstransactions = adstrans || [];
   
@@ -177,18 +178,20 @@ export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }
 const feepollTx = async (txHash: string) => {
   const intervalId = setInterval(async () => {
     // Call your API to check if the transaction has been confirmed
-    const res = await checktranStatus(txHash);
+    const res = await checktranStatus(txHash, "fee", tradeid);
 
     if (res.success) {
+      setTransStatus("completed")
+      toast.success("Usdt Transfer Successfull")
       clearInterval(intervalId); // Stop polling once confirmed
     }
-  }, 10000); // Poll every 5 seconds (adjust as needed)
+  }, 5000); // Poll every 5 seconds (adjust as needed)
 };
 
   const pollTx = async (txHash: string) => {
   const intervalId = setInterval(async () => {
     // Call your API to check if the transaction has been confirmed
-    const res = await checktranStatus(txHash);
+    const res = await checktranStatus(txHash, "normal", tradeid);
 
     if (res.success) {
             clearInterval(intervalId); // Stop polling once confirmed
@@ -196,11 +199,6 @@ const feepollTx = async (txHash: string) => {
     }
   }, 5000); // Poll every 5 seconds (adjust as needed)
 };
-
-  
-
-
-
 
 
 
@@ -256,24 +254,16 @@ const feepollTx = async (txHash: string) => {
   const handlerecieved = async (tradeId: string) => {
     try {
       setSeenLoading(true); // Start loading
-      const response = await confirmseen(tradeId, Amount, Price, selectedType, userid, merchantid);
+      const response = await confirmseen(adsid, tradeId, Amount, Price, selectedType, userid, merchantid);
       if (response?.success) {
         // Start polling
       await pollTx(response.transactionhash);
       const feecal = Number(Amount) * Number(Price);
-      const removedfee = feecal * 0.02 // Assuming 1% fee
+      const removedfee = feecal * 0.02 // Assuming 2% fee
       if(selectedType === "buy"){
       const fee = await sendusdttradefee(removedfee.toString(), userid);
        if(fee?.success){
       await feepollTx(fee.fee);
-      const complete = await completetrans(tradeid);
-      if (!complete?.success) {
-            toast.error("Error while completing the transaction. Please try again.");
-      } else{
-        setTransStatus("completed")
-            toast.success("Usdt Transfer Successfull")
-        
-      }      
     }else{
       toast.error("Error while sending fee transaction. Please try again.");
       }
@@ -331,7 +321,8 @@ const feepollTx = async (txHash: string) => {
       setMerchantconfirm(item.merchantconfirm as string),
       setPrice(item.price as string),
       seturl(item.receipt || ""),
-      setDate(item.createdAt)
+      setDate(item.createdAt),
+      setadsid(item.id)
       ))
     }else{
       toast.error("Trade information not found.");

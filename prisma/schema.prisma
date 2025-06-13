@@ -8,64 +8,31 @@ datasource db {
 }
 
 model User {
-  id              String    @id @default(cuid())
-  email           String    @unique
-  createdAt       DateTime  @default(now())
+  id              String           @id @default(cuid())
+  email           String           @unique
+  createdAt       DateTime         @default(now())
   emailVerified   Boolean?
   emailVerifiedAt DateTime?
-  kycverified     Boolean?  @default(false)
+  kycverified     Boolean?         @default(false)
   kycverifiedAt   DateTime?
-  image          String?          @default("default.png")
-  updatedAt      DateTime         @updatedAt
-  password       String
-  referralCode   String?          @unique
-  referredBy     String?
-  phoneNo        String?
-  name           String?
-  userName       String?          @unique
-  roles          String?          @default("user")
-  isBlocked      Boolean?         @default(false)
-  accounts       Account[]
-  kyc            Kyc[]
-  Notification   Notification[]
-  sessions       Session[]
-  Transaction    Transaction[]
-  userWallet     userWallet[]
-  wallet         wallets[]
-  ads            ads[]
-  adsTransaction adsTransaction[]
-  traderequest   traderequest[]
-  dispute        dispute[]
-}
-
-model Account {
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([provider, providerAccountId])
-}
-
-model Session {
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  image           String?          @default("default.png")
+  updatedAt       DateTime         @updatedAt
+  password        String
+  referralCode    String?          @unique
+  referredBy      String?
+  phoneNo         String?
+  name            String?
+  userName        String?          @unique
+  roles           String?          @default("user")
+  isBlocked       Boolean?         @default(false)
+  kyc             Kyc[]
+  Notification    Notification[]
+  userWallet      userWallet[]
+  wallet          wallets[]
+  ads             ads[]
+  adsTransaction  adsTransaction[]
+  traderequest    traderequest[]
+  dispute         dispute[]
 }
 
 model VerificationToken {
@@ -117,24 +84,6 @@ model Notification {
   User User @relation(fields: [userId], references: [id])
 }
 
-model Transaction {
-  id                    String   @id @default(cuid())
-  senderWalletAddress   String
-  receiverWalletAddress String
-  transactionHash       String   @unique
-  userId                String
-  amount                Float
-  status                String
-  createdAt             DateTime @default(now())
-  coin                  String
-  fee                   String
-  orderId               String   @unique
-  price                 String
-  qty                   Int
-
-  User User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
 model wallets {
   id            String   @id @default(cuid())
   address       String   @unique
@@ -166,60 +115,73 @@ model ads {
 }
 
 model adsTransaction {
-  id            String   @id @default(cuid())
-  adId          String
-  orderId       String  @unique
-  coin          String
-  receipt       String
-  type          String?
-  price         String
-  status        String
-  amount        String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  userId        String
-  walletAddress String?
-  merchantID    String
-  userName      String
-  merchantconfirm String @default("pending")
-  customerconfirm String @default("pending")
-  dispute dispute[]
-
+  id                  String         @id @default(cuid())
+  adId                String
+  orderId             String         @unique
+  coin                String
+  receipt             String
+  type                String?
+  price               String
+  status              String
+  amount              String
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  userId              String
+  walletAddress       String?
+  merchantID          String
+  userName            String
+  merchantconfirm     String         @default("pending")
+  customerconfirm     String         @default("pending")
+  dispute             dispute[]
+  tradeprocess tradeprocess[]
 
   User User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model traderequest {
-  id            String   @id @default(cuid())
+  id            String    @id @default(cuid())
   adId          String
   coin          String
   type          String?
   price         String
   status        String
   amount        String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  userId        String   
-  merchantId    String   
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  userId        String
+  merchantId    String
   walletAddress String?
   merchantName  String
-  dispute dispute[]
+  dispute       dispute[]
 
   User User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model dispute{
-  id String @id @default(cuid())
-  tradeid String 
-  orderid String
-  userid String
-  status String
-  useremail String
+model dispute {
+  id             String   @id @default(cuid())
+  tradeid        String
+  orderid        String
+  userid         String
+  status         String
+  useremail      String
   dispute_reason String
-  admin_notes String?
-  createdAt DateTime @default(now())
+  admin_notes    String?
+  createdAt      DateTime @default(now())
 
-  User User @relation(fields: [userid], references: [id], onDelete: Cascade)
-  trade traderequest @relation(fields: [tradeid], references: [id], onDelete: Cascade)
+  User     User           @relation(fields: [userid], references: [id], onDelete: Cascade)
+  trade    traderequest   @relation(fields: [tradeid], references: [id], onDelete: Cascade)
   adstrans adsTransaction @relation(fields: [orderid], references: [orderId], onDelete: Cascade)
-  }
+}
+
+model tradeprocess {
+  id               String @id @default(cuid())
+  tradeid          String @unique
+  orderid          String @unique
+  confirmseen      String
+  sendusdt         String
+  checkusdtsent    String
+  sendfeeusdt      String
+  checkusdtfeesent String
+
+  OrderId adsTransaction @relation(fields: [orderid], references: [orderId], onDelete: Cascade)
+}
