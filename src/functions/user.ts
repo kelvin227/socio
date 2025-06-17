@@ -957,15 +957,20 @@ export async function addModerator(email: string, name: string, roles: string) {
   }
 }
 export async function addNotification(
-  userId: string,
+  email: string,
   title: string,
   message: string
 ) {
   try {
     // Validate input
-    if (!userId || !title || !message) {
+    if (!email || !title || !message) {
       return { success: false, message: "All fields are required" };
     }
+    const user = await prisma.user.findUnique({
+      where:{email}
+    })
+
+    const userId = user?.id as string;
 
     // Create a new notification in the database
     const notification = await prisma.notification.create({
@@ -988,7 +993,7 @@ export async function addNotification(
   }
 }
 
-export async function getNotifications(email: string) {
+export async function getundeliveredNotifications(email: string) {
   try {
     // Fetch the user by email
     const user = await prisma.user.findUnique({
@@ -1001,7 +1006,12 @@ export async function getNotifications(email: string) {
     const userId = user.id; // Get the user ID
     // Fetch notifications for the user
     const notifications = await prisma.notification.findMany({
-      where: { userId },
+      where: { 
+        AND:[
+          {userId},
+          {isRead: false}
+        ]
+       },
       orderBy: { createdAt: "desc" }, // Sort by creation date (latest first)
     });
 
@@ -1254,7 +1264,7 @@ export async function addtraderequest(
     // Fetch the user by email
     const merchant = await prisma.user.findUnique({
       where: { userName },
-      select: { id: true, userName: true }, // Select only the user ID
+      select: { id: true, userName: true, email:true }, // Select only the user ID
     });
     if (!merchant) {
       return { success: false, message: "User not found" };
@@ -1368,6 +1378,12 @@ export async function addtraderequest(
     if (!traderequest) {
       return { success: false, message: "failed to upload" };
     }
+
+    const usersname = await prisma.user.findUnique({
+      where:{email}
+    })
+
+    await addNotification(merchant.email, "Trade Request", `you have a new trade request from ${usersname?.userName}`);
     return { success: true, message: "Trade request created successfully" };
   } catch (error) {
     console.log("Error creating trade request:", error);
@@ -1501,6 +1517,7 @@ export async function acceptTrade(id: string) {
           "Trade request accepted successfully, but unable to send user email",
       };
     }
+    await addNotification(user.email, "Trade Request Accepted", `your Trade request from the merchant ${traderequest.merchantName} has been Accepted`);
     return { success: true, message: `Trade request accepted successfully` };
   } catch (error) {
     console.error(`Error accepting trade request ${id}:`, error);
@@ -1525,8 +1542,8 @@ export async function Canceltrade(id: string) {
     const coin = traderequest.coin; // Get the user ID
     const status = traderequest.status; // Get the user ID
 
-    if (status === "Accepted") {
-      return { success: false, message: "Trade request already Accepted" };
+    if (status === "Cancelled") {
+      return { success: false, message: "Trade  already Cancelled" };
     }
 
     // Update the user's field in the database
@@ -1539,17 +1556,6 @@ export async function Canceltrade(id: string) {
       return { success: false, message: "unable to update trade request" };
     }
 
-    // Create a new ad in the database
-    const addTransaction = await prisma.adsTransaction.update({
-      where: { orderId: traderequestId },
-      data: {
-        status: "cancelled",
-      },
-    });
-
-    if (!addTransaction) {
-      return { success: false, message: "" };
-    }
     const user = await prisma.user.findUnique({
       where: { id: traderequest.userId },
       select: { email: true },
@@ -1558,7 +1564,7 @@ export async function Canceltrade(id: string) {
       return {
         success: true,
         message:
-          "Trade request accepted successfully, but unable to get the user email",
+          "Trade Cancelled successfully, but unable to get the user email",
       };
     }
     const mail = await sendtradeCancelledmails(
@@ -1574,10 +1580,11 @@ export async function Canceltrade(id: string) {
       return {
         success: true,
         message:
-          "Trade request accepted successfully, but unable to send user email",
+          "Trade Cancelled successfully, but unable to send user email",
       };
     }
-    return { success: true, message: `Trade request accepted successfully` };
+    await addNotification(user.email, "Trade Request", `you have a new trade request from to the ${traderequest.merchantName}, Has been cancelled`);
+    return { success: true, message: `Trade Cancelled successfully` };
   } catch (error) {
     console.error(`Error accepting trade request ${id}:`, error);
     return {
@@ -1603,7 +1610,7 @@ export async function getadstransactions(ids: string) {
     console.log(error);
   }
 }
-
+// add notification for the value below
 export async function confirmbuyer(
   id: string,
   receipt: string,
@@ -1688,6 +1695,7 @@ export async function confirmseen(
         success: true,
         message: "buyer has comfired the coin",
         transactionhash: send?.transactionhash,
+        feehash: send?.feetransactionhash
       };
     } else {
       const gettradeprocessinfo = await prisma.tradeprocess.findUnique({
@@ -1743,6 +1751,7 @@ export async function confirmseen(
         success: true,
         message: "buyer has comfirmed the coin",
         transactionhash: send?.transactionhash,
+        feehash: send?.feetransactionhash
       };
     }
   } catch (error) {

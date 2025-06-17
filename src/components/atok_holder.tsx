@@ -1,5 +1,6 @@
 "use client";
 /* eslint-disable */
+import { Skeleton } from "@/components/ui/skeleton"; // Make sure you have a Skeleton component
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowBigLeft, Clock } from "lucide-react";
@@ -150,6 +151,7 @@ export default function AtokHolder({
   const [selectedType, setSelectedType] = useState<string | null>("buy");
   const [showdialog, setshowdialog] = useState(false);
   const [showModal, setshowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [imgproof, setimgproof] = useState<PutBlobResult | null>(null);
   const idCardFrontRef = useRef<HTMLInputElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -367,9 +369,43 @@ export default function AtokHolder({
         setLang(storedValue);
       }
     }
+    // Simulate loading for demonstration, replace with your real data loading logic
+    const timer = setTimeout(() => setLoading(false), 1200);
+    return () => clearTimeout(timer);
   }, []);
+  
 
-  return !showads ? (
+  if (loading) {
+    // Skeleton Loader for coin cards
+    return (
+      <div className="p-6">
+        {[1, 2, 3, 4, 5, 6, 7].map((_, idx) => (
+          <div className="pb-4" key={idx}>
+            <div className="flex flex-box w-full p-2 border rounded-lg shadow light:bg-white">
+              <div className="mr-4">
+                <Skeleton className="h-16 w-16 rounded-full" />
+              </div>
+              <div className="flex-1">
+                <Skeleton className="h-6 w-32 mb-2" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+              </div>
+              <div className="flex flex-col items-end justify-between ml-auto">
+                <Skeleton className="h-6 w-24 mb-2" />
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-4 w-10" />
+                  <Skeleton className="h-4 w-4 rounded-full" />
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  } 
+ else {return !showads ? (
     <div>
       <div
         className="flex flex-box cursor-pointer"
@@ -1078,5 +1114,5 @@ export default function AtokHolder({
       </div>
     </div>
     </div>
-  );
+  );}
 }

@@ -4,8 +4,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { acceptTrade, Canceltrade, completetrans, confirmbuyer, confirmseen, createdispute } from "@/functions/user";
-import { BadgeCheck, Clock, Loader2 } from "lucide-react";
-import { checkTransactionByHash, checktranStatus, sendusdttradefee } from "@/functions/blockchain/wallet.utils";
+import { BadgeCheck, BadgeX, Clock, Loader2 } from "lucide-react";
+import { checkTransactionByHash, checktranStatus } from "@/functions/blockchain/wallet.utils";
 import { PutBlobResult } from "@vercel/blob";
 import { Dialog } from "@radix-ui/react-dialog";
 import { DialogContent, DialogTrigger } from "./ui/dialog";
@@ -40,6 +40,7 @@ const translations = {
     disputeSuccess: "Dispute created successfully, Please wait for admin to review your dispute",
     disputeError: "An error occurred while creating your dispute please try again",
     transactionCompleted: "Transaction completed",
+    transactionCancelled: "Transaction Cancelled",
     contactMerchant: "If you have any questions, feel free to reach out to the merchant.",
     thankYou: "Thank you for using our trading platform!",
     contactSupport: "For any issues, please contact support.",
@@ -96,6 +97,7 @@ const translations = {
     disputeSuccess: "爭議已成功創建，請等待管理員審核",
     disputeError: "創建爭議時發生錯誤，請重試",
     transactionCompleted: "交易已完成",
+    transactionCancelled: "Transaction Cancelled",
     contactMerchant: "如有疑問，請聯繫商家。",
     thankYou: "感謝您使用我們的交易平台！",
     contactSupport: "如有問題，請聯繫客服。",
@@ -129,7 +131,7 @@ const translations = {
 };
 
 export default function PendingTrades({ email, id, trades, tradeinfo, adstrans }: { email: string, id: string, trades: any[], tradeinfo: any, adstrans: any[] }) {
-  const [Lang, setLang] = useState('En');
+ const [Lang, setLang] = useState('En');
   const t = translations[Lang as "En" | "Chi"];
   const [coin, setCoin] = useState<string>("");
   const [Price, setPrice] = useState<string>("");
@@ -179,11 +181,16 @@ const feepollTx = async (txHash: string) => {
   const intervalId = setInterval(async () => {
     // Call your API to check if the transaction has been confirmed
     const res = await checktranStatus(txHash, "fee", tradeid);
+    toast("Paying trade fee please don't leave this page")
+
 
     if (res.success) {
       setTransStatus("completed")
-      toast.success("Usdt Transfer Successfull")
+      toast.success("Trade fee successfully paid");
       clearInterval(intervalId); // Stop polling once confirmed
+    }else{
+      toast.error("There was an error while sending fee to admin")
+      clearInterval(intervalId)
     }
   }, 5000); // Poll every 5 seconds (adjust as needed)
 };
@@ -194,12 +201,14 @@ const feepollTx = async (txHash: string) => {
     const res = await checktranStatus(txHash, "normal", tradeid);
 
     if (res.success) {
-            clearInterval(intervalId); // Stop polling once confirmed
-
+      toast.success("usdt successfully sent to the seller")
+      clearInterval(intervalId); // Stop polling once confirmed
+    }else{
+      toast.error("there was an error on the blockchain while sending usdt")
+      clearInterval(intervalId)
     }
   }, 5000); // Poll every 5 seconds (adjust as needed)
 };
-
 
 
   const accept = async (tradeId: string) => {
@@ -258,33 +267,7 @@ const feepollTx = async (txHash: string) => {
       if (response?.success) {
         // Start polling
       await pollTx(response.transactionhash);
-      const feecal = Number(Amount) * Number(Price);
-      const removedfee = feecal * 0.02 // Assuming 2% fee
-      if(selectedType === "buy"){
-      const fee = await sendusdttradefee(removedfee.toString(), userid);
-       if(fee?.success){
-      await feepollTx(fee.fee);
-    }else{
-      toast.error("Error while sending fee transaction. Please try again.");
-      }
-      
-      }else{
-        const fee = await sendusdttradefee(removedfee.toString(), merchantid);
-       if(fee?.success){
-      await feepollTx(fee.fee);
-      const complete = await completetrans(tradeid);
-      if (!complete?.success) {
-            toast.error("Error while completing the transaction. Please try again.");
-      } else{
-        setTransStatus("completed")
-            toast.success("Usdt Transfer Successfull")
-        
-      }      
-    }else{
-      toast.error("Error while sending fee transaction. Please try again.");
-      }
-      }
-      
+      await feepollTx(response.feehash)
       
       } else {
         toast.error("an unexpected error occured");
@@ -400,7 +383,7 @@ const feepollTx = async (txHash: string) => {
         toast.success(t.cancelSuccess);
         router.refresh();
       } else {
-        toast.success(response.message || t.cancelFail);
+        toast.error(response.message || t.cancelFail);
       }
     } catch (error) {
       console.error("Error cancelling trade:", error);
@@ -516,7 +499,7 @@ const feepollTx = async (txHash: string) => {
                       <Button
                         className="bg-blue-500 text-white"
                         onClick={() => {
-                          if (trade.status === "Accepted") {
+                          if (trade.status === "Accepted" || trade.status === "Cancelled") {
                             handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId, trade.createdAt, trade.walletAddress);
                           } else {
                             accept(trade.id);
@@ -531,14 +514,14 @@ const feepollTx = async (txHash: string) => {
                             {t.loading}
                           </span>
                         ) : (
-                          trade.status === "Accepted" ? t.view : t.acceptAndView
+                          trade.status === "Accepted"|| trade.status === "Cancelled" ? t.view : t.acceptAndView
                         )}
                       </Button>
                     )}
                   </td>
                   <td className="p-4">
                     <Button
-                      className="bg-red-500 text-white"
+                      className={trade.status === "Cancelled" || trade.status === "Accepted" ? "hidden" :"bg-red-500 text-white"}
                       onClick={() => cancelTrade(trade.id)}
                     >
                       {t.cancel}
@@ -602,9 +585,9 @@ const feepollTx = async (txHash: string) => {
                     </Button>
                   ) : (
                     <Button
-                      className="light:bg-blue-500 dark:text-white"
+                      className="light:bg-blue-500"
                       onClick={() => {
-                        if (trade.status === "Accepted") {
+                        if (trade.status === "Accepted" || trade.status ===  "Cancelled") {
                           handleView(trade.type, trade.id, trade.status, trade.amount, trade.userId, trade.coin, trade.merchantId, trade.createdAt, trade.walletAddress);
                         } else {
                           accept(trade.id);
@@ -618,12 +601,12 @@ const feepollTx = async (txHash: string) => {
                           {t.loading}
                         </span>
                       ) : (
-                        trade.status === "Accepted" ? t.view : t.acceptAndView
+                        trade.status === "Cancelled" || trade.status === "Accepted"? t.view : t.acceptAndView
                       )}
                     </Button>
                   )}
                   <Button
-                    className="bg-red-500 text-white"
+                    className={trade.status === "Cancelled" || trade.status ===  "Accepted" ? "hidden" :"bg-red-500 text-white"}
                     onClick={() => cancelTrade(trade.id)}
                   >
                     {t.cancel}
@@ -641,7 +624,7 @@ const feepollTx = async (txHash: string) => {
             </div>
           ) : (
             <div className={show ? "max-w-md mx-auto p-6 bg-yellow-50 border border-yellow-300 dark:bg-[#1a1a1a] dark:border dark:border-[#333333] shadow-lg rounded-lg text-center  dark:text-white text-gray-600" : "hidden"}>
-              {transStatus === "completed" ? (
+              {transStatus === "completed" && status != "Cancelled" && status !== "pending" ? (
                 <div>
                   <div className="flex justify-center mb-4">
                     <BadgeCheck className="text-green-500 w-16 h-16" />
@@ -665,7 +648,31 @@ const feepollTx = async (txHash: string) => {
                     </div>
                   </div>
                 </div>
-              ) : selectedType === "buy" ?
+              ) : status === "Cancelled" ?
+               <div>
+                  <div className="flex justify-center mb-4">
+                    <BadgeX className="text-red-500 w-16 h-16" />
+                  </div>
+                  <h1 className="text-2xl font-bold text-red-700 mb-2">{t.transactionCancelled}</h1>
+                  <p className="mb-4">{t.contactMerchant}</p>
+                  <p className="mb-4">{t.thankYou}</p>
+                  <p className="mb-4">{t.contactSupport}</p>
+                  <div className="w-full">
+                    <div className="grid grid-box w-full gap-4">
+                      <Button
+                        className="w-full dark:bg-gray-400 light:text-green-300"
+                        disabled={merchantconfirm === "pending"}
+                        onClick={() => router.replace("/wallet")}
+                      >
+                        {t.viewAsset}
+                      </Button>
+                      <Button className="w-full dark:bg-gray-400" onClick={() => BackView()}>
+                        {t.back}
+                      </Button>
+                    </div>
+                  </div>
+                </div> : 
+                selectedType === "buy" ?
               merchantid === id ? (
                 <div>
                   <div className="flex justify-center mb-4">
@@ -725,10 +732,8 @@ const feepollTx = async (txHash: string) => {
                           {t.waitingMerchant}
                         </Button>
                       )}
-                      {merchantconfirm || customerconfirm ? <Button className="w-full dark:bg-gray-400 text-blue-300" onClick={() => { setShowDisputeModal(true) }}>
+                      {<Button className="w-full dark:bg-gray-400 text-blue-300" onClick={() => { setShowDisputeModal(true) }}>
                         {t.orderDispute}
-                      </Button> : <Button className="w-full dark:bg-gray-400 text-blue-300">
-                        {t.cancel}
                       </Button>}
                     </div>
                   </div>
@@ -785,9 +790,7 @@ const feepollTx = async (txHash: string) => {
                           {t.waitingMerchant}
                         </Button>
                       )}
-                      {merchantconfirm || customerconfirm ? <Button className="w-full dark:bg-gray-400 text-blue-300" onClick={() => cancelTrade(id)}>
-                        {t.cancel}
-                      </Button> : <Button className="w-full dark:bg-gray-400 text-blue-300" onClick={handledispute}>
+                      { <Button className="w-full dark:bg-gray-400 text-blue-300" onClick={handledispute}>
                         {t.orderDispute}
                       </Button>}
                     </div>
@@ -850,9 +853,7 @@ const feepollTx = async (txHash: string) => {
               {t.waitingMerchant}
             </Button>
           )}
-          {merchantconfirm || customerconfirm ? <Button className="w-full dark:bg-gray-400 text-blue-300" onClick={() => cancelTrade(tradeid)}>
-            {t.cancel}
-          </Button> : <Button className="w-full dark:bg-gray-400 text-blue-300" onClick={handledispute}>
+          {<Button className="w-full dark:bg-gray-400 text-blue-300" onClick={handledispute}>
             {t.orderDispute}
           </Button>}
         </div>
@@ -918,10 +919,8 @@ const feepollTx = async (txHash: string) => {
               {t.waitingMerchant}
             </Button>
           )}
-          {merchantconfirm || customerconfirm ? <Button className="w-full dark:bg-gray-400 text-blue-300" onClick={() => setShowDisputeModal(true)}>
+          {<Button className="w-full dark:bg-gray-400 text-blue-300" onClick={() => setShowDisputeModal(true)}>
             {t.orderDispute}
-          </Button> : <Button className="w-full dark:bg-gray-400 text-blue-300" onClick={() => cancelTrade(tradeid)}>
-            {t.cancel}
           </Button>}
         </div>
       </div>

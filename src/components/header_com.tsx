@@ -1,5 +1,5 @@
 "use client";
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,12 +13,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Menu, Wallet, BadgeCheck, Bell} from "lucide-react";
+import { Menu, Wallet, BadgeCheck } from "lucide-react";
 import { NavItems, NavItemsChi } from "@/app/(User)/app/(User)/user_config";
 import { LogOut } from "../../actions/authactions";
 import { getKycStatus1, getUserByEmail } from "@/functions/user";
 import { toast } from "sonner";
-import {  FaEarthAmericas } from "react-icons/fa6";
+import { FaEarthAmericas } from "react-icons/fa6";
+import NotiBell from "./NotiBell";
+// import { useRouter } from "next/navigation";
 
 // Add translation object at the top
 const translations = {
@@ -55,62 +57,80 @@ const translations = {
     support: "支持",
     logout: "登出",
     socio: "Socio",
-  }
+  },
 };
 
-export default function HeaderCom({email}: {email: string}) {
-  const [Lang, setLang] = useState('En');
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt: Date;
+}
+
+export default function HeaderCom({ email, notificationIsRead }: { email: string, notificationIsRead:  Notification[]}) {
+  const [Lang, setLang] = useState("En");
   const [isOpen, setIsOpen] = useState(false);
   const [kyc, setkyc] = useState(false);
-  const [profilePicUrl, setProfilePicUrl] = useState("")
-
-  const fetchkyc = async() => {
+  const [profilePicUrl, setProfilePicUrl] = useState("");
+  const fetchkyc = async () => {
     const getkyc = await getKycStatus1(email);
-    if(!getkyc.success){
-      toast.error( "we encountered an unexpected error while kyc status please refresh the page")
-    }else{
-        if(getkyc.message){
-        setkyc(true)
-        }
-    }
-  }
-  const fetchPP = async() =>{
-    const getPP = await getUserByEmail(email);
-      setProfilePicUrl(getPP?.image as string);
-  }
- useEffect(() => {
-      // Check if window is defined (i.e., we are on the client-side)
-      if (typeof window !== 'undefined') {
-        // Get data from local storage
-        const storedValue = localStorage.getItem('userLanguage');
-        if (storedValue) {
-          setLang(storedValue);
-        }
+    if (!getkyc.success) {
+      toast.error(
+        "we encountered an unexpected error while kyc status please refresh the page"
+      );
+    } else {
+      if (getkyc.message) {
+        setkyc(true);
       }
-      fetchkyc();
+    }
+  };
+  const fetchPP = async () => {
+    const getPP = await getUserByEmail(email);
+    setProfilePicUrl(getPP?.image as string);
+  };
+  useEffect(() => {
+    // Check if window is defined (i.e., we are on the client-side)
+    if (typeof window !== "undefined") {
+      // Get data from local storage
+      const storedValue = localStorage.getItem("userLanguage");
+      if (storedValue) {
+        setLang(storedValue);
+      }
+    }
+    fetchkyc();
     fetchPP();
   });
- const t = translations[Lang as "En" | "Chi"];
- const handleLang =(lang: string) =>{
+  const t = translations[Lang as "En" | "Chi"];
+  const handleLang = (lang: string) => {
     setLang(lang);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('userLanguage', lang);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("userLanguage", lang);
       console.log("Language set to:", lang);
     }
-window.location.reload(); 
+    window.location.reload();
+  };
+
+  let NavItem;
+  if (Lang === "Chi") {
+    NavItem = NavItemsChi;
+  } else {
+    NavItem = NavItems;
   }
 
- let NavItem;
- if(Lang === "Chi"){
-   NavItem = NavItemsChi;
- }else{
-  NavItem = NavItems;
- }
+//  const router = useRouter();
+  // useEffect(() => {
+  //         const interval = setInterval(() => {
+  //             router.refresh();
+  //         }, 10000); // refresh every 10 seconds
+  
+  //         return () => clearInterval(interval);
+  //     }, [router]);
 
   return (
     <header className="flex items-center h-16 px-4 border-b shrink-0 md:px-6 justify-between">
       <div className="flex items-center gap-4">
-        <Button onClick={() => setIsOpen(true)} className="">
+        <Button onClick={() => setIsOpen(true)}>
           <Menu size={24} />
         </Button>
 
@@ -151,37 +171,29 @@ window.location.reload();
       </div>
 
       <div className="ml-4 flex items-center gap-3">
-         <DropdownMenu>
-                        <DropdownMenuTrigger className="flex gap-2 items-center">
-                          <FaEarthAmericas />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem onClick={() => handleLang("En")}>English</DropdownMenuItem>
-                          {/* <DropdownMenuItem onClick={() => handleLang("Fr")}>French</DropdownMenuItem> */}
-                          <DropdownMenuItem onClick={() => handleLang("Chi")}>Chinese</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="overflow-hidden rounded-full"
-            >
-              <Bell size={20} />
-            </Button>
+          <DropdownMenuTrigger className="flex gap-2 items-center">
+            <FaEarthAmericas />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>{t.notifications}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>{t.sentYou}</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>{t.btcLow}</DropdownMenuItem>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => handleLang("En")}>
+              English
+            </DropdownMenuItem>
+            {/* <DropdownMenuItem onClick={() => handleLang("Fr")}>French</DropdownMenuItem> */}
+            <DropdownMenuItem onClick={() => handleLang("Chi")}>
+              Chinese
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <DropdownMenu></DropdownMenu>
-
-        <BadgeCheck className={kyc ?"text-green-500" : "text-red-500"}></BadgeCheck>
+          {/* eslint-disable-next-line */}
+        <NotiBell tnotifications={t.notifications} tsentYou={t.sentYou} tbtcLow={t.btcLow} notification={notificationIsRead as any} />
+        <BadgeCheck
+          className={
+            kyc
+              ? "text-green-500 hidden sm:hidden md:block lg:block xlg:block"
+              : "hidden sm:hidden md:block lg:block xlg:block text-red-500"
+          }
+        ></BadgeCheck>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -202,7 +214,7 @@ window.location.reload();
             </Link>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <Link href={'/wallet/transaction'}>{t.transactionHistory}</Link>
+              <Link href={"/wallet/transaction"}>{t.transactionHistory}</Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Link href={"/wallet/payment/crypto"}>{t.paymentSettings}</Link>
@@ -214,9 +226,15 @@ window.location.reload();
             <Button
               variant="outline"
               size="icon"
-              className="overflow-hidden rounded-full"
+              className="overflow-hidden rounded-full "
             >
-              <Avatar>
+              <Avatar
+                className={
+                  kyc
+                    ? "border-2 border-green-500 sm:border-2 sm:border-green-500 md:border-0 md:border-green-500 lg:border-0 lg:border-green-500"
+                    : "border-2 border-red-500 sm:border-2 sm:border-red-500 md:border-0 md:border-red-500 lg:border-0 lg:border-red-500"
+                }
+              >
                 <AvatarImage
                   src={profilePicUrl || "https://github.com/shadcn.png"}
                   alt="@shadcn"
@@ -251,8 +269,6 @@ window.location.reload();
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        
       </div>
     </header>
   );

@@ -1,6 +1,7 @@
 "use client";
 /* eslint-disable */
 import React, { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton"; // Make sure you have a Skeleton component
 import {
   Card,
   CardContent,
@@ -58,6 +59,8 @@ export default function PagePlaceholder({ pageName, barchartdata }: { pageName: 
   const [previousCompletionPercentage, setPreviousCompletionPercentage] = useState<number>(0);
   const [currentCompletionPercentage, setCurrentCompletionPercentage] = useState<number>(0);
   const [completedtranspercent, setcompletedtranspercent] = useState<number>(0);
+    const [loading, setLoading] = useState(true); // <-- Add loading state
+
   // const [totalearnings, settotalearnings] = useState(0);
   // const [oldearnings, setoldearnings] = useState(0);
   // const [earningspercent, setearningspercent] = useState(0);
@@ -119,7 +122,8 @@ const calculatevolumePercentage = (currentVolume: number, oldVolume: number) => 
     
 
 useEffect(()=> {
-  Volume();
+    setLoading(true);
+    Volume();
     const CPC = calculatevolumePercentage(Number(totalVolume), oldVolume);
     const completedPercenatge = calculatePercentage(Number(completedtrans), Number(totaltrans));
     const previouscompletedpercentage = calculatePercentage(Number(previouscomletedtrans), Number(previoustotaltrans));
@@ -137,11 +141,35 @@ useEffect(()=> {
       if (storedValue) {
         setLang(storedValue);
       }
-      // Check if userLanguage is set in local storage
-      console.log("Current Language:", storedValue);
     }
+          setLoading(false); // <-- Set loading to false after data is loaded
+
 })
-  return (
+if (loading) {
+    // Skeleton Loader
+    return (
+      <div className="flex flex-col gap-4 mt-10">
+        <Skeleton className="h-10 w-1/3 mb-4" />
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          {[1, 2, 3].map((_, idx) => (
+            <Card className="w-full" key={idx}>
+              <CardHeader>
+                <Skeleton className="h-6 w-1/2 mb-2" />
+                <Skeleton className="h-4 w-1/4" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-1/3" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="min-h-[200px] w-full mt-6">
+          <Skeleton className="h-48 w-full" />
+        </div>
+      </div>
+    );
+  } else{
+    return (
     <div className="flex flex-col gap-4 mt-10">
       <h1 className="text-3xl font-bold">{pageName}</h1>
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -179,5 +207,7 @@ useEffect(()=> {
    
     </div>
   );
+  }
+  
 }
 

@@ -1,12 +1,15 @@
 "use server";
 import { prisma } from "@/lib/db";
-import { ethers } from "ethers";
+import { ethers, formatUnits } from "ethers";
 import { completetrans } from "../user";
 /* eslint-disable */
 
 const adminWallet = "0xd8c8223d43F6AD2af6D5c6399C6Fc63aF42253B6";
 const usdtcontractaddress = "0x55d398326f99059ff775485246999027b3197955";
 const atokcontractaddress = "0x900650C66c8D317DF5CaCc2Ea0D2F39549bA8632";
+const provider = new ethers.JsonRpcProvider(
+  `https://bsc-mainnet.infura.io/v3/${process.env.INFRUA_API_KEY}`
+);
 const abi = [
   {
     inputs: [],
@@ -743,16 +746,23 @@ export async function checkbalance(
     adminWallet,
     fee.toString()
   );
-  const gaspriceconvert = parseInt(gasPrice?.gasPrice, 16);
-  const gasPriceConvertForFee = parseInt(gasPriceForFee?.gasPrice, 16);
-  const requiredBNBForFee = gasPriceConvertForFee * Number(estimatedGasLimit);
-  const requiredBNB = gaspriceconvert * Number(estimatedGasLimit);
-  const requiredBNBBalance = requiredBNB + requiredBNBForFee;
+  const gaspriceconvert = gasPrice?.totalGasWei ?? 0 * gasPrice?.gasPrice;
+  console.log("this is gaspriceconvert", formatUnits(gaspriceconvert));
+  const gasPriceConvertForFee = gasPriceForFee?.totalGasWei ?? 0 * gasPrice?.gasPrice;
+  console.log("this is gasPriceconvertforfee", formatUnits(gasPriceConvertForFee))
+//   const requiredBNBForFee = Number(gasPriceConvertForFee) * Number(estimatedGasLimit);
+//   console.log("this is requiredBNBforFee", requiredBNBForFee)
+//   const requiredBNB = Number(gaspriceconvert) * Number(estimatedGasLimit);
+//   console.log("this is the reuiredbnb",requiredBNB)
+  const requiredBNBBalance = formatUnits(gasPriceConvertForFee) + formatUnits(gaspriceconvert);
+  console.log("this is the required bnb balance", requiredBNBBalance)
 
-  if (Number(senderBNBBalance.message) < requiredBNBBalance) {
+  console.log(senderBNBBalance.message)
+
+  if (Number(senderBNBBalance.message) < Number(requiredBNBBalance)) {
     return {
       success: false,
-      message: `Insufficient BNB for gas fees in wallet ${address}. Needs approx. ${requiredBNB} BNB.`,
+      message: `Insufficient BNB for gas fees in wallet ${address}. Needs approx. ${requiredBNBBalance} BNB.`,
     };
   }
   return { success: true, message: "" };
@@ -1055,40 +1065,51 @@ export async function estimateGas(
 ) {
   try {
     const usdtContractAddress = "0x55d398326f99059fF775485246999027B3197955"; // USDT on BSC
-
+    // 2. Instantiate USDT Contract
+    const usdtContract = new ethers.Contract(
+      usdtcontractaddress,
+      abi,
+      provider
+    );
+    // Estimate gas limit directly using the contract instance or provider
+    const estimatedGasLimit = await usdtContract.transfer.estimateGas(
+      senderwallet,
+      ethers.parseUnits(amount, 6),
+      { from: senderwallet } // Important for accurate estimation
+    );
     // Create Interface for ERC20 transfer
-    const erc20Interface = new ethers.Interface([
-      "function transfer(address to, uint256 amount)",
-    ]);
+    // const erc20Interface = new ethers.Interface([
+    //   "function transfer(address to, uint256 amount)",
+    // ]);
 
     // Encode the transfer data
-    const encodedData = erc20Interface.encodeFunctionData("transfer", [
-      senderwallet,
-      ethers.parseUnits(amount, 6), // USDT has 6 decimals
-    ]);
+    // const encodedData = erc20Interface.encodeFunctionData("transfer", [
+    //   senderwallet,
+    //   ethers.parseUnits(amount, 6), // USDT has 6 decimals
+    // ]);
 
     // Send fetch request to estimate gas
-    const response = await fetch(
-      `https://bsc-mainnet.infura.io/v3/${process.env.INFRUA_API_KEY}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          method: "eth_estimateGas",
-          params: [
-            {
-              from: senderwallet,
-              to: usdtContractAddress,
-              data: encodedData,
-            },
-          ],
-          id: 1,
-        }),
-      }
-    );
+    // const response = await fetch(
+    //   `https://bsc-mainnet.infura.io/v3/${process.env.INFRUA_API_KEY}`,
+    //   {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({
+    //       jsonrpc: "2.0",
+    //       method: "eth_estimateGas",
+    //       params: [
+    //         {
+    //           from: senderwallet,
+    //           to: usdtContractAddress,
+    //           data: encodedData,
+    //         },
+    //       ],
+    //       id: 1,
+    //     }),
+    //   }
+    // );
 
     const getGasPrice = await fetch(
       `https://bsc-mainnet.infura.io/v3/${process.env.INFRUA_API_KEY}`,
@@ -1106,14 +1127,10 @@ export async function estimateGas(
       }
     );
 
-    const result = await response.json();
-    if (result.error) {
-      console.error("Gas estimation error:", result.error);
-      return null;
-    }
+  
     const gasPriceresult = await getGasPrice.json();
     if (gasPriceresult.error) {
-      console.error("Gas estimation error:", result.error);
+      console.error("Gas estimation error:");
       return null;
     }
 
@@ -1121,11 +1138,18 @@ export async function estimateGas(
     const gasPrice = gasPriceresult.result; // Returns a bigint
     //parseInt()
 
+    console.log("this is the estimated gas limit", estimatedGasLimit);
+    console.log("this is the estimated gas price", gasPrice);
+
     // Calculate total gas cost in wei
-    const totalGasWei = result.result * gasPrice;
+    const totalGasWei = estimatedGasLimit * BigInt(gasPrice);
+    console.log("this is the totalgaswei", totalGasWei)
 
     // Convert to BNB (divide by 1e18 to go from wei to BNB)
     const totalGasBNB = ethers.formatEther(totalGasWei);
+    console.log(totalGasBNB)
+
+    //the gasPrice is in hexdecimal, the totalGasWei is in bigint, 
 
     return { success: true, message: totalGasBNB, gasPrice, totalGasWei };
   } catch (err) {
@@ -1174,62 +1198,82 @@ export async function sendusdttrade(
     const senderAddress = wallet.address;
     console.log(`Transfer initiated by ${senderAddress}`);
 
-    // 2. Instantiate USDT Contract
-    const usdtContract = new ethers.Contract(usdtcontractaddress, abi, wallet);
-
-    // 3. Get USDT decimals to format the amount correctly
+// 2. Get USDT decimals to format the amount correctly
     const fee = Number(amount) * 0.02;
     const amountandfee = fee + Number(amount);
-    const amountInWei = ethers.parseUnits(amountandfee.toString(), 18);
-
-    // Optional: Check sender's balance before sending
-    const senderUSDTBalance = await usdtContract.balanceOf(senderAddress);
-    if (senderUSDTBalance <= amountInWei) {
-      return {
-        success: false,
-        message: `Insufficient USDT balance for ${senderAddress}. Has ${ethers.formatUnits(senderUSDTBalance, 18)} USDT, needs ${amount} USDT.`,
-      };
-    }
+    const amountInWei = ethers.parseUnits(amountandfee.toString(), 6);
     const decimalNumber = fee;
     const roundedNumber = decimalNumber.toFixed(6);
     const feetostring = roundedNumber.toString();
+    // // 3. Instantiate USDT Contract
+     const usdtContract = new ethers.Contract(usdtcontractaddress, abi, wallet);
 
-    // Optional: Check sender's BNB balance for gas fees
-    const senderBNBBalance = await getBnbBalance(senderAddress);
-    // You might want to estimate gas for the transaction more precisely here.
-    // For a simple transfer, a rough estimate is okay, but it's crucial for users to have enough BNB.
-    const estimatedGasLimit = ethers.formatEther("60000"); // A common estimate for token transfer
-    const gasPrice = await estimateGas(senderAddress, recipient, amount);
-    const gasPriceForFee = await estimateGas(
-      senderAddress,
-      adminWallet,
-      feetostring
-    );
-    const gaspriceconvert = parseInt(gasPrice?.gasPrice, 16);
-    const gasPriceConvertForFee = parseInt(gasPriceForFee?.gasPrice, 16);
-    const requiredBNBForFee = gasPriceConvertForFee * Number(estimatedGasLimit);
-    const requiredBNB = gaspriceconvert * Number(estimatedGasLimit);
-    const requiredBNBBalance = requiredBNB + requiredBNBForFee;
-    if (Number(senderBNBBalance.message) < requiredBNBBalance) {
-      return {
-        success: false,
-        message: `Insufficient BNB for gas fees in wallet ${senderAddress}. Needs approx. ${requiredBNB} BNB.`,
-      };
-    }
+    
+    // // Optional: Check sender's balance before sending
+    // console.log("checking usdt balance before sending usdt")
+    // const senderUSDTBalance = await usdtContract.balanceOf(senderAddress);
+    // if (senderUSDTBalance <= amountInWei) {
+    //   return {
+    //     success: false,
+    //     message: `Insufficient USDT balance for ${senderAddress}. Has ${ethers.formatUnits(senderUSDTBalance, 6)} USDT, needs ${amount} USDT.`,
+    //   };
+    // }
+    
+
+    // // Optional: Check sender's BNB balance for gas fees
+    // console.log("checking sender for gas fee")
+    // const senderBNBBalance = await getBnbBalance(senderAddress);
+    // // You might want to estimate gas for the transaction more precisely here.
+    // // For a simple transfer, a rough estimate is okay, but it's crucial for users to have enough BNB.
+    // const estimatedGasLimit = ethers.formatEther("60000"); // A common estimate for token transfer
+    // console.log(estimatedGasLimit)
+    // console.log(ethers.formatEther("180000000000000"));
+    // console.log(ethers.formatEther("63807675000000"))
+    // const gasPrice = await estimateGas(senderAddress, recipient, amount);
+    // const gasPriceForFee = await estimateGas(
+    //   senderAddress,
+    //   adminWallet,
+    //   feetostring
+    // );
+    // const gaspriceconvert = ethers.formatUnits(gasPrice?.totalGasWei ?? 0);
+    // const gasPriceConvertForFee = ethers.formatUnits(gasPriceForFee?.totalGasWei ?? 0);
+    // const requiredBNBForFee = Number(gasPriceConvertForFee);
+    // const requiredBNB = Number(gaspriceconvert);
+    // const requiredBNBBalance = requiredBNB + requiredBNBForFee;
+    // if (Number(senderBNBBalance.message) < requiredBNBBalance) {
+    //   return {
+    //     success: false,
+    //     message: `Insufficient BNB for gas fees in wallet ${senderAddress}. Needs approx. ${requiredBNB} BNB.`,
+    //   };
+    // }
+    const decimalNumberBigInt = ethers.parseUnits(roundedNumber.toString());
 
     // 4. Send the Transaction
     console.log(
       `Attempting to transfer ${amount} USDT from ${senderAddress} to ${recipient}`
     );
+    const gaslimit = 60000;
     const tx = await usdtContract.transfer(
       recipient,
       ethers.parseUnits(amount),
-      {
-        gasLimit: ethers.parseEther(estimatedGasLimit), // Explicitly set gas limit or let ethers estimate
-      }
+       {
+         gasLimit: gaslimit, // Explicitly set gas limit or let ethers estimate
+       }
+    );
+    console.log(
+      `Attempting to transfer fee ${roundedNumber} USDT from ${senderAddress} to ${adminWallet}`
+    );
+    const currentNonce = await provider.getTransactionCount(wallet.address, 'latest');
+    const feetx = await usdtContract.transfer(
+      adminWallet,
+      decimalNumberBigInt,
+       {
+         nonce: currentNonce + 1,
+         gasLimit: gaslimit,
+       }
     );
 
-    return { transactionhash: tx.hash };
+    return { transactionhash: tx.hash, feetransactionhash: feetx.hash };
 
     // 5. Wait for Transaction Confirmation (important for reliability)
     // const receipt = await tx.wait(); // Waits for 1 block confirmation by default
@@ -1268,83 +1312,76 @@ export async function sendusdttrade(
   }
 }
 
-export async function sendusdttradefee(amount: string, id: string) {
-  if (!amount || Number(amount) === 0) {
-    throw new Error("Invalid amount provided.");
-  }
+// export async function sendusdttradefee(amount: string, id: string) {
+//   if (!amount || Number(amount) === 0) {
+//     throw new Error("Invalid amount provided.");
+//   }
 
-  const wallets = await prisma.wallets.findUnique({
-    where: { userId: id },
-    select: { address: true, encrypted_key: true, private_key: true },
-  });
+//   const wallets = await prisma.wallets.findUnique({
+//     where: { userId: id },
+//     select: { address: true, encrypted_key: true, private_key: true },
+//   });
 
-  try {
-    // 1. Setup Provider and Wallet
-    const provider = new ethers.JsonRpcProvider(
-      `https://bsc-mainnet.infura.io/v3/${process.env.INFRUA_API_KEY}`
-    );
-    const wallet = new ethers.Wallet(wallets?.private_key as string, provider);
+//   try {
+//     // 1. Setup Provider and Wallet
+//     const provider = new ethers.JsonRpcProvider(
+//       `https://bsc-mainnet.infura.io/v3/${process.env.INFRUA_API_KEY}`
+//     );
+//     const wallet = new ethers.Wallet(wallets?.private_key as string, provider);
 
-    // Get the sender's address (for logging/checking)
-    const senderAddress = wallet.address;
-    console.log(`Transfer initiated by ${senderAddress}`);
+//     // Get the sender's address (for logging/checking)
+//     const senderAddress = wallet.address;
+//     console.log(`Transfer initiated by ${senderAddress}`);
 
-    // 2. Instantiate USDT Contract
-    const usdtContract = new ethers.Contract(usdtcontractaddress, abi, wallet);
+//     // 2. Instantiate USDT Contract
+//     const usdtContract = new ethers.Contract(usdtcontractaddress, abi, wallet);
 
-    // 3. Get USDT decimals to format the amount correctly
-    const fee = Number(amount);
-    const decimalNumber = fee;
-    const roundedNumber = decimalNumber.toFixed(6);
-    const feetostring = roundedNumber.toString();
-    const decimalNumberBigInt = ethers.parseUnits(roundedNumber.toString());
+//     // 3. Get USDT decimals to format the amount correctly
+//     const fee = Number(amount);
+//     const decimalNumber = fee;
+//     const roundedNumber = decimalNumber.toFixed(6);
+//     const feetostring = roundedNumber.toString();
+//     const decimalNumberBigInt = ethers.parseUnits(roundedNumber.toString());
 
-    // Optional: Check sender's BNB balance for gas fees
-    const senderBNBBalance = await getBnbBalance(senderAddress);
-    // You might want to estimate gas for the transaction more precisely here.
-    // For a simple transfer, a rough estimate is okay, but it's crucial for users to have enough BNB.
-    const estimatedGasLimit = ethers.formatEther("60000"); // A common estimate for token transfer
-    const gasPriceForFee = await estimateGas(
-      senderAddress,
-      adminWallet,
-      feetostring
-    );
+//     // Optional: Check sender's BNB balance for gas fees
+//     const senderBNBBalance = await getBnbBalance(senderAddress);
+//     // You might want to estimate gas for the transaction more precisely here.
+//     // For a simple transfer, a rough estimate is okay, but it's crucial for users to have enough BNB.
+//     const estimatedGasLimit = ethers.formatEther("60000"); // A common estimate for token transfer
+//     const gasPriceForFee = await estimateGas(
+//       senderAddress,
+//       adminWallet,
+//       feetostring
+//     );
 
-    const gasPriceConvertForFee = parseInt(gasPriceForFee?.gasPrice, 16);
-    const requiredBNBForFee = gasPriceConvertForFee * Number(estimatedGasLimit);
+//     const gasPriceConvertForFee = parseInt(gasPriceForFee?.gasPrice, 16);
+//     const requiredBNBForFee = gasPriceConvertForFee * Number(estimatedGasLimit);
 
-    if (Number(senderBNBBalance.message) < requiredBNBForFee) {
-      return {
-        success: false,
-        message: `Insufficient BNB for gas fees in wallet ${senderAddress}. Needs approx. ${requiredBNBForFee} BNB.`,
-      };
-    }
-    const feetx = await usdtContract.transfer(
-      adminWallet,
-      decimalNumberBigInt,
-      {
-        gasLimit: ethers.parseEther(estimatedGasLimit),
-      }
-    );
+//     if (Number(senderBNBBalance.message) < requiredBNBForFee) {
+//       return {
+//         success: false,
+//         message: `Insufficient BNB for gas fees in wallet ${senderAddress}. Needs approx. ${requiredBNBForFee} BNB.`,
+//       };
+//     }
 
-    return { success: true, fee: feetx.hash };
-  } catch (error: any) {
-    let errorMessage = "An unexpected error occurred during the transfer.";
+//     return { success: true, fee: feetx.hash };
+//   } catch (error: any) {
+//     let errorMessage = "An unexpected error occurred during the transfer.";
 
-    // Try to get more specific error messages from the blockchain or Ethers.js
-    if (error.reason) {
-      errorMessage = `Blockchain Error: ${error.reason}`;
-    } else if (
-      error.message &&
-      error.message.includes("insufficient funds for gas")
-    ) {
-      errorMessage = "Insufficient BNB for gas fees in the sender's wallet.";
-    } else if (error.code === "CALL_EXCEPTION") {
-      errorMessage =
-        "Smart contract call failed. Check recipient address and amount.";
-    }
-  }
-}
+//     // Try to get more specific error messages from the blockchain or Ethers.js
+//     if (error.reason) {
+//       errorMessage = `Blockchain Error: ${error.reason}`;
+//     } else if (
+//       error.message &&
+//       error.message.includes("insufficient funds for gas")
+//     ) {
+//       errorMessage = "Insufficient BNB for gas fees in the sender's wallet.";
+//     } else if (error.code === "CALL_EXCEPTION") {
+//       errorMessage =
+//         "Smart contract call failed. Check recipient address and amount.";
+//     }
+//   }
+// }
 
 export async function checkTransactionByHash(
   txHash: string,
@@ -1482,10 +1519,10 @@ export async function checktranStatus(
         where: { orderid },
         data: { checkusdtfeesent: "checking" },
       });
-    }else{
-        await prisma.tradeprocess.update({
+    } else {
+      await prisma.tradeprocess.update({
         where: { orderid },
-        data: {checkusdtsent: "checking" },
+        data: { checkusdtsent: "checking" },
       });
     }
     console.log(`Checking transaction hash: ${hash}`);
@@ -1508,11 +1545,11 @@ export async function checktranStatus(
           where: { orderid },
           data: { sendfeeusdt: "failed", checkusdtfeesent: "completed" },
         });
-      }else{
+      } else {
         await prisma.tradeprocess.update({
-        where: { orderid },
-        data: { sendusdt: "failed", checkusdtfeesent: "completed" },
-      });
+          where: { orderid },
+          data: { sendusdt: "failed", checkusdtfeesent: "completed" },
+        });
       }
       return {
         success: false,
@@ -1524,16 +1561,14 @@ export async function checktranStatus(
       await prisma.tradeprocess.update({
         where: { orderid },
         data: { sendfeeusdt: "sent", checkusdtfeesent: "completed" },
-        
       });
       await completetrans(orderid);
-    }else{
-        await prisma.tradeprocess.update({
+    } else {
+      await prisma.tradeprocess.update({
         where: { orderid },
         data: { sendusdt: "sent", checkusdtsent: "completed" },
       });
     }
-    
 
     return {
       success: true,
