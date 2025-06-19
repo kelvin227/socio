@@ -28,7 +28,6 @@ import {
   //IconTrendingDown,
 } from "@tabler/icons-react"
 import { getfivep2ptransaction } from "@/functions/user";
-import { useRouter } from "next/navigation";
 
 const monthTranslations: Record<string, { En: string; Chi: string }> = {
   January: { En: "January", Chi: "一月" },
@@ -48,29 +47,17 @@ const monthTranslations: Record<string, { En: string; Chi: string }> = {
 
   
 export default function PagePlaceholder({ pageName, barchartdata }: { pageName: string, barchartdata: any[] }) {
-  const [Lang, setLang] = useState('En');
-  const [totalVolume, setTotalVolume] = useState<number>(0);
-  const [oldVolume, setOldVolume] = useState<number>(0);
-  const [percentchange, setPercentChange] = useState<number>(0);
-  const [completedtrans, setcompletedtrans] = useState<number>(0)
-  const [totaltrans, settotaltrans] = useState<number>(0);
-  const [previouscomletedtrans, setpreviouscompletedreans] = useState<number>(0);
-  const [previoustotaltrans, setprevioustotaltrans] = useState<number>(0);
-  const [previousCompletionPercentage, setPreviousCompletionPercentage] = useState<number>(0);
-  const [currentCompletionPercentage, setCurrentCompletionPercentage] = useState<number>(0);
-  const [completedtranspercent, setcompletedtranspercent] = useState<number>(0);
-    const [loading, setLoading] = useState(true); // <-- Add loading state
-
-  // const [totalearnings, settotalearnings] = useState(0);
-  // const [oldearnings, setoldearnings] = useState(0);
-  // const [earningspercent, setearningspercent] = useState(0);
-  // const [totalTrades, setTotalTrades] = useState(0);
-  // const [oldTrades, setOldTrades] = useState(0);
-  // const [Tradespercent, setTradesPercent] =useState(0);
-  const translatedData = barchartdata.map((item: any) => ({
-  ...item,
-  month: monthTranslations[item.month]?.[Lang as "En" | "Chi"] || item.month,
-}));
+    const [Lang, setLang] = useState('En');
+    const [totalVolume, setTotalVolume] = useState<number>(0);
+    const [oldVolume, setOldVolume] = useState<number>(0);
+    const [percentchange, setPercentChange] = useState<number>(0);
+    const [completedtrans, setcompletedtrans] = useState<number>(0);
+    const [totaltrans, settotaltrans] = useState<number>(0);
+    const [previouscomletedtrans, setpreviouscompletedreans] = useState<number>(0);
+    const [previoustotaltrans, setprevioustotaltrans] = useState<number>(0);
+    // const [previousCompletionPercentage, setPreviousCompletionPercentage] = useState<number>(0); // Remove, calculate dynamically
+    // const [currentCompletionPercentage, setCurrentCompletionPercentage] = useState<number>(0); // Remove, calculate dynamically
+    const [completedtranspercent, setcompletedtranspercent] = useState<number>(0);
   const chartConfig = {
   Buy: {
     label: Lang === "Chi" ? "買" :"Buy",
@@ -99,76 +86,113 @@ export default function PagePlaceholder({ pageName, barchartdata }: { pageName: 
     content: completedtrans,
   },
 ];
-  const Volume = async()=> {
-  const response = await getfivep2ptransaction(pageName)
-  if(response.success){
-    setTotalVolume(Number(response.totalVolume));
-    setOldVolume(Number(response.oldtotalVolume));
-    setcompletedtrans(Number(response.completedtrans))
-    settotaltrans(Number(response.totaltrans));
-    setpreviouscompletedreans(Number(response.previouscompletedtrans));
-    setprevioustotaltrans(Number(response.previousTotaltrans));
-  }
-}
+// Fetch volume data only ONCE on mount, or when pageName changes
+    useEffect(() => {
+        const fetchVolumeData = async () => {
+            // setLoading(true); // If you add a loading state for cards
+            const response = await getfivep2ptransaction(pageName);
+            if (response.success) {
+                setTotalVolume(Number(response.totalVolume));
+                setOldVolume(Number(response.oldtotalVolume));
+                setcompletedtrans(Number(response.completedtrans));
+                settotaltrans(Number(response.totaltrans));
+                setpreviouscompletedreans(Number(response.previouscompletedtrans));
+                setprevioustotaltrans(Number(response.previousTotaltrans));
+            }
+            // setLoading(false); // If you add a loading state for cards
+        };
+        fetchVolumeData();
 
-const calculatePercentage = (completed: number, total: number) => {
-      if (total === 0) return 0; // Avoid division by zero
-      return (completed / total) * 100;
+        // Set language from local storage once on mount
+        if (typeof window !== 'undefined') {
+            const storedValue = localStorage.getItem('userLanguage');
+            if (storedValue) {
+                setLang(storedValue);
+            }
+        }
+    }, [pageName]); // Run only when pageName changes (typically once on mount)
+
+
+     const [isCardDataLoading, setIsCardDataLoading] = useState(true); // New loading state for cards
+
+    // Modify `useEffect` for `Volume()`
+    useEffect(() => {
+        const fetchVolumeData = async () => {
+            setIsCardDataLoading(true); // Start loading for cards
+            const response = await getfivep2ptransaction(pageName);
+            if (response.success) {
+                setTotalVolume(Number(response.totalVolume));
+                setOldVolume(Number(response.oldtotalVolume));
+                setcompletedtrans(Number(response.completedtrans));
+                settotaltrans(Number(response.totaltrans));
+                setpreviouscompletedreans(Number(response.previouscompletedtrans));
+                setprevioustotaltrans(Number(response.previousTotaltrans));
+            }
+            setIsCardDataLoading(false); // End loading for cards
+        };
+        fetchVolumeData();
+
+        if (typeof window !== 'undefined') {
+            const storedValue = localStorage.getItem('userLanguage');
+            if (storedValue) {
+                setLang(storedValue);
+            }
+        }
+    }, [pageName]);
+
+    // Recalculate percentages whenever their source state variables change
+    useEffect(() => {
+        const currentCompletionPercentage = calculatePercentage(Number(completedtrans), Number(totaltrans));
+        const previousCompletionPercentage = calculatePercentage(Number(previouscomletedtrans), Number(previoustotaltrans));
+        const percentageChange = currentCompletionPercentage - previousCompletionPercentage;
+
+        setcompletedtranspercent(percentageChange);
+        setPercentChange(calculatevolumePercentage(Number(totalVolume), oldVolume));
+    }, [totalVolume, oldVolume, completedtrans, totaltrans, previouscomletedtrans, previoustotaltrans]);
+
+
+    const calculatePercentage = (completed: number, total: number) => {
+        if (total === 0) return 0;
+        return (completed / total) * 100;
     };
-const calculatevolumePercentage = (currentVolume: number, oldVolume: number) => {
-      if (oldVolume === 0) return 0; // Avoid division by zero \
-      return ((currentVolume - oldVolume) / oldVolume) * 100;
-    }
-    
 
-useEffect(()=> {
-    setLoading(true);
-    Volume();
-    const CPC = calculatevolumePercentage(Number(totalVolume), oldVolume);
-    const completedPercenatge = calculatePercentage(Number(completedtrans), Number(totaltrans));
-    const previouscompletedpercentage = calculatePercentage(Number(previouscomletedtrans), Number(previoustotaltrans));
-    setPreviousCompletionPercentage(previouscompletedpercentage);
-    setCurrentCompletionPercentage(completedPercenatge);
-     // --- Calculate the Change (Absolute Difference in Percentage Points) ---
-    const percentageChange = currentCompletionPercentage - previousCompletionPercentage;
+    const calculatevolumePercentage = (currentVolume: number, oldVolume: number) => {
+        if (oldVolume === 0) return 0;
+        return ((currentVolume - oldVolume) / oldVolume) * 100;
+    };
 
-    setcompletedtranspercent(percentageChange);
-    setPercentChange(CPC);
-    // Check if window is defined (i.e., we are on the client-side)
-    if (typeof window !== 'undefined') {
-      // Get data from local storage
-      const storedValue = localStorage.getItem('userLanguage');
-      if (storedValue) {
-        setLang(storedValue);
-      }
-    }
-          setLoading(false); // <-- Set loading to false after data is loaded
+    const translatedData = barchartdata.map((item: any) => ({
+        ...item,
+        month: monthTranslations[item.month]?.[Lang as "En" | "Chi"] || item.month,
+    }));    
 
-})
-if (loading) {
-    // Skeleton Loader
-    return (
-      <div className="flex flex-col gap-4 mt-10">
-        <Skeleton className="h-10 w-1/3 mb-4" />
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          {[1, 2, 3].map((_, idx) => (
-            <Card className="w-full" key={idx}>
-              <CardHeader>
-                <Skeleton className="h-6 w-1/2 mb-2" />
-                <Skeleton className="h-4 w-1/4" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-1/3" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        <div className="min-h-[200px] w-full mt-6">
-          <Skeleton className="h-48 w-full" />
-        </div>
-      </div>
-    );
-  } else{
+
+ // Now, in your return:
+    if (isCardDataLoading) { // Use the new specific loading state
+        return (
+            <div className="flex flex-col gap-4 mt-10">
+                <Skeleton className="h-10 w-1/3 mb-4" />
+                <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                    {[1, 2, 3].map((_, idx) => (
+                        <Card className="w-full" key={idx}>
+                            <CardHeader>
+                                <Skeleton className="h-6 w-1/2 mb-2" />
+                                <Skeleton className="h-4 w-1/4" />
+                            </CardHeader>
+                            <CardContent>
+                                <Skeleton className="h-8 w-1/3" />
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+                
+               {/* Skeleton for the Bar Chart */}
+                <div className="min-h-[200px] w-full mt-6">
+                    <Skeleton className="h-48 w-full" /> {/* Adjust height as needed */}
+                </div>
+            </div>
+        );
+    } else{
     return (
     <div className="flex flex-col gap-4 mt-10">
       <h1 className="text-3xl font-bold">{pageName}</h1>

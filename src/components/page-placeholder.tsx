@@ -1,3 +1,4 @@
+
 "use client";
 import React from "react";
 import {
@@ -8,8 +9,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent  } from "@/components/ui/chart"
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@/components/ui/chart";
 import {
   // IconChevronDown,
   // IconChevronLeft,
@@ -23,47 +31,58 @@ import {
   // IconLoader,
   // IconPlus,
   IconTrendingUp,
-  //IconTrendingDown,
-} from "@tabler/icons-react"
+  IconTrendingDown,
+  IconMinus
+} from "@tabler/icons-react";
 
-const chartData = [
-  { month: "January", desktop: 186, mobile: 80 },
-  { month: "February", desktop: 305, mobile: 200 },
-  { month: "March", desktop: 237, mobile: 120 },
-  { month: "April", desktop: 73, mobile: 190 },
-  { month: "May", desktop: 209, mobile: 130 },
-  { month: "June", desktop: 214, mobile: 140 },
-]
+/* eslint-disable */
 
-const chartConfig = {
-  desktop: {
-    label: "Desktop",
+export default function PagePlaceholder({
+  pageName,
+  usercount,
+  percentage,
+  kyccount,
+  percentagekyc,
+  CTcount,
+  percentageCT,
+  barchartdata
+}: {
+  pageName: string;
+  usercount: number;
+  percentage: number;
+  kyccount: number;
+  percentagekyc: number;
+  CTcount: number;
+  percentageCT: number;
+  barchartdata: any[];
+}) {
+  const cardData = [
+    {
+      title: "Pending Kyc",
+      description: percentagekyc,
+      content: kyccount
+    },
+    {
+      title: "Total Users",
+      description: percentage,
+      content: usercount,
+    },
+    {
+      title: "Completed Trades",
+      description: percentageCT,
+      content: CTcount,
+    },
+  ];
+  const chartConfig = {
+  Buy: {
+    label: "Buy",
     color: "#2563eb",
   },
-  mobile: {
-    label: "Mobile",
+  Sell: {
+    label: "Sell",
     color: "#60a5fa",
   },
-} satisfies ChartConfig
-
-const cardData = [
-  {
-    title: "Pending Kyc",
-    description: "40%",
-    content: "200+",
-  },
-  {
-    title: "Total Users",
-    description: "40%",
-    content: "200+",
-  },
-  {
-    title: "Pending withdrawal",
-    description: "40%",
-    content: "389",
-  },
-];
-export default function PagePlaceholder({ pageName }: { pageName: string }) {
+} satisfies ChartConfig;
   return (
     <div className="flex flex-col gap-4 mt-10">
       <h1 className="text-3xl font-bold">{pageName}</h1>
@@ -72,7 +91,14 @@ export default function PagePlaceholder({ pageName }: { pageName: string }) {
           <Card className="w-full" key={index}>
             <CardHeader>
               <CardTitle>{card.title}</CardTitle>
-              <CardDescription>{card.description} <IconTrendingUp className="size-4" /></CardDescription>
+              <CardDescription>
+                {card.description}%
+                {card.description > 0 ? (
+                  <IconTrendingUp className="size-4 text-green-500" />
+                ) : card.description < 0 ? (
+                  <IconTrendingDown className="size-4 text-red-500" />
+                ) : <IconMinus className="size-4 text-gray-500" />}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <p>{card.content}</p>
@@ -81,22 +107,21 @@ export default function PagePlaceholder({ pageName }: { pageName: string }) {
         ))}
       </div>
       <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-      <BarChart accessibilityLayer data={chartData}>
-      <CartesianGrid vertical={false} />
-      <XAxis
-      dataKey="month"
-      tickLine={false}
-      tickMargin={10}
-      axisLine={false}
-      tickFormatter={(value) => value.slice(0, 3)}
-    />
-    <ChartTooltip content={<ChartTooltipContent />} />
-    <ChartLegend content={<ChartLegendContent />} />
-        <Bar dataKey="desktop" fill="var(--color-desktop)" radius={4} />
-        <Bar dataKey="mobile" fill="var(--color-mobile)" radius={4} />
-      </BarChart>
-    </ChartContainer>
+        <BarChart accessibilityLayer data={barchartdata}>
+          <CartesianGrid vertical={false} />
+          <XAxis
+            dataKey="month"
+            tickLine={false}
+            tickMargin={10}
+            axisLine={false}
+            tickFormatter={(value) => value.slice(0, 3)}
+          />
+          <ChartTooltip content={<ChartTooltipContent />} />
+          <ChartLegend content={<ChartLegendContent />} />
+          <Bar dataKey="Buy" fill="#2563eb" radius={4} />
+          <Bar dataKey="Sell" fill="#60a5fa" radius={4} />
+        </BarChart>
+      </ChartContainer>
     </div>
   );
 }
-

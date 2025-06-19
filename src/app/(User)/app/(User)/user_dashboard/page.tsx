@@ -17,47 +17,46 @@ export default async function Home() {
   if (!user) {
     console.log("error: User not found");
   }
+  const currentYear = new Date().getFullYear();
+  // Parallelize these fetches
+  const [wallet, getbuy] = await Promise.all([
+    prisma.wallets.findUnique({
+      where: { userId: user?.id }, // Use user.id directly
+      select: { address: true },
+    }),
+    prisma.adsTransaction.findMany({
+      where: {
+        AND: [
+          {
+            OR: [
+              {
+                merchantID: user?.id
+              },
+              // Add userId: user.id here if you want to include user's own buy/sell as client
+              // { userId: user.id }
+            ]
+          },
+          {
+            createdAt: {
+              gte: new Date(currentYear, 0, 1),
+              lt: new Date(currentYear + 1, 0, 1),
+            }
+          },
+          { status: "completed" },
+          {
+            type: {
+              in: ['buy', 'sell']
+            }
+          }
+        ]
+      },
+      select: { type: true, amount: true, createdAt: true, merchantID: true, userId: true, status: true },
+    })
+  ]);
 
-  const wallet = await prisma.wallets.findUnique({
-    where: { userId: user?.id },
-    select: { address: true },
-  });
   if (!wallet) {
     console.log("error: Wallet not found");
-  }
-
-  const currentYear = new Date().getFullYear();
-
-  const getbuy = await prisma.adsTransaction.findMany({
-    where: {
-      AND: [
-        {
-          OR: [
-            {
-              merchantID: user?.id
-            }
-          ]
-        },
-        {
-          createdAt: {
-            gte: new Date(currentYear, 0, 1), // Jan 1st of current year
-            lt: new Date(currentYear + 1, 0, 1), // Jan 1st of next year
-          }
-        },
-        {
-          status: "completed"
-        },
-        {
-          type: {
-            in: ['buy', 'sell']
-          }
-        }
-      ]
-    },
-    select: { type: true, amount: true, createdAt: true, merchantID:true, userId:true,status:true },
-  })
-  if (!getbuy) {
-    console.error(getbuy);
+    // Handle appropriately
   }
 
   // --- Data Transformation Logic ---
