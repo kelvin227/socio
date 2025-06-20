@@ -1200,15 +1200,12 @@ export async function sendusdttrade(
 
 // 2. Get USDT decimals to format the amount correctly
     const fee = Number(amount) * 0.02;
-    const amountandfee = fee + Number(amount);
-    const amountInWei = ethers.parseUnits(amountandfee.toString(), 6);
-    const decimalNumber = fee;
+    const decimalNumber = fee * 2;
     const roundedNumber = decimalNumber.toFixed(6);
-    const feetostring = roundedNumber.toString();
     // // 3. Instantiate USDT Contract
      const usdtContract = new ethers.Contract(usdtcontractaddress, abi, wallet);
 
-    
+    const amountfee =  Number(amount) - 2;
     // // Optional: Check sender's balance before sending
     // console.log("checking usdt balance before sending usdt")
     // const senderUSDTBalance = await usdtContract.balanceOf(senderAddress);
@@ -1255,7 +1252,7 @@ export async function sendusdttrade(
     const gaslimit = 60000;
     const tx = await usdtContract.transfer(
       recipient,
-      ethers.parseUnits(amount),
+      ethers.parseUnits(amountfee.toString()),
        {
          gasLimit: gaslimit, // Explicitly set gas limit or let ethers estimate
        }
