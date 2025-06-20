@@ -640,27 +640,7 @@ export async function getKycDetails(email: string) {
     };
   }
 }
-export async function getKycRequests() {
-  try {
-    const kycRequests = await prisma.kyc.findMany({
-      where: { Status: "pending" },
-      include: {
-        user: {
-          select: {
-            email: true, // Include the user's email
-          },
-        },
-      },
-    });
-    if (!kycRequests) {
-      return { success: false, message: "unable to get kyc" };
-    }
-    return { success: true, message: kycRequests };
-  } catch (error) {
-    console.error("Error fetching KYC requests:", error);
-    throw new Error("Failed to fetch KYC requests");
-  }
-}
+
 
 export async function blockuser(email: string) {
   // Fetch the user by email
