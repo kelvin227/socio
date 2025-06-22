@@ -1,5 +1,4 @@
 "use client"
-/* eslint-disable */
 import type { PutBlobResult } from '@vercel/blob';
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";

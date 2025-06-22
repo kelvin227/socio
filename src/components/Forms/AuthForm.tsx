@@ -315,7 +315,7 @@ const AuthForm = () => {
     // Simulate page loading
     const timer = setTimeout(() => setIsPageLoading(false), 1200);
     return () => clearTimeout(timer);
-  }, []);
+  }, [router]);
   const handleSubmitForm = async (data: z.infer<typeof formSchema>) => {
      setIsSubmitting(true);
     const response = await SignUp(

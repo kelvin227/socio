@@ -58,7 +58,7 @@ const Overview_page = ({email, profile}: {email: string, profile: User}) => {
             setLang(storedValue);
           }
         }
-    });
+    }, []);
     const t = translations[Lang];
 
   return (

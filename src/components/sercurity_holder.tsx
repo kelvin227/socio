@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/card";
 import { checkcode, sendcode, updatePassword } from "@/functions/user";
 import { Key, Mail, RectangleEllipsis } from "lucide-react";
-import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -64,7 +63,6 @@ export default function Security({ email, verified }: { email: string, verified:
     const [pass, setPass] = useState<string>("")
     const [confirmPass, setconfirmPass] = useState<string>("");
     const [Lang, setLang] = useState<string>("En");
-    const router = useRouter();
 
     const t = translations[Lang as "En" | "Chi"];
 
@@ -113,7 +111,7 @@ export default function Security({ email, verified }: { email: string, verified:
             setLang(storedValue);
           }
         }
-    });
+    }, []);
 
     return (
         <div>

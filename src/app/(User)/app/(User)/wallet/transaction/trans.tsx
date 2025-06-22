@@ -160,7 +160,6 @@ export const TransactionTable = ({ address, email, id }: { address: string, emai
   useEffect(() => {
     fetchTransactionData();
     fetchP2PTransactionData();
-    // eslint-disable-next-line
   }, [Lang]);
 
   return (
