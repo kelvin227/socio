@@ -27,7 +27,6 @@ import {
   IconTrendingUp,
   //IconTrendingDown,
 } from "@tabler/icons-react"
-import { getfivep2ptransaction } from "@/functions/user";
 
 const monthTranslations: Record<string, { En: string; Chi: string }> = {
   January: { En: "January", Chi: "一月" },
