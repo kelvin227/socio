@@ -111,14 +111,13 @@ export default function Security({ email, verified }: { email: string, verified:
           const storedValue = localStorage.getItem('userLanguage');
           if (storedValue) {
             setLang(storedValue);
-            router.refresh();
           }
         }
-    }, []);
+    });
 
     return (
         <div>
-            <div className={codeDialog ? "hidden" : ""}>
+            <div className={codeDialog || changepassDialog  ? "hidden" : ""}>
                 <Card>
                     <div className="flex flex-box">
                         <CardContent>

@@ -93,8 +93,6 @@ export default function KycPageholder ({email, kycss}: {email: string, kycss: st
   const t = translations[Lang as "En" | "Chi"];
   const idCardFrontRef = useRef<HTMLInputElement>(null);
   const idCardBackRef = useRef<HTMLInputElement>(null);
-  const [blobFront, setBlobFront] = useState<PutBlobResult | null>(null);
-  const [blobBack, setBlobBack] = useState<PutBlobResult | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
   const [kycApproved, setKycApproved] = useState(false);
@@ -112,20 +110,10 @@ export default function KycPageholder ({email, kycss}: {email: string, kycss: st
   useEffect(() => {
     if (kycss === "approved") {
       setKycApproved(true);
-      setKycPending(false);
-      setKycRejected(false);
     } else if (kycss === "pending") {
-      setKycApproved(false);
       setKycPending(true);
-      setKycRejected(false);
     } else if (kycss === "rejected") {
-      setKycApproved(false);
-      setKycPending(false);
       setKycRejected(true);
-    } else {
-      setKycApproved(false);
-      setKycPending(false);
-      setKycRejected(false);
     }
     if (typeof window !== 'undefined') {
       const storedValue = localStorage.getItem('userLanguage');
@@ -180,7 +168,6 @@ export default function KycPageholder ({email, kycss}: {email: string, kycss: st
         throw new Error(getText(t, "uploadFrontFailed"));
       }
       const newBlobFront = (await frontResponse.json()) as PutBlobResult;
-      setBlobFront(newBlobFront);
 
       // Upload back ID card
       if (!idCardBackRef.current?.files) {
@@ -195,8 +182,6 @@ export default function KycPageholder ({email, kycss}: {email: string, kycss: st
         throw new Error(getText(t, "uploadBackFailed"));
       }
       const newBlobBack = (await backResponse.json()) as PutBlobResult;
-      setBlobBack(newBlobBack);
-
       // Submit KYC details
       const response = await SubmitKyc(
         email,

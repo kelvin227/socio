@@ -68,27 +68,10 @@ interface Notification {
   createdAt: Date;
 }
 
-export default function HeaderCom({ email, notificationIsRead }: { email: string, notificationIsRead:  Notification[]}) {
+export default function HeaderCom({ email, notificationIsRead, img, kyc }: { email: string, notificationIsRead:  Notification[], img: string, kyc: boolean}) {
   const [Lang, setLang] = useState("En");
   const [isOpen, setIsOpen] = useState(false);
-  const [kyc, setkyc] = useState(false);
-  const [profilePicUrl, setProfilePicUrl] = useState("");
-  const fetchkyc = async () => {
-    const getkyc = await getKycStatus1(email);
-    if (!getkyc.success) {
-      toast.error(
-        "we encountered an unexpected error while kyc status please refresh the page"
-      );
-    } else {
-      if (getkyc.message) {
-        setkyc(true);
-      }
-    }
-  };
-  const fetchPP = async () => {
-    const getPP = await getUserByEmail(email);
-    setProfilePicUrl(getPP?.image as string);
-  };
+
   useEffect(() => {
     // Check if window is defined (i.e., we are on the client-side)
     if (typeof window !== "undefined") {
@@ -98,8 +81,6 @@ export default function HeaderCom({ email, notificationIsRead }: { email: string
         setLang(storedValue);
       }
     }
-    fetchkyc();
-    fetchPP();
   });
   const t = translations[Lang as "En" | "Chi"];
   const handleLang = (lang: string) => {
@@ -236,7 +217,7 @@ export default function HeaderCom({ email, notificationIsRead }: { email: string
                 }
               >
                 <AvatarImage
-                  src={profilePicUrl || "https://github.com/shadcn.png"}
+                  src={img}
                   alt="@shadcn"
                 />
                 <AvatarFallback>CN</AvatarFallback>

@@ -35,13 +35,11 @@ const translations = {
 
 export default function ReferralPage({ refer, refferedUsers }: { refer: string, refferedUsers: any[] }) {
   const [Lang, setLang] = useState('En');
-  const [referralCode] = useState(refer);
-  const [referredUsers] = useState(refferedUsers);
 
   const t = translations[Lang as "En" | "Chi"];
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(referralCode);
+    navigator.clipboard.writeText(refer);
     alert(t.copied);
   };
 
@@ -66,7 +64,7 @@ export default function ReferralPage({ refer, refferedUsers }: { refer: string, 
         <CardContent>
           <div className="flex items-center gap-4">
             <Input
-              value={referralCode}
+              value={refer}
               readOnly
               className="w-full light:bg-gray-100 cursor-not-allowed"
             />
@@ -83,7 +81,7 @@ export default function ReferralPage({ refer, refferedUsers }: { refer: string, 
           <CardTitle>{t.referredUsers}</CardTitle>
         </CardHeader>
         <CardContent>
-          {referredUsers.length > 0 ? (
+          {refferedUsers.length > 0 ? (
             <table className="min-w-full light:bg-white border border-gray-300 rounded-lg shadow-lg">
               <thead>
                 <tr className="light:bg-gray-100">
@@ -93,7 +91,7 @@ export default function ReferralPage({ refer, refferedUsers }: { refer: string, 
                 </tr>
               </thead>
               <tbody>
-                {referredUsers.map((user, index) => (
+                {refferedUsers.map((user, index) => (
                   <tr key={index}>
                     <td className="p-4 border-b">{!user.name ? t.noName : user.name}</td>
                     <td className="p-4 border-b">{user.email}</td>

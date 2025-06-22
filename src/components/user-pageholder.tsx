@@ -46,15 +46,9 @@ const monthTranslations: Record<string, { En: string; Chi: string }> = {
 
 
   
-export default function PagePlaceholder({ pageName, barchartdata }: { pageName: string, barchartdata: any[] }) {
+export default function PagePlaceholder({ pageName, barchartdata, totalVolume, oldtotalVolume, completedtrans, totaltrans, previouscompletedtrans, previousTotaltrans }: { pageName: string, barchartdata: any[], totalVolume: number, oldtotalVolume: number, completedtrans: number, totaltrans: number, previouscompletedtrans: number, previousTotaltrans: number }) {
     const [Lang, setLang] = useState('En');
-    const [totalVolume, setTotalVolume] = useState<number>(0);
-    const [oldVolume, setOldVolume] = useState<number>(0);
     const [percentchange, setPercentChange] = useState<number>(0);
-    const [completedtrans, setcompletedtrans] = useState<number>(0);
-    const [totaltrans, settotaltrans] = useState<number>(0);
-    const [previouscomletedtrans, setpreviouscompletedreans] = useState<number>(0);
-    const [previoustotaltrans, setprevioustotaltrans] = useState<number>(0);
     // const [previousCompletionPercentage, setPreviousCompletionPercentage] = useState<number>(0); // Remove, calculate dynamically
     // const [currentCompletionPercentage, setCurrentCompletionPercentage] = useState<number>(0); // Remove, calculate dynamically
     const [completedtranspercent, setcompletedtranspercent] = useState<number>(0);
@@ -88,20 +82,6 @@ export default function PagePlaceholder({ pageName, barchartdata }: { pageName: 
 ];
 // Fetch volume data only ONCE on mount, or when pageName changes
     useEffect(() => {
-        const fetchVolumeData = async () => {
-            // setLoading(true); // If you add a loading state for cards
-            const response = await getfivep2ptransaction(pageName);
-            if (response.success) {
-                setTotalVolume(Number(response.totalVolume));
-                setOldVolume(Number(response.oldtotalVolume));
-                setcompletedtrans(Number(response.completedtrans));
-                settotaltrans(Number(response.totaltrans));
-                setpreviouscompletedreans(Number(response.previouscompletedtrans));
-                setprevioustotaltrans(Number(response.previousTotaltrans));
-            }
-            // setLoading(false); // If you add a loading state for cards
-        };
-        fetchVolumeData();
 
         // Set language from local storage once on mount
         if (typeof window !== 'undefined') {
@@ -110,45 +90,35 @@ export default function PagePlaceholder({ pageName, barchartdata }: { pageName: 
                 setLang(storedValue);
             }
         }
-    }, [pageName]); // Run only when pageName changes (typically once on mount)
+    }); // Run only when pageName changes (typically once on mount)
 
 
      const [isCardDataLoading, setIsCardDataLoading] = useState(true); // New loading state for cards
 
     // Modify `useEffect` for `Volume()`
     useEffect(() => {
-        const fetchVolumeData = async () => {
-            setIsCardDataLoading(true); // Start loading for cards
-            const response = await getfivep2ptransaction(pageName);
-            if (response.success) {
-                setTotalVolume(Number(response.totalVolume));
-                setOldVolume(Number(response.oldtotalVolume));
-                setcompletedtrans(Number(response.completedtrans));
-                settotaltrans(Number(response.totaltrans));
-                setpreviouscompletedreans(Number(response.previouscompletedtrans));
-                setprevioustotaltrans(Number(response.previousTotaltrans));
-            }
-            setIsCardDataLoading(false); // End loading for cards
-        };
-        fetchVolumeData();
-
         if (typeof window !== 'undefined') {
             const storedValue = localStorage.getItem('userLanguage');
             if (storedValue) {
                 setLang(storedValue);
             }
         }
-    }, [pageName]);
+        setTimeout(() => {
+          // Simulate loading delay
+          // @ts-ignore
+          setIsCardDataLoading(false);
+        }, 2000);
+    });
 
     // Recalculate percentages whenever their source state variables change
     useEffect(() => {
         const currentCompletionPercentage = calculatePercentage(Number(completedtrans), Number(totaltrans));
-        const previousCompletionPercentage = calculatePercentage(Number(previouscomletedtrans), Number(previoustotaltrans));
+        const previousCompletionPercentage = calculatePercentage(Number(previouscompletedtrans), Number(previousTotaltrans));
         const percentageChange = currentCompletionPercentage - previousCompletionPercentage;
 
         setcompletedtranspercent(percentageChange);
-        setPercentChange(calculatevolumePercentage(Number(totalVolume), oldVolume));
-    }, [totalVolume, oldVolume, completedtrans, totaltrans, previouscomletedtrans, previoustotaltrans]);
+        setPercentChange(calculatevolumePercentage(Number(totalVolume), oldtotalVolume));
+    }, [totalVolume, oldtotalVolume, completedtrans, totaltrans, previouscompletedtrans, previousTotaltrans]);
 
 
     const calculatePercentage = (completed: number, total: number) => {

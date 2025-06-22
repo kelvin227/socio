@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { useRouter } from 'next/navigation';
 
 export interface User {
   id: string;
@@ -50,7 +49,6 @@ const translations = {
 };
 
 const Overview_page = ({email, profile}: {email: string, profile: User}) => {
-    const router = useRouter()
     const [Lang, setLang] = useState<"En" | "Chi">("En");
     
     useEffect(() => {
@@ -58,10 +56,9 @@ const Overview_page = ({email, profile}: {email: string, profile: User}) => {
           const storedValue = localStorage.getItem('userLanguage');
           if (storedValue === "En" || storedValue === "Chi") {
             setLang(storedValue);
-            router.refresh();
           }
         }
-    }, []);
+    });
     const t = translations[Lang];
 
   return (
