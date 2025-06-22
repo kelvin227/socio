@@ -22,7 +22,7 @@ export default async function Header(){
 
   return(
   // eslint-disable-next-line
-    <HeaderCom email={session?.user?.email as string} notificationIsRead={notificationIsRead.notifications as any} img={getPP?.image as string} kyc={kyc?.kycverified as boolean}/>
+    <HeaderCom notificationIsRead={notificationIsRead.notifications as any} img={getPP?.image as string} kyc={kyc?.kycverified as boolean}/>
 
   )
 
