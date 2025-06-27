@@ -48,6 +48,11 @@ export default auth(async (req) => {
                 }
                 return NextResponse.rewrite(new URL(`/admin${req.nextUrl.pathname}`, req.url));
             }
+            case "api":
+                {
+                    return NextResponse.rewrite(new URL(`/api${req.nextUrl.pathname}`, req.url));
+                }
+
         default:
             return NextResponse.next();
     }
