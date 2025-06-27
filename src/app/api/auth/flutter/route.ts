@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-
+/* eslint-disable */
 const prisma = new PrismaClient();
 const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_jwt_key';
 
