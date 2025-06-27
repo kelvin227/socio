@@ -18,7 +18,6 @@ import { NavItems, NavItemsChi } from "@/app/(User)/app/(User)/user_config";
 import { LogOut } from "../../actions/authactions";
 import { FaEarthAmericas } from "react-icons/fa6";
 import NotiBell from "./NotiBell";
-// import { useRouter } from "next/navigation";
 
 // Add translation object at the top
 const translations = {
@@ -85,7 +84,6 @@ export default function HeaderCom({ notificationIsRead, img, kyc }: { notificati
     setLang(lang);
     if (typeof window !== "undefined") {
       localStorage.setItem("userLanguage", lang);
-      console.log("Language set to:", lang);
     }
     window.location.reload();
   };
@@ -97,14 +95,6 @@ export default function HeaderCom({ notificationIsRead, img, kyc }: { notificati
     NavItem = NavItems;
   }
 
-//  const router = useRouter();
-  // useEffect(() => {
-  //         const interval = setInterval(() => {
-  //             router.refresh();
-  //         }, 10000); // refresh every 10 seconds
-  
-  //         return () => clearInterval(interval);
-  //     }, [router]);
 
   return (
     <header className="flex items-center h-16 px-4 border-b shrink-0 md:px-6 justify-between">
