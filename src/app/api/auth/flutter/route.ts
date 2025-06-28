@@ -3,10 +3,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs'; // For password hashing
 import jwt from 'jsonwebtoken'; // For generating JWTs
-
+/* eslint-disable */
 // Extend global type to include prisma for TypeScript
 declare global {
-  // eslint-disable-next-line no-var
   var prisma: PrismaClient | undefined;
 }
 
