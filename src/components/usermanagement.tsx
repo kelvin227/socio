@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { blockuser, getUserByEmail, unblockuser } from "@/functions/user";
+import { blockuser, getUser, unblockuser } from "@/functions/user";
 
 export default function UserManagementHolder() {
   const [userData, setUserData] = useState<{
@@ -29,7 +29,7 @@ export default function UserManagementHolder() {
   const handleSearch = async () => {
     setLoading(true);
     try {
-      const response = await getUserByEmail(searchQuery);
+      const response = await getUser(searchQuery);
       if (!response) {
         throw new Error("Failed to fetch user data");
       }

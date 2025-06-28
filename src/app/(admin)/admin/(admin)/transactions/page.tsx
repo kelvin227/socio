@@ -13,6 +13,7 @@ export default function TransactionLog() {
     coin: string,
     walletAddress: string,
     userId: string,
+    merchantID: string,
     amount: number,
     status: string,
     createdAt: Date,
@@ -38,6 +39,7 @@ export default function TransactionLog() {
           coin: response.coin ?? "",
           walletAddress: response.walletAddress ?? "",
           userId: response.userId ?? "",
+          merchantID: response.merchantID ?? "",
           amount: typeof response.amount === "number" ? response.amount : Number(response.amount) || 0,
           status: response.status ?? "",
           createdAt: response.createdAt ? new Date(response.createdAt) : new Date(),
@@ -180,9 +182,9 @@ export default function TransactionLog() {
       {/* Details Modal/Section */}
       {showDetails && transactions && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="dark:bg-gray-700 light:bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
+          <div className="dark:bg-gray-700 bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
             <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+              className="absolute top-2 right-2 dark:text-gray-500 hover:text-gray-700"
               onClick={() => setShowDetails(false)}
             >
               ✕
@@ -202,6 +204,9 @@ export default function TransactionLog() {
             </div>
             <div className="mb-2">
               <span className="font-semibold">User ID:</span> {transactions.userId}
+            </div>
+            <div className="mb-2">
+              <span className="font-semibold">Merchant ID:</span> {transactions.merchantID}
             </div>
             <div className="mb-2">
               <span className="font-semibold">Amount:</span> {transactions.amount}

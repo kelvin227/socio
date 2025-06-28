@@ -114,6 +114,23 @@ export async function getUserByEmail(email: string) {
   return user;
 }
 
+export async function getUser(value: string){
+  const user = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: value },
+        { id: value }
+      ]
+    },
+    // Remove 'omit' if not supported by Prisma, or replace with 'select' or 'exclude' as needed
+    omit:{
+      password: true
+    }
+  });
+
+  return user;
+}
+
 export async function getUserByID(id: string) {
   const user = await prisma.user.findUnique({
     where: { id },
