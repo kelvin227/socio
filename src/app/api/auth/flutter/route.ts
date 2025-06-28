@@ -23,7 +23,7 @@ if (process.env.NODE_ENV === 'production') {
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_jwt_key'; // USE A STRONG SECRET IN PRODUCTION ENV!
 
-export default async function Handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function FLUTTER(req: NextApiRequest, res: NextApiResponse) {
     if (req.method !== 'POST') {
         return res.status(405).json({ success: false, message: 'Method Not Allowed' });
     }
