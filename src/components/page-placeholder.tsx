@@ -1,4 +1,3 @@
-
 "use client";
 import React from "react";
 import {
@@ -32,7 +31,7 @@ import {
   // IconPlus,
   IconTrendingUp,
   IconTrendingDown,
-  IconMinus
+  IconMinus,
 } from "@tabler/icons-react";
 
 /* eslint-disable */
@@ -45,7 +44,8 @@ export default function PagePlaceholder({
   percentagekyc,
   CTcount,
   percentageCT,
-  barchartdata
+  barchartdata,
+  fivecompletedtrans,
 }: {
   pageName: string;
   usercount: number;
@@ -55,12 +55,13 @@ export default function PagePlaceholder({
   CTcount: number;
   percentageCT: number;
   barchartdata: any[];
+  fivecompletedtrans: any[];
 }) {
   const cardData = [
     {
       title: "Pending Kyc",
       description: percentagekyc,
-      content: kyccount
+      content: kyccount,
     },
     {
       title: "Total Users",
@@ -74,15 +75,15 @@ export default function PagePlaceholder({
     },
   ];
   const chartConfig = {
-  Buy: {
-    label: "Buy",
-    color: "#2563eb",
-  },
-  Sell: {
-    label: "Sell",
-    color: "#60a5fa",
-  },
-} satisfies ChartConfig;
+    Buy: {
+      label: "Buy",
+      color: "#2563eb",
+    },
+    Sell: {
+      label: "Sell",
+      color: "#60a5fa",
+    },
+  } satisfies ChartConfig;
   return (
     <div className="flex flex-col gap-4 mt-10">
       <h1 className="text-3xl font-bold">{pageName}</h1>
@@ -97,7 +98,9 @@ export default function PagePlaceholder({
                   <IconTrendingUp className="size-4 text-green-500" />
                 ) : card.description < 0 ? (
                   <IconTrendingDown className="size-4 text-red-500" />
-                ) : <IconMinus className="size-4 text-gray-500" />}
+                ) : (
+                  <IconMinus className="size-4 text-gray-500" />
+                )}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -122,6 +125,78 @@ export default function PagePlaceholder({
           <Bar dataKey="Sell" fill="#60a5fa" radius={4} />
         </BarChart>
       </ChartContainer>
+
+      <div className="w-full overflow-x-auto">
+        <div className="hidden md:block">
+            <table className="min-w-full light:bg-white border border-gray-200 rounded-lg shadow-sm">
+          <thead>
+            <tr className="dark:bg-gray-900 light:bg-gray-100">
+              <th className="px-4 py-2 text-left text-xs font-semibold light:text-gray-700">
+                ID
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-semibold light:text-gray-700">
+                merchant ID
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-semibold light:text-gray-700">
+                Coin
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-semibold light:text-gray-700">
+                Type
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-semibold light:text-gray-700">
+                Amount
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-semibold light:text-gray-700">
+                Date
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {fivecompletedtrans.map((tx: any, idx: number) => (
+              <tr
+                key={tx.id || idx}
+                className="border-t border-gray-100 dark:hover:bg-gray-100 dark:hover:text-black hover:bg-gray-900 hover:text-white"
+              >
+                <td className="px-4 py-2 text-sm">{tx.id}</td>
+                <td className="px-4 py-2 text-sm">{tx.merchantID}</td>
+                <td className="px-4 py-2 text-sm">{tx.coin}</td>
+                <td className="px-4 py-2 text-sm">{tx.type}</td>
+                <td className="px-4 py-2 text-sm">{tx.amount}</td>
+                <td className="px-4 py-2 text-sm">
+                  {tx.createdAt instanceof Date
+                    ? tx.createdAt.toLocaleDateString()
+                    : String(tx.createdAt)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        </div>
+      
+        {/* Mobile view */}
+        <div className="md:hidden flex flex-col gap-2 mt-4">
+          {fivecompletedtrans.map((tx: any, idx: number) => (
+            <div
+              key={tx.id || idx}
+              className="light:bg-white border rounded-lg p-3 shadow-sm"
+            >
+              <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <span>ID: {tx.id}</span>
+                <span>
+                  {tx.createdAt instanceof Date
+                    ? tx.createdAt.toLocaleDateString()
+                    : String(tx.createdAt)}
+                </span>
+              </div>
+              <div className="font-semibold text-gray-800">{tx.user}</div>
+              <div className="flex justify-between mt-1 text-sm">
+                <span className="capitalize">{tx.type}</span>
+                <span className="font-bold">{tx.amount}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
