@@ -93,9 +93,23 @@ export default async function Home() {
         },
         take: 10
       });
+            const getptrans = await prisma.adsTransaction.findMany({
+        where:{
+          AND: [
+            {
+              status: "pending",
+              type: { in: ["buy", "sell"]}
+            }
+          ]
+        },
+        orderBy:{
+          createdAt: "desc"
+        },
+        take: 10
+      });
 
   if (role?.roles === 'admin') {
-    return <PagePlaceholder pageName={session?.user?.email as string} usercount={countuser} percentage={PC.percentageIncrease} kyccount={PCKyc.countkyc} percentagekyc={PCKyc.percentageIncrease} CTcount={PCCT.countct} percentageCT={PCCT.percentageIncrease} barchartdata={monthlyAggregates as any} fivecompletedtrans={gettransaction as any}/>;
+    return <PagePlaceholder pageName={session?.user?.email as string} usercount={countuser} percentage={PC.percentageIncrease} kyccount={PCKyc.countkyc} percentagekyc={PCKyc.percentageIncrease} CTcount={PCCT.countct} percentageCT={PCCT.percentageIncrease} barchartdata={monthlyAggregates as any} fivecompletedtrans={gettransaction as any} fiveptrans={getptrans as any}/>;
   }else{
     return (
       <div className="flex items-center justify-center w-full h-screen">
