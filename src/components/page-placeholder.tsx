@@ -33,8 +33,6 @@ import {
   IconTrendingDown,
   IconMinus,
 } from "@tabler/icons-react";
-import { TransactionTable } from "@/app/(admin)/admin/(admin)/admin_wallet/transaction/trans";
-
 /* eslint-disable */
 
  const Transactiontable = ({ transaction }: { transaction: any[] }) => (
