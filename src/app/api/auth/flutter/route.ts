@@ -1,5 +1,4 @@
 // pages/api/auth/signup.ts (or app/api/auth/signup/route.ts for App Router)
-/* eslint-disable */
 import { NextApiRequest, NextApiResponse } from 'next';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs'; // For password hashing
