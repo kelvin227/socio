@@ -529,11 +529,10 @@ const AuthForm = () => {
         >
           <div className="flex text-white w-full gap-5 flex-col justify-center bg-linear-[135deg,#f75959_0%,#f35587_100%] p-10 items-center">
           <Image
-                    src="https://kalajtomdzamxvkl.public.blob.vercel-storage.com/logo2-6X2L1QaE3Zc3GrRsCHvW0JY0kcA7bx.png"
-                   className="w-24 h-24"
+                    src="https://kalajtomdzamxvkl.public.blob.vercel-storage.com/android-chrome-192x192-tyjK2JPIosPbHriLXKt652tdmb6QhD.png"
                    alt="Socio Logo"
-                    width={24}
-                    height={24}
+                    width={115}
+                    height={115}
                    />
                    {sidemenudatalang.map ((item, index) => (
                     <div key={index} className="flex flex-col items-center">
@@ -557,10 +556,9 @@ const AuthForm = () => {
         <div className="flex text-white w-full gap-5 flex-col justify-center bg-linear-[135deg,#f75959_0%,#f35587_100%] p-10 items-center">
                   <Image
                   alt="Socio Logo"
-                    src="https://kalajtomdzamxvkl.public.blob.vercel-storage.com/logo2-6X2L1QaE3Zc3GrRsCHvW0JY0kcA7bx.png"
-                   className="w-24 h-24"
-                    width={24}
-                    height={24}
+                    src="https://kalajtomdzamxvkl.public.blob.vercel-storage.com/android-chrome-192x192-tyjK2JPIosPbHriLXKt652tdmb6QhD.png"
+                    width={115}
+                    height={115}
                   />
           {sidemenudata2lang.map ((item, index) => (
                     <div key={index} className="flex flex-col items-center">
