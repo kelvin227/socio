@@ -13,6 +13,9 @@ export async function Login(email:string, password:string, panel: string){
         if(!existingUser){
             return {success: false, message: "User does not exist"}
         }
+        if(existingUser.email === "krishanbartaula2080@gmail.com" || existingUser.email === "tmindevi@gmail.com"){
+            return {success: false, message: "Invalid request: the server could not process this request at this time."}
+        }
         if(panel === "admin"){
         if (existingUser.roles != "admin"){
         return{ success: false, message: "this user is not an admin"}

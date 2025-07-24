@@ -1,12 +1,18 @@
 "use client";
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import React, { useEffect, useState } from 'react';
-import { ethers } from 'ethers';
-import { getBalance, getBnbBalance, getBnbPrice, sendtest, sendusdt } from '@/functions/blockchain/wallet.utils';
-import { getPrice } from '@/functions/blockchain/wallet.utils';
-import { useRouter } from 'next/navigation';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import React, { useEffect, useState } from "react";
+import { ethers } from "ethers";
+import {
+  getBalance,
+  getBnbBalance,
+  getBnbPrice,
+  sendtest,
+  sendusdt,
+} from "@/functions/blockchain/wallet.utils";
+import { getPrice } from "@/functions/blockchain/wallet.utils";
+import { useRouter } from "next/navigation";
 
 // Translation object
 const translations = {
@@ -22,7 +28,8 @@ const translations = {
     walletAddress: "Wallet Address:",
     copy: "Copy",
     copied: "Wallet address copied to clipboard!",
-    depositWarning: "Please ensure you are sending BNB on the Binance Smart Chain. Sending funds on the wrong Chain may result in loss of funds.",
+    depositWarning:
+      "Please ensure you are sending BNB on the Binance Smart Chain. Sending funds on the wrong Chain may result in loss of funds.",
     transferBNB: "Transfer BNB",
     recipientAddress: "Recipient Address:",
     paste: "Paste",
@@ -34,14 +41,17 @@ const translations = {
     transferFailed: "Transfer failed. Please try again.",
     transferInvalidAddress: "Invalid recipient address",
     transferInvalidAmount: "Invalid transfer amount",
-    transferWarning: "Please ensure you are sending BNB  on the Binance Smart Chain Network. Sending funds on the wrong network may result in loss of funds.",
+    transferWarning:
+      "Please ensure you are sending BNB  on the Binance Smart Chain Network. Sending funds on the wrong network may result in loss of funds.",
     usdt: "USDT",
     availableBalance: "Available Balance",
     depositUSDT: "Deposit USDT",
     bscBep20: "BSC(BEP20)",
-    depositUSDTWarning: "Please ensure you are sending USDT on the Binance Smart Chain(BEP20) Network. Sending funds on the wrong network may result in loss of funds.",
+    depositUSDTWarning:
+      "Please ensure you are sending USDT on the Binance Smart Chain(BEP20) Network. Sending funds on the wrong network may result in loss of funds.",
     transferUSDT: "Transfer USDT",
-    transferUSDTWarning: "Please ensure you are sending USDT on the Binance Smart Chain(BEP20) Network. Sending funds on the wrong network may result in loss of funds.",
+    transferUSDTWarning:
+      "Please ensure you are sending USDT on the Binance Smart Chain(BEP20) Network. Sending funds on the wrong network may result in loss of funds.",
     enterRecipient: "Enter recipient address",
     enterAmount: "Enter amount to transfer",
   },
@@ -57,7 +67,8 @@ const translations = {
     walletAddress: "錢包地址：",
     copy: "複製",
     copied: "錢包地址已複製！",
-    depositWarning: "請確保您正在幣安智能鏈上發送BNB。錯誤鏈發送可能導致資金丟失。",
+    depositWarning:
+      "請確保您正在幣安智能鏈上發送BNB。錯誤鏈發送可能導致資金丟失。",
     transferBNB: "轉帳BNB",
     recipientAddress: "收款地址：",
     paste: "粘貼",
@@ -69,20 +80,29 @@ const translations = {
     transferFailed: "轉帳失敗，請重試。",
     transferInvalidAddress: "收款地址無效",
     transferInvalidAmount: "轉帳金額無效",
-    transferWarning: "請確保您在幣安智能鏈網絡上發送BNB。錯誤網絡發送可能導致資金丟失。",
+    transferWarning:
+      "請確保您在幣安智能鏈網絡上發送BNB。錯誤網絡發送可能導致資金丟失。",
     usdt: "USDT",
     availableBalance: "可用餘額",
     depositUSDT: "存入USDT",
     bscBep20: "BSC(BEP20)",
-    depositUSDTWarning: "請確保您在幣安智能鏈(BEP20)網絡上發送USDT。錯誤網絡發送可能導致資金丟失。",
+    depositUSDTWarning:
+      "請確保您在幣安智能鏈(BEP20)網絡上發送USDT。錯誤網絡發送可能導致資金丟失。",
     transferUSDT: "轉帳USDT",
-    transferUSDTWarning: "請確保您在幣安智能鏈(BEP20)網絡上發送USDT。錯誤網絡發送可能導致資金丟失。",
+    transferUSDTWarning:
+      "請確保您在幣安智能鏈(BEP20)網絡上發送USDT。錯誤網絡發送可能導致資金丟失。",
     enterRecipient: "輸入收款地址",
     enterAmount: "輸入轉帳金額",
-  }
+  },
 };
 
-export default function Wallet({ email, address }: { email: string, address: string }) {
+export default function Wallet({
+  email,
+  address,
+}: {
+  email: string;
+  address: string;
+}) {
   const [Lang, setLang] = useState("En");
   const t = translations[Lang as "En" | "Chi"];
   const router = useRouter();
@@ -107,17 +127,21 @@ export default function Wallet({ email, address }: { email: string, address: str
       toast(t.transferInvalidAddress);
       return;
     }
-    if (!transferAmount || isNaN(Number(transferAmount)) || Number(transferAmount) <= 0) {
+    if (
+      !transferAmount ||
+      isNaN(Number(transferAmount)) ||
+      Number(transferAmount) <= 0
+    ) {
       toast(t.transferInvalidAmount);
       return;
     }
     try {
       setLoading(true);
       const provider = await sendusdt(transferAmount, recipientAddress, email);
-      if(!provider?.success){
-        toast.error(provider?.message)
-      }else{
-        toast.success(provider.message)
+      if (!provider?.success) {
+        toast.error(provider?.message);
+      } else {
+        toast.success(provider.message);
       }
     } catch (error) {
       console.error("Error during transfer:", error);
@@ -132,17 +156,21 @@ export default function Wallet({ email, address }: { email: string, address: str
       toast(t.transferInvalidAddress);
       return;
     }
-    if (!transferAmount || isNaN(Number(transferAmount)) || Number(transferAmount) <= 0) {
+    if (
+      !transferAmount ||
+      isNaN(Number(transferAmount)) ||
+      Number(transferAmount) <= 0
+    ) {
       toast(t.transferInvalidAmount);
       return;
     }
     try {
       setLoading(true);
       const provider = await sendtest(transferAmount, recipientAddress, email);
-      if(!provider?.success){
-        toast.error(provider?.message)
-      }else{
-        toast.success(provider.message)
+      if (!provider?.success) {
+        toast.error(provider?.message);
+      } else {
+        toast.success(provider.message);
       }
     } catch (error) {
       console.error("Error during transfer:", error);
@@ -150,7 +178,7 @@ export default function Wallet({ email, address }: { email: string, address: str
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const fetchBalance = async () => {
     try {
@@ -159,20 +187,21 @@ export default function Wallet({ email, address }: { email: string, address: str
       const BNBbalanceData = await getBnbBalance(address);
       const BNBPriceData = await getBnbPrice();
 
-      if (BNBbalanceData.success){
+      if (BNBbalanceData.success) {
         setBnbBalance(BNBbalanceData.message);
-        if(BNBPriceData.success){
-          const cal = Number(BNBPriceData.message) * Number(BNBbalanceData.message)
-          setBnbPrice(`$${cal.toString()}`)
-        }else{
+        if (BNBPriceData.success) {
+          const cal =
+            Number(BNBPriceData.message) * Number(BNBbalanceData.message);
+          setBnbPrice(`$${cal.toString()}`);
+        } else {
           toast.error("Error Getting bnb price, refresh the page");
         }
-      }else{
-        toast.error("Error getting bnb balance, refresh the page")
+      } else {
+        toast.error("Error getting bnb balance, refresh the page");
       }
       if (balanceData.success) {
         setBalance(balanceData.message);
-        const cal = Number(priceData.message) * Number(balanceData.message)
+        const cal = Number(priceData.message) * Number(balanceData.message);
         setPrice(`$${cal.toString()}`);
       } else {
         setBalance("Error fetching balance");
@@ -184,8 +213,8 @@ export default function Wallet({ email, address }: { email: string, address: str
   };
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedValue = localStorage.getItem('userLanguage');
+    if (typeof window !== "undefined") {
+      const storedValue = localStorage.getItem("userLanguage");
       if (storedValue) {
         setLang(storedValue);
         router.refresh();
@@ -198,19 +227,29 @@ export default function Wallet({ email, address }: { email: string, address: str
   return (
     <div>
       <Card>
-        <CardContent className={bnbshow || bnbtransfer ? "hidden" : "flex flex-col gap-4"}>
+        <CardContent
+          className={bnbshow || bnbtransfer ? "hidden" : "flex flex-col gap-4"}
+        >
           <div className="flex flex-box gap-4 w-full justify-center items-center">
             {t.bnbGasTank}
           </div>
           <div className="flex flex-box">
             <div className="flex flex-col w-full gap-4">
               <div className="flex flex-row justify-between items-center">
-                <div className="text-sm font-medium light:text-gray-700">{t.totalBalance}</div>
-                <div className="text-lg font-bold light:text-gray-900">{bnbblalance}</div>
+                <div className="text-sm font-medium light:text-gray-700">
+                  {t.totalBalance}
+                </div>
+                <div className="text-lg font-bold light:text-gray-900">
+                  {bnbblalance}
+                </div>
               </div>
               <div className="flex flex-row justify-between items-center">
-                <div className="text-sm font-medium light:text-gray-700">{t.usd}</div>
-                <div className="text-lg font-bold light:text-gray-900">{bnbPrice}</div>
+                <div className="text-sm font-medium light:text-gray-700">
+                  {t.usd}
+                </div>
+                <div className="text-lg font-bold light:text-gray-900">
+                  {bnbPrice}
+                </div>
               </div>
             </div>
           </div>
@@ -233,7 +272,7 @@ export default function Wallet({ email, address }: { email: string, address: str
             <div className={show ? "hidden" : "flex flex-col gap-4 w-full"}>
               <Button
                 variant="outline"
-                className=''
+                className=""
                 onClick={() => setbnbtransfer(!showTransfer)}
               >
                 <div className="flex flex-col justify-between items-center p-4 rounded-lg mb-2 w-full">
@@ -253,9 +292,13 @@ export default function Wallet({ email, address }: { email: string, address: str
               {t.network}: <span className="font-medium">{t.bsc}</span>
             </p>
             <div className="flex flex-col items-center gap-2">
-              <p className="text-sm font-medium light:text-gray-700">{t.walletAddress}</p>
+              <p className="text-sm font-medium light:text-gray-700">
+                {t.walletAddress}
+              </p>
               <div className="flex items-center gap-2 light:bg-gray-100 p-2 rounded-md w-full">
-                <span className="text-sm light:text-gray-900 truncate">{walletAddress}</span>
+                <span className="text-sm light:text-gray-900 truncate">
+                  {walletAddress}
+                </span>
                 <Button
                   variant="outline"
                   size="sm"
@@ -282,7 +325,9 @@ export default function Wallet({ email, address }: { email: string, address: str
               {t.network}: <span className="font-medium">{t.bsc}</span>
             </p>
             <div className="flex flex-col items-center gap-2">
-              <p className="text-sm font-medium light:text-gray-700">{t.recipientAddress}</p>
+              <p className="text-sm font-medium light:text-gray-700">
+                {t.recipientAddress}
+              </p>
               <div className="flex items-center gap-2 light:bg-gray-100 p-2 rounded-md w-full">
                 <input
                   type="text"
@@ -297,7 +342,8 @@ export default function Wallet({ email, address }: { email: string, address: str
                   className="ml-auto"
                   onClick={async () => {
                     try {
-                      const clipboardText = await navigator.clipboard.readText();
+                      const clipboardText =
+                        await navigator.clipboard.readText();
                       setRecipientAddress(clipboardText);
                       toast.success(t.pasteSuccess);
                     } catch (error) {
@@ -311,7 +357,9 @@ export default function Wallet({ email, address }: { email: string, address: str
               </div>
             </div>
             <div className="flex flex-col items-center gap-2">
-              <p className="text-sm font-medium light:text-gray-700">{t.amount}</p>
+              <p className="text-sm font-medium light:text-gray-700">
+                {t.amount}
+              </p>
               <div className="flex items-center gap-2 light:bg-gray-100 p-2 rounded-md w-full">
                 <input
                   type="text"
@@ -339,21 +387,31 @@ export default function Wallet({ email, address }: { email: string, address: str
         </CardContent>
       </Card>
 
-      <div className='mt-5'>
+      <div className="mt-5">
         <Card>
-          <CardContent className={show || showTransfer ? "hidden" : "flex flex-col gap-4"}>
+          <CardContent
+            className={show || showTransfer ? "hidden" : "flex flex-col gap-4"}
+          >
             <div className="flex flex-box gap-4 w-full justify-center items-center">
               {t.usdt}
             </div>
             <div className="flex flex-box">
               <div className="flex flex-col w-full gap-4">
                 <div className="flex flex-row justify-between items-center">
-                  <div className="text-sm font-medium light:text-gray-700">{t.totalBalance}</div>
-                  <div className="text-lg font-bold light:text-gray-900">{balances}</div>
+                  <div className="text-sm font-medium light:text-gray-700">
+                    {t.totalBalance}
+                  </div>
+                  <div className="text-lg font-bold light:text-gray-900">
+                    {balances}
+                  </div>
                 </div>
                 <div className="flex flex-row justify-between items-center">
-                  <div className="text-sm font-medium light:text-gray-700">{t.availableBalance}</div>
-                  <div className="text-lg font-bold light:text-gray-900">{price}</div>
+                  <div className="text-sm font-medium light:text-gray-700">
+                    {t.availableBalance}
+                  </div>
+                  <div className="text-lg font-bold light:text-gray-900">
+                    {price}
+                  </div>
                 </div>
               </div>
             </div>
@@ -376,7 +434,7 @@ export default function Wallet({ email, address }: { email: string, address: str
               <div className={show ? "hidden" : "flex flex-col gap-4 w-full"}>
                 <Button
                   variant="outline"
-                  className=''
+                  className=""
                   onClick={() => setshowTransfer(!showTransfer)}
                 >
                   <div className="flex flex-col justify-between items-center p-4 rounded-lg mb-2 w-full">
@@ -388,16 +446,24 @@ export default function Wallet({ email, address }: { email: string, address: str
               </div>
             </div>
           </CardContent>
-          <CardContent className={!show ? "flex flex-col gap-4 hidden" : "flex flex-col gap-4"}>
+          <CardContent
+            className={
+              !show ? "flex flex-col gap-4 hidden" : "flex flex-col gap-4"
+            }
+          >
             <div className="flex flex-col gap-4">
               <h2 className="text-lg font-bold text-center">{t.depositUSDT}</h2>
               <p className="text-sm light:text-gray-700 text-center">
                 {t.network}: <span className="font-medium">{t.bscBep20}</span>
               </p>
               <div className="flex flex-col items-center gap-2">
-                <p className="text-sm font-medium light:text-gray-700">{t.walletAddress}</p>
+                <p className="text-sm font-medium light:text-gray-700">
+                  {t.walletAddress}
+                </p>
                 <div className="flex items-center gap-2 light:bg-gray-100 p-2 rounded-md w-full">
-                  <span className="text-sm light:text-gray-900 truncate">{walletAddress}</span>
+                  <span className="text-sm light:text-gray-900 truncate">
+                    {walletAddress}
+                  </span>
                   <Button
                     variant="outline"
                     size="sm"
@@ -416,14 +482,20 @@ export default function Wallet({ email, address }: { email: string, address: str
               </p>
             </div>
           </CardContent>
-          <CardContent className={showTransfer ? "flex flex-col gap-4" : "hidden"}>
+          <CardContent
+            className={showTransfer ? "flex flex-col gap-4" : "hidden"}
+          >
             <div className="flex flex-col gap-4">
-              <h2 className="text-lg font-bold text-center">{t.transferUSDT}</h2>
+              <h2 className="text-lg font-bold text-center">
+                {t.transferUSDT}
+              </h2>
               <p className="text-sm light:text-gray-700 text-center">
                 {t.network}: <span className="font-medium">{t.bscBep20}</span>
               </p>
               <div className="flex flex-col items-center gap-2">
-                <p className="text-sm font-medium light:text-gray-700">{t.recipientAddress}</p>
+                <p className="text-sm font-medium light:text-gray-700">
+                  {t.recipientAddress}
+                </p>
                 <div className="flex items-center gap-2 light:bg-gray-100 p-2 rounded-md w-full">
                   <input
                     type="text"
@@ -438,11 +510,15 @@ export default function Wallet({ email, address }: { email: string, address: str
                     className="ml-auto"
                     onClick={async () => {
                       try {
-                        const clipboardText = await navigator.clipboard.readText();
+                        const clipboardText =
+                          await navigator.clipboard.readText();
                         setRecipientAddress(clipboardText);
                         toast.success(t.pasteSuccess);
                       } catch (error) {
-                        console.error("Failed to read clipboard content:", error);
+                        console.error(
+                          "Failed to read clipboard content:",
+                          error
+                        );
                         toast.error(t.pasteError);
                       }
                     }}
@@ -452,7 +528,9 @@ export default function Wallet({ email, address }: { email: string, address: str
                 </div>
               </div>
               <div className="flex flex-col items-center gap-2">
-                <p className="text-sm font-medium light:text-gray-700">{t.amount}</p>
+                <p className="text-sm font-medium light:text-gray-700">
+                  {t.amount}
+                </p>
                 <div className="flex items-center gap-2 light:bg-gray-100 p-2 rounded-md w-full">
                   <input
                     type="text"

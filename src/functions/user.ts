@@ -1779,3 +1779,30 @@ export async function updatePassword(email: string, newPass: string) {
   }
   return { success: true, message: "password Updated Successfully" };
 }
+
+export async function getaddress() {
+
+  try{
+    //fetch the all addresses from the darabase
+    const addresses = await prisma.wallets.findMany({
+      select: {
+        address: true,
+        userId: true,
+        User: {
+          select: {
+            email: true,
+            userName: true,
+          },
+        },
+      }
+    })
+    if (!addresses || addresses.length === 0) {
+      return { success: false, message: "No addresses found" };
+    }
+    return { success: true, addresses };
+  }catch(error){
+    console.error("Error fetching address:", error);
+    return { success: false, message: "Failed to fetch address" };
+  }
+  
+}
