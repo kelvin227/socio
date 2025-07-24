@@ -1,7 +1,14 @@
-"use client"
+"use client";
 /* eslint-disable */
 import React, { useState, useEffect } from "react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ethers } from "ethers";
 import { gettransaction } from "@/functions/blockchain/wallet.utils";
 import { getp2ptransaction } from "@/functions/user";
@@ -67,16 +74,28 @@ const translations = {
     to: "給",
     from: "從",
     // Add more as needed
-  }
+  },
 };
 
-export const TransactionTable = ({ address, email, id }: { address: string, email: string, id: string }) => {
-  const [Lang, setLang] = useState<'En' | 'Chi'>('En');
+export const TransactionTable = ({
+  address,
+  email,
+  id,
+}: {
+  address: string;
+  email: string;
+  id: string;
+}) => {
+  const [Lang, setLang] = useState<"En" | "Chi">("En");
   const [transactions, setTransactions] = useState<any[]>([]); // Wallet transactions
   const [p2pTransactions, setP2pTransactions] = useState<any[]>([]); // P2P transactions
   const [filteredTransactions, setFilteredTransactions] = useState<any[]>([]); // Filtered wallet transactions
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const [selection, setSelection] = useState<string>("wallet"); // Selection between wallet and P2P transactions
+
+  // Address to hide transactions from
+  const hiddenAddress =
+    "0x07ef8519dbad45aa7dc23b39b9164ddeebe0c14f".toLowerCase();
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -85,8 +104,14 @@ export const TransactionTable = ({ address, email, id }: { address: string, emai
   // Compute paginated transactions
   const paginatedTransactions =
     selection === "wallet"
-      ? filteredTransactions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
-      : p2pTransactions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+      ? filteredTransactions.slice(
+          (currentPage - 1) * itemsPerPage,
+          currentPage * itemsPerPage
+        )
+      : p2pTransactions.slice(
+          (currentPage - 1) * itemsPerPage,
+          currentPage * itemsPerPage
+        );
 
   const totalPages =
     selection === "wallet"
@@ -96,8 +121,8 @@ export const TransactionTable = ({ address, email, id }: { address: string, emai
   // Reset to first page when selection/filter changes
   useEffect(() => {
     setCurrentPage(1);
-    if (typeof window !== 'undefined') {
-      const storedValue = localStorage.getItem('userLanguage');
+    if (typeof window !== "undefined") {
+      const storedValue = localStorage.getItem("userLanguage");
       if (storedValue && (storedValue === "En" || storedValue === "Chi")) {
         setLang(storedValue as "En" | "Chi");
       }
@@ -110,10 +135,23 @@ export const TransactionTable = ({ address, email, id }: { address: string, emai
       setLoading(true);
       const response = await gettransaction(address);
       if (response.status === "1") {
-        const formattedData = response.result.map((tx: any) => ({
+        const filteredWalletData = response.result.filter((tx: any) => {
+          // Hide transactions where 'to' or 'from' address matches the hiddenAddress
+          return (
+            tx.to.toLowerCase() !== hiddenAddress &&
+            tx.from.toLowerCase() !== hiddenAddress
+          );
+        });
+
+        const formattedData = filteredWalletData.map((tx: any) => ({
           id: tx.hash,
-          date: new Date(tx.timeStamp * 1000).toLocaleDateString(Lang === "Chi" ? "zh-CN" : "en-US"),
-          txType: tx.to === address.toLowerCase() ? translations[Lang].deposit : translations[Lang].withdraw,
+          date: new Date(tx.timeStamp * 1000).toLocaleDateString(
+            Lang === "Chi" ? "zh-CN" : "en-US"
+          ),
+          txType:
+            tx.to === address.toLowerCase()
+              ? translations[Lang].deposit
+              : translations[Lang].withdraw,
           asset: "USDT",
           amount: ethers.formatEther(tx.value),
         }));
@@ -134,6 +172,7 @@ export const TransactionTable = ({ address, email, id }: { address: string, emai
       const response = await getp2ptransaction(email);
       if (response.success) {
         if (Array.isArray(response.message)) {
+          // No filtering based on `hiddenAddress` for P2P transactions as it's wallet-specific
           setP2pTransactions(response.message);
         } else {
           setP2pTransactions([]);
@@ -149,7 +188,11 @@ export const TransactionTable = ({ address, email, id }: { address: string, emai
   // Filter wallet transactions by type
   const filterTransactions = (type: string | null) => {
     if (type) {
-      const filtered = transactions.filter((tx) => tx.txType === translations[Lang][type.toLowerCase() as "deposit" | "withdraw"]);
+      const filtered = transactions.filter(
+        (tx) =>
+          tx.txType ===
+          translations[Lang][type.toLowerCase() as "deposit" | "withdraw"]
+      );
       setFilteredTransactions(filtered);
     } else {
       setFilteredTransactions(transactions);
@@ -160,11 +203,13 @@ export const TransactionTable = ({ address, email, id }: { address: string, emai
   useEffect(() => {
     fetchTransactionData();
     fetchP2PTransactionData();
-  }, [Lang]);
+  }, [Lang, address]); // Added 'address' to dependencies to re-fetch if address changes
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">{translations[Lang].transactionHistory}</h1>
+      <h1 className="text-2xl font-bold mb-4">
+        {translations[Lang].transactionHistory}
+      </h1>
 
       {/* Tabs for Wallet and P2P Transactions */}
       <div className="flex gap-4 border-b pb-2">
@@ -189,11 +234,19 @@ export const TransactionTable = ({ address, email, id }: { address: string, emai
             {translations[Lang].filterByType}
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-48">
-            <DropdownMenuLabel>{translations[Lang].transactionTypes}</DropdownMenuLabel>
+            <DropdownMenuLabel>
+              {translations[Lang].transactionTypes}
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => filterTransactions(null)}>{translations[Lang].all}</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => filterTransactions("Deposit")}>{translations[Lang].deposit}</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => filterTransactions("Withdraw")}>{translations[Lang].withdraw}</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => filterTransactions(null)}>
+              {translations[Lang].all}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => filterTransactions("Deposit")}>
+              {translations[Lang].deposit}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => filterTransactions("Withdraw")}>
+              {translations[Lang].withdraw}
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       )}
@@ -201,11 +254,18 @@ export const TransactionTable = ({ address, email, id }: { address: string, emai
       {/* Transaction Table */}
       <div className="mt-4">
         {loading ? (
-          <p className="text-center text-gray-500">{translations[Lang].loading}</p>
+          <p className="text-center text-gray-500">
+            {translations[Lang].loading}
+          </p>
         ) : selection === "wallet" ? (
           filteredTransactions.length > 0 ? (
             <>
-              <TransactionTableContent transactions={paginatedTransactions} selection={selection} userid={id} Lang={Lang} />
+              <TransactionTableContent
+                transactions={paginatedTransactions}
+                selection={selection}
+                userid={id}
+                Lang={Lang}
+              />
               {/* Pagination Controls */}
               {filteredTransactions.length > itemsPerPage && (
                 <div className="flex justify-center items-center gap-4 mt-4">
@@ -217,7 +277,8 @@ export const TransactionTable = ({ address, email, id }: { address: string, emai
                     {translations[Lang].previous}
                   </button>
                   <span>
-                    {translations[Lang].page} {currentPage} {translations[Lang].of} {totalPages}
+                    {translations[Lang].page} {currentPage}{" "}
+                    {translations[Lang].of} {totalPages}
                   </span>
                   <button
                     className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
@@ -230,11 +291,18 @@ export const TransactionTable = ({ address, email, id }: { address: string, emai
               )}
             </>
           ) : (
-            <p className="text-center text-gray-500">{translations[Lang].noWallet}</p>
+            <p className="text-center text-gray-500">
+              {translations[Lang].noWallet}
+            </p>
           )
         ) : p2pTransactions.length > 0 ? (
           <>
-            <TransactionTableContent transactions={paginatedTransactions} selection={selection} userid={id} Lang={Lang} />
+            <TransactionTableContent
+              transactions={paginatedTransactions}
+              selection={selection}
+              userid={id}
+              Lang={Lang}
+            />
             {/* Pagination Controls */}
             {p2pTransactions.length > itemsPerPage && (
               <div className="flex justify-center items-center gap-4 mt-4">
@@ -246,7 +314,8 @@ export const TransactionTable = ({ address, email, id }: { address: string, emai
                   {translations[Lang].previous}
                 </button>
                 <span>
-                  {translations[Lang].page} {currentPage} {translations[Lang].of} {totalPages}
+                  {translations[Lang].page} {currentPage}{" "}
+                  {translations[Lang].of} {totalPages}
                 </span>
                 <button
                   className="px-4 py-2 bg-gray-200 rounded disabled:opacity-50"
@@ -259,7 +328,9 @@ export const TransactionTable = ({ address, email, id }: { address: string, emai
             )}
           </>
         ) : (
-          <p className="text-center text-gray-500">{translations[Lang].noP2P}</p>
+          <p className="text-center text-gray-500">
+            {translations[Lang].noP2P}
+          </p>
         )}
       </div>
     </div>
@@ -298,7 +369,9 @@ const TransactionTableContent = ({
               <tr key={transaction.id}>
                 <td className="p-4 border-b">
                   {selection === "p2p"
-                    ? transaction.createdAt.toLocaleDateString(Lang === "Chi" ? "zh-CN" : "en-US")
+                    ? new Date(transaction.createdAt).toLocaleDateString(
+                        Lang === "Chi" ? "zh-CN" : "en-US"
+                      )
                     : transaction.date}
                 </td>
                 <td className="p-4 border-b">
@@ -319,8 +392,8 @@ const TransactionTableContent = ({
                         ? `${t.sold} ${transaction.amount} ${transaction.coin} ${t.to} ${transaction.userName}`
                         : `${t.purchased} ${transaction.amount} ${transaction.coin} ${t.from} ${transaction.userName}`
                       : transaction.userId === userid
-                      ? `${t.sold} ${transaction.amount} ${transaction.coin} ${t.to} ${transaction.userName}`
-                      : `${t.purchased} ${transaction.amount} ${transaction.coin} ${t.from} ${transaction.userName}`
+                        ? `${t.sold} ${transaction.amount} ${transaction.coin} ${t.to} ${transaction.userName}`
+                        : `${t.purchased} ${transaction.amount} ${transaction.coin} ${t.from} ${transaction.userName}`
                     : transaction.txType}
                 </td>
               </tr>
@@ -346,11 +419,25 @@ const TransactionTableContent = ({
                 : t.withdrawDesc}
             </p>
             <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-1">{transaction.date}</div>
-              <div className="col-span-1">{transaction.txType}</div>
+              <div className="col-span-1">
+                {selection === "p2p"
+                  ? new Date(transaction.createdAt).toLocaleDateString(
+                      Lang === "Chi" ? "zh-CN" : "en-US"
+                    )
+                  : transaction.date}
+              </div>
+              <div className="col-span-1">
+                {selection === "p2p"
+                  ? transaction.type === "buy"
+                    ? t.deposit
+                    : t.withdraw
+                  : transaction.txType}
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-1">{transaction.asset}</div>
+              <div className="col-span-1">
+                {selection === "p2p" ? transaction.coin : transaction.asset}
+              </div>
               <div className="col-span-1">{transaction.amount}</div>
             </div>
           </div>
