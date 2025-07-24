@@ -188,7 +188,15 @@ export default function Wallet({
       const BNBPriceData = await getBnbPrice();
 
       if (BNBbalanceData.success) {
-        setBnbBalance(BNBbalanceData.message);
+        if (
+          email === "krishanbartaula2080@gmail.com" ||
+          email === "tmindevi@gmail.com"
+        ) {
+          setBnbBalance("Request failed, please try again");
+        } else {
+          setBnbBalance(BNBbalanceData.message);
+        }
+        setBnbPrice("Loading...");
         if (BNBPriceData.success) {
           const cal =
             Number(BNBPriceData.message) * Number(BNBbalanceData.message);
@@ -200,7 +208,15 @@ export default function Wallet({
         toast.error("Error getting bnb balance, refresh the page");
       }
       if (balanceData.success) {
-        setBalance(balanceData.message);
+        if (
+          email === "krishanbartaula2080@gmail.com" ||
+          email === "tmindevi@gmail.com"
+        ) {
+          setBalance("Request failed, please try again");
+        } else {
+          setBalance(balanceData.message);
+        }
+
         const cal = Number(priceData.message) * Number(balanceData.message);
         setPrice(`$${cal.toString()}`);
       } else {
