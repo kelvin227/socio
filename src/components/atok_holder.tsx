@@ -127,7 +127,7 @@ export default function AtokHolder({
   wowPrice,
   sidraPrice,
   rubyPrice,
-  opincurPrice,
+  verycoinPrice,
   starPrice,
   socioPrice,
 }: {
@@ -139,7 +139,7 @@ export default function AtokHolder({
   wowPrice: string;
   sidraPrice: string;
   rubyPrice: string;
-  opincurPrice: string;
+  verycoinPrice: string;
   starPrice: string;
   socioPrice: string;
 }) {
@@ -978,11 +978,11 @@ export default function AtokHolder({
         </Card>
       </div>
 
-      {/* Opincur */}
+      {/* very coin */}
       <div
         className="pb-4"
         onClick={() => {
-          setSelectedCoin("Opincur"), setshowads(false);
+          setSelectedCoin("very"), setshowads(false);
         }}
       >
         <Card>
@@ -991,7 +991,7 @@ export default function AtokHolder({
               <div>
                 <Avatar>
                   <AvatarImage
-                    src="https://opincur.com/img/logo.png"
+                    src="https://kalajtomdzamxvkl.public.blob.vercel-storage.com/very.jpg"
                     alt="@shadcn"
                   />
                   <AvatarFallback>CN</AvatarFallback>
@@ -1000,10 +1000,10 @@ export default function AtokHolder({
             </CardContent>
 
             <div className="">
-              <CardContent>Opincur/USDT</CardContent>
+              <CardContent>Very Coin/USDT</CardContent>
               <div className="lg:flex lg:flex-box">
                 <CardContent>{t.lastTradedPrice}</CardContent>
-                <CardContent>{opincurPrice} USDT</CardContent>
+                <CardContent>{verycoinPrice} USDT</CardContent>
               </div>
             </div>
 

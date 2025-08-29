@@ -313,7 +313,7 @@ export async function updatewallet(
         };
       }
       return { success: true, message: "Ruby wallet updated successfully" };
-    } else if (coin === "opincur") {
+    } else if (coin === "very") {
       const send = await prisma.userWallet.update({
         where: {
           userid,
@@ -325,10 +325,10 @@ export async function updatewallet(
       if (!send) {
         return {
           success: false,
-          message: "unable able to the Opincur wallet address",
+          message: "unable able to the very coin wallet address",
         };
       }
-      return { success: true, message: "Opincur wallet updated successfully" };
+      return { success: true, message: "very coin wallet updated successfully" };
     } else if (coin === "star") {
       const send = await prisma.userWallet.update({
         where: {
@@ -420,7 +420,7 @@ export async function updatewallet(
         };
       }
       return { success: true, message: "Ruby wallet updated successfully" };
-    } else if (coin === "opincur") {
+    } else if (coin === "very") {
       const send = await prisma.userWallet.create({
         data: {
           userid,
@@ -430,10 +430,10 @@ export async function updatewallet(
       if (!send) {
         return {
           success: false,
-          message: "unable able to the Opincur wallet address",
+          message: "unable able to the very coin wallet address",
         };
       }
-      return { success: true, message: "Opincur wallet updated successfully" };
+      return { success: true, message: "very coin wallet updated successfully" };
     } else if (coin === "star") {
       const send = await prisma.userWallet.create({
         data: {
@@ -975,7 +975,7 @@ export async function createads(
           message: `Update your ${coin} wallet address`,
         };
       }
-    } else if (coin === "Opincur") {
+    } else if (coin === "very") {
       walletAddress = wallet?.walletAddress5; // Get the user's wallet address
       if (walletAddress === null) {
         return {
@@ -1182,7 +1182,7 @@ export async function addtraderequest(
           message: `Update your ${coin} wallet address`,
         };
       }
-    } else if (coin === "Opincur") {
+    } else if (coin === "very") {
       walletAddress = wallet?.walletAddress5; // Get the user's wallet address
       if (walletAddress === null) {
         return {

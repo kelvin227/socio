@@ -67,11 +67,11 @@ export default async function Profile() {
     orderBy: { createdAt: "desc" }, // Fetch the latest by creation date
     select: { price: true },
   })
-  const fetchadpriceopincur= await prisma.adsTransaction.findFirst({
+  const fetchadpriceverycoin= await prisma.adsTransaction.findFirst({
     where: {
       AND: [
         { status: "completed" },
-        { coin: "opincur" }
+        { coin: "very" }
       ]
     },
     orderBy: { createdAt: "desc" }, // Fetch the latest by creation date
@@ -91,7 +91,7 @@ export default async function Profile() {
 
   
   return (
-    <AtokHolder userads={userads.ads as any} data={data.ads as any} email={profile} name={username.userName as string} atokPrice={fetchadpriceatok?.price as string || "no data available"} wowPrice={fetchadpricewow?.price as string || "No data available"} sidraPrice={fetchadpricesidra?.price as string || "No data available"} rubyPrice={fetchadpriceruby?.price as string || "No data available"} opincurPrice={fetchadpriceopincur?.price as string || "No data available"} starPrice={fetchadpricestar?.price as string || "No data available"} socioPrice={fetchadpricesocio?.price as string || "no data available"}/>
+    <AtokHolder userads={userads.ads as any} data={data.ads as any} email={profile} name={username.userName as string} atokPrice={fetchadpriceatok?.price as string || "no data available"} wowPrice={fetchadpricewow?.price as string || "No data available"} sidraPrice={fetchadpricesidra?.price as string || "No data available"} rubyPrice={fetchadpriceruby?.price as string || "No data available"} verycoinPrice={fetchadpriceverycoin?.price as string || "No data available"} starPrice={fetchadpricestar?.price as string || "No data available"} socioPrice={fetchadpricesocio?.price as string || "no data available"}/>
     
   );
 };

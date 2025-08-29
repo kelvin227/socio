@@ -27,8 +27,8 @@ export default function OTC_handler({email} :{email: string}){
         coins = "sda";
       }else if(coin === "Ruby Wallet address"){
         coins = "rbl";
-      } else if(coin === "Opincur Wallet address"){
-        coins = "opincur";
+      } else if(coin === "very coin Wallet address"){
+        coins = "very";
       }else if(coin === "Star Network Wallet address"){
         coins = "star";
       } else if(coin === "Socio Wallet address"){
@@ -65,8 +65,8 @@ export default function OTC_handler({email} :{email: string}){
       image: "https://play-lh.googleusercontent.com/OVJjGaAQNzEBJXeqi8RLvDHKHb-be2bbF95iKsrhltNDSOAYXO-qJKJexTV-OT9h-A=w480-h960-rw",
     },
     {
-      name: "Opincur Wallet address",
-      image: "https://opincur.com/img/logo.png",
+      name: "very coin Wallet address",
+      image: "https://kalajtomdzamxvkl.public.blob.vercel-storage.com/very.jpg",
     },
     {
       name: "Star Network Wallet address",
